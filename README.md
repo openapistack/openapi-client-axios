@@ -33,7 +33,7 @@ With promises / CommonJS syntax:
 ```javascript
 const OpenAPIFrontend = require('openapi-frontend').default;
 
-const api = new OpenAPIFrontend({ definition: 'http://example.com/api/openapi.json' });
+const api = new OpenAPIFrontend({ definition: 'https://example.com/api/openapi.json' });
 api.init()
   .then(client => client.getPetById(1))
   .then(res => console.log('Here is pet id:1 from the api', res));
@@ -44,7 +44,7 @@ With async-await / ES6 syntax:
 ```javascript
 import OpenAPIFrontend from 'openapi-frontend';
 
-const api = new OpenAPIFrontend({ definition: 'http://example.com/api/openapi.json' });
+const api = new OpenAPIFrontend({ definition: 'https://example.com/api/openapi.json' });
 api.init();
 
 async function createPet() {
