@@ -19,6 +19,7 @@ and importing them via YAML or JSON files or by just passing an object
   - `client({ method: 'put', url: '/pets/1', data: pet })` - axios basic
 - [x] Built on top of the robust [axios](https://github.com/axios/axios) JavaScript library
 - [x] Isomorphic, works both in browser and Node.js
+- [x] TypeScript typings included
 - [ ] Option to mock API responses using [OpenAPI examples objects](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#example-object)
 or [JSON Schema definitions](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#schema-object)
 
