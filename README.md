@@ -6,6 +6,8 @@
 
 JavaScript library for consuming OpenAPI-enabled APIs
 
+Also see: [openapi-backend](https://github.com/anttiviljami/openapi-backend)
+
 ## Features
 
 - [x] Create API clients by describing them in [OpenAPI specification](https://github.com/OAI/OpenAPI-Specification)
