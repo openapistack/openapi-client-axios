@@ -1,15 +1,32 @@
+import _ from 'lodash';
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
+import bath from 'bath';
 import { validate as validateOpenAPI } from 'openapi-schema-validation';
 import SwaggerParser from 'swagger-parser';
 import { OpenAPIV3 } from 'openapi-types';
 
 export type Document = OpenAPIV3.Document;
-
+export type OperationMethodPathParameterArgument = string | number;
+export type OperationMethodDataArgument = any;
+export type OperationMethod = (
+  ...args: Array<OperationMethodPathParameterArgument | OperationMethodDataArgument | AxiosRequestConfig>
+) => Promise<AxiosResponse<any>>;
 export interface OpenAPIFrontendExtensions {
-  [operationId: string]: (data?: any, config?: AxiosRequestConfig) => Promise<AxiosResponse<any>>;
+  [operationId: string]: OperationMethod;
 }
-
 export type OpenAPIClient = AxiosInstance & OpenAPIFrontendExtensions;
+
+/**
+ * OAS Operation Object containing the path and method so it can be placed in a flat array of operations
+ *
+ * @export
+ * @interface Operation
+ * @extends {OpenAPIV3.OperationObject}
+ */
+export interface Operation extends OpenAPIV3.OperationObject {
+  path: string;
+  method: string;
+}
 
 /**
  * Main class and the default export of the 'openapi-frontend' module
@@ -78,23 +95,42 @@ export class OpenAPIFrontend {
     }
 
     // return the created axios instance
-    const client = axios.create();
+    const instance = axios.create();
 
     // set baseURL to the one found in the definition servers
     const baseURL = this.getBaseURL();
     if (baseURL) {
-      client.defaults.baseURL = baseURL;
+      instance.defaults.baseURL = baseURL;
     }
 
-    // TODO: add methods for operationIds
+    // from here on, we want to handle the client as an extended axios client instance
+    this.client = instance as OpenAPIClient;
 
-    // set client
-    this.client = client as OpenAPIClient;
+    // add methods for operationIds
+    const operations = this.getOperations();
+    for (const operation of operations) {
+      const { operationId } = operation;
+      if (operationId) {
+        this.client[operationId] = this.createOperationMethod(operation);
+      }
+    }
 
-    // set initialized = true
+    // we are now initalized
     this.initalized = true;
+    return this.client;
+  }
 
-    return client;
+  /**
+   * Returns an instance of OpenAPIClient
+   *
+   * @returns
+   * @memberof OpenAPIFrontend
+   */
+  public async getClient(): Promise<OpenAPIClient> {
+    if (!this.initalized) {
+      return this.init();
+    }
+    return this.client;
   }
 
   /**
@@ -118,7 +154,7 @@ export class OpenAPIFrontend {
    * @returns string
    * @memberof OpenAPIFrontend
    */
-  public getBaseURL() {
+  public getBaseURL(): string {
     if (!this.definition) {
       return;
     }
@@ -128,5 +164,99 @@ export class OpenAPIFrontend {
     }
 
     return this.definition.servers[0].url;
+  }
+
+  /**
+   * Creates an axios method for an operation
+   *
+   * (...pathParams, data?: any, config?)
+   * => Promise<AxiosResponse>
+   *
+   * @param {Operation} operation
+   * @memberof OpenAPIFrontend
+   */
+  public createOperationMethod(operation: Operation): OperationMethod {
+    const { method, path } = operation;
+
+    return (...args) => {
+      let axiosConfig: AxiosRequestConfig = { method };
+
+      // parse path template
+      const pathParams = bath(path);
+
+      // handle operation method arguments
+      const paramArgs: string[] = [];
+      for (const argument of args) {
+        switch (typeof argument) {
+          // the first arguments are always path parameters for operation
+          // the last argument, if of type object is the opts object
+          case 'string':
+            // this is a path param argument
+            paramArgs.push(argument);
+            break;
+          case 'number':
+            // this is a path param argument
+            paramArgs.push(`${argument}`);
+            break;
+          default:
+            if (axiosConfig.data === undefined) {
+              // this is a data argument
+              // you can pass null as the first non param argument if you want to override axios config
+              axiosConfig.data = argument;
+            } else {
+              // this is an axios config override argument
+              axiosConfig = { ...axiosConfig, ...argument };
+            }
+            break;
+        }
+      }
+
+      // construct a map of path param names and values
+      const params = _.zipObject(pathParams.names, paramArgs);
+
+      // make sure all path parameters are set
+      _.map(_.values(params), (value, index) => {
+        if (value === undefined) {
+          const paramName = pathParams.names[index];
+          if (this.strict) {
+            throw new Error(`Missing argument #${index} for path parameter ${paramName}`);
+          }
+          // set the value to "undefined"
+          params[paramName] = 'undefined';
+        }
+      });
+
+      // construct URL from path
+      axiosConfig.url = pathParams.path(params);
+
+      // do the axios request
+      return this.client.request(axiosConfig);
+    };
+  }
+
+  /**
+   * Flattens operations into a simple array of Operation objects easy to work with
+   *
+   * @returns {Operation[]}
+   * @memberof OpenAPIBackend
+   */
+  public getOperations(): Operation[] {
+    const paths = _.get(this.definition, 'paths', {});
+    return _.chain(paths)
+      .entries()
+      .flatMap(([path, pathBaseObject]) => {
+        const methods = _.pick(pathBaseObject, ['get', 'put', 'post', 'delete', 'options', 'head', 'patch', 'trace']);
+        return _.map(_.entries(methods), ([method, operation]) => ({
+          ...(operation as OpenAPIV3.OperationObject),
+          path,
+          method,
+          // add the path base object's operations to the operation's parameters
+          parameters: [
+            ...((operation.parameters as OpenAPIV3.ParameterObject[]) || []),
+            ...((pathBaseObject.parameters as OpenAPIV3.ParameterObject[]) || []),
+          ],
+        }));
+      })
+      .value();
   }
 }

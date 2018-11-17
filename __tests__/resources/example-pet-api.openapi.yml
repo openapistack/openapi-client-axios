@@ -6,6 +6,8 @@ info:
 tags:
   - name: pets
     description: Pet operations
+servers:
+  - url: http://localhost:8080
 paths:
   /pets:
     get:

@@ -8,6 +8,7 @@
     "object-literal-sort-keys": false,
     "no-string-literal": false,
     "object-literal-key-quotes": false,
-    "no-console": false
+    "no-console": false,
+    "trailing-comma": [true, {"multiline": "always", "singleline": "never", "esSpecCompliant": true}]
   }
 }
