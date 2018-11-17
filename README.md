@@ -8,12 +8,14 @@ JavaScript library for consuming OpenAPI-enabled APIs
 
 ## Features
 
-- [x] Create API clients by describing them in OpenAPI document specification and importing them via YAML or JSON files
-or just passing an object
-- [x] Easy to call API operations with your preferred syntax
-  - `client.updatePet(1, pet)`
-  - `client.query('updatePet', 1, pet)`
-  - `client.patch('/pets/1', { data: pet })`
+- [x] Create API clients by describing them in [OpenAPI specification](https://github.com/OAI/OpenAPI-Specification)
+and importing them via YAML or JSON files or by just passing an object
+- [x] Call API operations with your preferred syntax:
+  - `client.updatePet(1, pet)` - operation methods
+  - `client.query('updatePet', 1, pet)` - query method
+  - `client.put('/pets/1', pet)` - axios method aliases
+  - `client({ method: 'put', url: '/pets/1', data: pet })` - axios basic
+- [x] Built on top of the robust [axios](https://github.com/axios/axios) JavaScript library
 - [x] Isomorphic, works both in browser and Node.js
 
 ## Quick Start
@@ -22,10 +24,10 @@ or just passing an object
 npm install --save openapi-frontend
 ```
 
-With promises:
+With promises / CommonJS syntax:
 
 ```javascript
-import OpenAPIFrontend from 'openapi-frontend';
+const OpenAPIFrontend = require('openapi-frontend').default;
 
 const api = new OpenAPIFrontend({ definition: 'http://example.com/api/openapi.json' });
 api.init()
@@ -33,7 +35,7 @@ api.init()
   .then(res => console.log('Here is pet id:1 from the api', res));
 ```
 
-With async/await:
+With async-await / ES6 syntax:
 
 ```javascript
 import OpenAPIFrontend from 'openapi-frontend';
@@ -42,8 +44,7 @@ const api = new OpenAPIFrontend({ definition: 'http://example.com/api/openapi.js
 api.init();
 
 async function createPet() {
-  const myPet = { name: 'Garfield' };
-  const res = await client.createPet(myPet);
+  const res = await api.client.createPet({ name: 'Garfield' });
   console.log('Pet created', res);
 }
 ```
