@@ -162,6 +162,34 @@ describe('OpenAPIFrontend', () => {
       expect(mockHandler).toBeCalled();
     });
 
+    test("get('/pets') calls GET /pets", async () => {
+      const api = new OpenAPIFrontend({ definition, strict: true });
+      const client = await api.init();
+
+      const mock = new MockAdapter(api.client);
+      const mockResponse = [{ id: 1, name: 'Garfield' }];
+      const mockHandler = jest.fn((config) => [200, mockResponse]);
+      mock.onGet('/pets').reply((config) => mockHandler(config));
+
+      const res = await client.get('/pets');
+      expect(res.data).toEqual(mockResponse);
+      expect(mockHandler).toBeCalled();
+    });
+
+    test("({ method: 'get', url: '/pets' }) calls GET /pets", async () => {
+      const api = new OpenAPIFrontend({ definition, strict: true });
+      const client = await api.init();
+
+      const mock = new MockAdapter(api.client);
+      const mockResponse = [{ id: 1, name: 'Garfield' }];
+      const mockHandler = jest.fn((config) => [200, mockResponse]);
+      mock.onGet('/pets').reply((config) => mockHandler(config));
+
+      const res = await client({ method: 'get', url: '/pets' });
+      expect(res.data).toEqual(mockResponse);
+      expect(mockHandler).toBeCalled();
+    });
+
     test("query('getPetById', 1) calls GET /pets/1", async () => {
       const api = new OpenAPIFrontend({ definition, strict: true });
       const client = await api.init();
@@ -224,18 +252,21 @@ describe('OpenAPIFrontend', () => {
       expect(mockContext.data).toEqual(JSON.stringify(pet));
     });
 
-    test('deletePetById(1) calls DELETE /pets/1', async () => {
+    test("query('replacePetById', 1, pet) calls PUT /pets/1 with JSON payload", async () => {
       const api = new OpenAPIFrontend({ definition, strict: true });
       const client = await api.init();
 
       const mock = new MockAdapter(api.client);
-      const mockResponse = { id: 1, name: 'Garfield' };
+      const pet = { id: 1, name: 'Garfield' };
+      const mockResponse = pet;
       const mockHandler = jest.fn(() => [200, mockResponse]);
-      mock.onDelete('/pets/1').reply((config) => mockHandler(config));
+      mock.onPut('/pets/1').reply((config) => mockHandler(config));
 
-      const res = await client.deletePetById(1);
+      const res = await client.replacePetById(1, pet);
       expect(res.data).toEqual(mockResponse);
       expect(mockHandler).toBeCalled();
+      const mockContext = mockHandler.mock.calls[mockHandler.mock.calls.length - 1][0];
+      expect(mockContext.data).toEqual(JSON.stringify(pet));
     });
 
     test('replacePetById(1, pet) calls PUT /pets/1 with JSON payload', async () => {
@@ -255,6 +286,19 @@ describe('OpenAPIFrontend', () => {
       expect(mockContext.data).toEqual(JSON.stringify(pet));
     });
 
+    test('deletePetById(1) calls DELETE /pets/1', async () => {
+      const api = new OpenAPIFrontend({ definition, strict: true });
+      const client = await api.init();
+
+      const mock = new MockAdapter(api.client);
+      const mockResponse = { id: 1, name: 'Garfield' };
+      const mockHandler = jest.fn(() => [200, mockResponse]);
+      mock.onDelete('/pets/1').reply((config) => mockHandler(config));
+
+      const res = await client.deletePetById(1);
+      expect(res.data).toEqual(mockResponse);
+      expect(mockHandler).toBeCalled();
+    });
     test('getOwnerByPetId(1) calls GET /pets/1/owner', async () => {
       const api = new OpenAPIFrontend({ definition, strict: true });
       const client = await api.init();
