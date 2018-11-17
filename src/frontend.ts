@@ -8,10 +8,13 @@ import { OpenAPIV3 } from 'openapi-types';
 export type Document = OpenAPIV3.Document;
 export type OperationMethodPathParameterArgument = string | number;
 export type OperationMethodDataArgument = any;
-export type OperationMethod = (
-  ...args: Array<OperationMethodPathParameterArgument | OperationMethodDataArgument | AxiosRequestConfig>
-) => Promise<AxiosResponse<any>>;
+export type OperationMethodArgument =
+  | OperationMethodPathParameterArgument
+  | OperationMethodDataArgument
+  | AxiosRequestConfig;
+export type OperationMethod = (...args: OperationMethodArgument[]) => Promise<AxiosResponse<any>>;
 export interface OpenAPIFrontendExtensions {
+  query(operationId: string, ...args: OperationMethodArgument[]): Promise<AxiosResponse<any>>;
   [operationId: string]: OperationMethod;
 }
 export type OpenAPIClient = AxiosInstance & OpenAPIFrontendExtensions;
@@ -45,6 +48,8 @@ export class OpenAPIFrontend {
   public initalized: boolean;
   public client: OpenAPIClient;
 
+  public operations: { [operationId: string]: OperationMethod };
+
   /**
    * Creates an instance of OpenAPIFrontend.
    *
@@ -64,6 +69,7 @@ export class OpenAPIFrontend {
     this.inputDocument = optsWithDefaults.definition;
     this.strict = optsWithDefaults.strict;
     this.validate = optsWithDefaults.validate;
+    this.operations = {};
   }
 
   /**
@@ -106,14 +112,19 @@ export class OpenAPIFrontend {
     // from here on, we want to handle the client as an extended axios client instance
     this.client = instance as OpenAPIClient;
 
-    // add methods for operationIds
+    // create methods for operationIds
     const operations = this.getOperations();
     for (const operation of operations) {
       const { operationId } = operation;
       if (operationId) {
-        this.client[operationId] = this.createOperationMethod(operation);
+        this.operations[operationId] = this.createOperationMethod(operation);
+        // also add the method to the axios client for syntactic sugar
+        this.client[operationId] = this.operations[operationId];
       }
     }
+
+    // add the query method
+    this.client.query = (operationId, ...args) => this.operations[operationId](...args);
 
     // we are now initalized
     this.initalized = true;
@@ -168,9 +179,7 @@ export class OpenAPIFrontend {
 
   /**
    * Creates an axios method for an operation
-   *
-   * (...pathParams, data?: any, config?)
-   * => Promise<AxiosResponse>
+   * (...pathParams, data?, config?) => Promise<AxiosResponse>
    *
    * @param {Operation} operation
    * @memberof OpenAPIFrontend
