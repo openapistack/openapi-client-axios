@@ -6,3 +6,41 @@
 
 JavaScript library for consuming OpenAPI-enabled APIs. Isomorphic, works both in browser and Node.js.
 
+## Quick Start
+
+```
+npm install --save openapi-frontend
+```
+
+With promises:
+
+```javascript
+import OpenAPIFrontend from 'openapi-frontend';
+
+const api = new OpenAPIFrontend({ definition: 'http://example.com/api/openapi.json' });
+api.init()
+  .then(client => client.getPetById(1))
+  .then(res => console.log('Here is pet id:1 from the api', res));
+```
+
+With async/await:
+
+```javascript
+import OpenAPIFrontend from 'openapi-frontend';
+
+const api = new OpenAPIFrontend({ definition: 'http://example.com/api/openapi.json' });
+api.init();
+
+async function createPet() {
+  const myPet = { name: 'Garfield' };
+  const res = await client.createPet(myPet);
+  console.log('Pet created', res);
+}
+```
+
+## Contributing
+
+OpenAPI Backend is Free and Open Source Software. Issues and pull requests are more than welcome!
+
+[<img alt="The Chilicorn" src="http://spiceprogram.org/assets/img/chilicorn_sticker.svg" width="250" height="250">](https://spiceprogram.org/oss-sponsorship)
+
