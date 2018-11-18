@@ -36,7 +36,6 @@
     "!*.config.js"
   ],
   "dependencies": {
-    "@types/swagger-parser": "^4.0.2",
     "axios": "^0.18.0",
     "bath": "^2.1.1",
     "lodash": "^4.17.11",
@@ -47,6 +46,7 @@
     "@types/jest": "^23.3.9",
     "@types/lodash": "^4.14.118",
     "@types/node": "^10.12.9",
+    "@types/swagger-parser": "^4.0.2",
     "axios-mock-adapter": "^1.15.0",
     "jest": "^23.6.0",
     "markdown-toc": "^1.2.0",
