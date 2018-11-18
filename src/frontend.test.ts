@@ -404,9 +404,9 @@ describe('OpenAPIFrontend', () => {
   describe('mock api using openapi-backend', async () => {
     const mockApi = new OpenAPIBackend({ definition });
     mockApi.register({
-      notFound: async () => [404, { err: 'not found' }],
-      validationFail: async (c) => [400, { err: c.validation.errors }],
-      notImplemented: async (c) => {
+      notFound: () => [404, { err: 'not found' }],
+      validationFail: (c) => [400, { err: c.validation.errors }],
+      notImplemented: (c) => {
         const { status, mock } = mockApi.mockResponseForOperation(c.operation.operationId);
         return [status, mock];
       },

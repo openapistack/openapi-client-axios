@@ -134,9 +134,9 @@ const definition = './openapi.yml';
 // create the mock API
 const mockApi = new OpenAPIBackend({ definition });
 mockApi.register({
-  notFound: async () => [404, { err: 'not found' }],
-  validationFail: async (c) => [400, { err: c.validation.errors }],
-  notImplemented: async (c) => {
+  notFound: () => [404, { err: 'not found' }],
+  validationFail: (c) => [400, { err: c.validation.errors }],
+  notImplemented: (c) => {
     const { status, mock } = mockApi.mockResponseForOperation(c.operation.operationId);
     return [status, mock];
   },
