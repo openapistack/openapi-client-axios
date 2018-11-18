@@ -20,9 +20,8 @@ and importing them via YAML or JSON files or by just passing an object
   - `client({ method: 'put', url: '/pets/1', data: pet })` - axios basic
 - [x] Built on top of the robust [axios](https://github.com/axios/axios) JavaScript library
 - [x] Isomorphic, works both in browser and Node.js
+- [x] Option to mock API backends using [openapi-backend](https://github.com/anttiviljami/openapi-backend)
 - [x] TypeScript types included
-- [ ] Option to mock API responses using [OpenAPI examples objects](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#example-object)
-or [JSON Schema definitions](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#schema-object)
 
 ## Quick Start
 
@@ -53,6 +52,114 @@ async function createPet() {
   const res = await api.client.createPet({ name: 'Garfield' });
   console.log('Pet created', res);
 }
+```
+
+## Calling API operations
+
+After initalizing `OpenAPIFrontend`, an instance of `OpenAPIClient` is exposed.
+
+Example:
+```javascript
+const api = new OpenAPIFrontend({ definition: 'https://example.com/api/openapi.json' });
+api.init().then((client) => {
+  // ...
+});
+```
+
+Each instance of `OpenAPIClient` is an [axios instance](https://github.com/axios/axios#creating-an-instance) extended
+with extra methods for calling API operations.
+
+There are four different ways to call API operations with `OpenAPIClient`:
+
+1. `client.updatePet(1, pet)` - operation methods
+2. `client.query('updatePet', 1, pet)` - query method
+3. `client.put('/pets/1', pet)` - axios method aliases
+4. `client({ method: 'put', url: '/pets/1', data: pet })` - axios basic
+
+Example:
+```javascript
+const api = new OpenAPIFrontend({
+  definition: {
+    openapi: '3.0.1',
+    info: {
+      title: 'Petstore',
+      version: '1.0.0',
+    },
+    servers: [{ url: 'http://localhost:9000' }], // petstore api
+    paths: {
+      '/pets': {
+        get: {
+          operationId: 'getPets',
+          responses: {
+            200: { description: 'ok' },
+          },
+        },
+      },
+    },
+  },
+});
+
+async function test() {
+  const client = await api.init();
+
+  const res1 = await client.getPets();
+  const res2 = await client.query('getPets');
+  const res3 = await client.get('/pets');
+  const res4 = await client({ method: 'get', url: '/pets' });
+
+  assert.deepEqual(res1.data, res2.data);
+  assert.deepEqual(res1.data, res3.data);
+  assert.deepEqual(res1.data, res4.data);
+}
+test();
+```
+
+## Mocking with OpenAPI Backend
+
+Combining OpenAPI Frontend with [`openapi-backend`](https://github.com/anttiviljami/openapi-backend) allows you to
+easily mock your API backend while developing client applications.
+
+OpenAPI Backend uses [OpenAPI examples objects](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#example-object)
+and [JSON Schema definitions](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#schema-object)
+to mock responses using your OpenAPI specification document. Routing and input validation is also automatically enabled
+when using the `handleRequest()` method.
+
+Example:
+```javascript
+import OpenAPIFrontend from 'openapi-frontend';
+import OpenAPIBackend from 'openapi-backend';
+
+const definition = './openapi.yml';
+
+// create the mock API
+const mockApi = new OpenAPIBackend({ definition });
+mockApi.register({
+  notFound: async () => [404, { err: 'not found' }],
+  validationFail: async (c) => [400, { err: c.validation.errors }],
+  notImplemented: async (c) => {
+    const { status, mock } = mockApi.mockResponseForOperation(c.operation.operationId);
+    return [status, mock];
+  },
+});
+
+// create the client with a mockHandler using OpenAPIBackend.handleRequest()
+const api = new OpenAPIFrontend({
+  definition,
+  mockHandler: (config) =>
+    mockApi.handleRequest({
+      method: config.method,
+      path: config.url,
+      body: config.data,
+      headers: config.headers,
+    }),
+});
+
+// init both the mock api backend and the client
+mockApi.init()
+  .then(() => api.init())
+  .then((client) => {
+    // all calls using OpenAPIClient will now be handled by the mocked OpenAPI backend
+  });
 ```
 
 ## Contributing

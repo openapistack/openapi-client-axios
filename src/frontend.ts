@@ -1,5 +1,6 @@
 import _ from 'lodash';
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
+import MockAdapter from 'axios-mock-adapter';
 import bath from 'bath';
 import { validate as validateOpenAPI } from 'openapi-schema-validation';
 import SwaggerParser from 'swagger-parser';
@@ -31,6 +32,8 @@ export interface Operation extends OpenAPIV3.OperationObject {
   method: string;
 }
 
+export type MockHandler = (config: AxiosRequestConfig) => any[] | Promise<any[]>;
+
 /**
  * Main class and the default export of the 'openapi-frontend' module
  *
@@ -44,11 +47,14 @@ export class OpenAPIFrontend {
 
   public strict: boolean;
   public validate: boolean;
+  public mockDelay: number;
+  public mockHandler: MockHandler;
 
   public initalized: boolean;
   public client: OpenAPIClient;
 
   public operations: { [operationId: string]: OperationMethod };
+  public mockAdapter: MockAdapter;
 
   /**
    * Creates an instance of OpenAPIFrontend.
@@ -59,16 +65,25 @@ export class OpenAPIFrontend {
    * @param {boolean} opts.validate - whether to validate requests with Ajv (default: true)
    * @memberof OpenAPIFrontend
    */
-  constructor(opts: { definition: Document | string; strict?: boolean; validate?: boolean }) {
+  constructor(opts: {
+    definition: Document | string;
+    strict?: boolean;
+    validate?: boolean;
+    mockHandler?: MockHandler;
+    mockDelay?: number;
+  }) {
     const optsWithDefaults = {
       validate: true,
       strict: false,
+      mockDelay: 0,
       handlers: {},
       ...opts,
     };
     this.inputDocument = optsWithDefaults.definition;
     this.strict = optsWithDefaults.strict;
     this.validate = optsWithDefaults.validate;
+    this.mockDelay = optsWithDefaults.mockDelay;
+    this.mockHandler = optsWithDefaults.mockHandler;
     this.operations = {};
   }
 
@@ -123,6 +138,11 @@ export class OpenAPIFrontend {
       }
     }
 
+    // mock the api using the given handler
+    if (this.mockHandler) {
+      this.mock(this.mockHandler, { mockDelay: this.mockDelay });
+    }
+
     // add the query method
     this.client.query = (operationId, ...args) => this.operations[operationId](...args);
 
@@ -142,6 +162,21 @@ export class OpenAPIFrontend {
       return this.init();
     }
     return this.client;
+  }
+
+  /**
+   * Sets an axios mock adapter with given handler. Meant to be used with openapi-backend
+   *
+   * @param {MockHandler} mockHandler
+   * @memberof OpenAPIFrontend
+   */
+  public mock(mockHandler: MockHandler, opts?: { mockDelay: number }) {
+    this.mockHandler = mockHandler;
+    if (opts && opts.mockDelay !== undefined) {
+      this.mockDelay = opts.mockDelay;
+    }
+    this.mockAdapter = new MockAdapter(this.client, { delayResponse: this.mockDelay });
+    this.mockAdapter.onAny().reply(this.mockHandler);
   }
 
   /**
@@ -267,5 +302,16 @@ export class OpenAPIFrontend {
         }));
       })
       .value();
+  }
+
+  /**
+   * Gets a single operation based on operationId
+   *
+   * @param {string} operationId
+   * @returns {Operation}
+   * @memberof OpenAPIBackend
+   */
+  public getOperation(operationId: string): Operation {
+    return _.find(this.getOperations(), { operationId });
   }
 }

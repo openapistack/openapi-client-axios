@@ -1,5 +1,7 @@
 import path from 'path';
 import { OpenAPIFrontend } from './frontend';
+
+import OpenAPIBackend from 'openapi-backend';
 import { OpenAPIV3 } from 'openapi-types';
 import MockAdapter from 'axios-mock-adapter';
 
@@ -23,6 +25,11 @@ const pathId: OpenAPIV3.ParameterObject = {
   },
 };
 
+const examplePet = {
+  id: 1,
+  name: 'Garfield',
+};
+
 const definition: OpenAPIV3.Document = {
   openapi: '3.0.0',
   info: {
@@ -34,29 +41,53 @@ const definition: OpenAPIV3.Document = {
     '/pets': {
       get: {
         operationId: 'getPets',
-        responses,
+        responses: {
+          200: {
+            $ref: '#/components/responses/PetsListRes',
+          },
+        },
       },
       post: {
         operationId: 'createPet',
-        responses,
+        responses: {
+          201: {
+            $ref: '#/components/responses/PetRes',
+          },
+        },
       },
     },
     '/pets/{id}': {
       get: {
         operationId: 'getPetById',
-        responses,
+        responses: {
+          200: {
+            $ref: '#/components/responses/PetRes',
+          },
+        },
       },
       put: {
         operationId: 'replacePetById',
-        responses,
+        responses: {
+          200: {
+            $ref: '#/components/responses/PetRes',
+          },
+        },
       },
       patch: {
         operationId: 'updatePetById',
-        responses,
+        responses: {
+          200: {
+            $ref: '#/components/responses/PetRes',
+          },
+        },
       },
       delete: {
         operationId: 'deletePetById',
-        responses,
+        responses: {
+          200: {
+            $ref: '#/components/responses/PetRes',
+          },
+        },
       },
       parameters: [pathId],
     },
@@ -71,6 +102,48 @@ const definition: OpenAPIV3.Document = {
       get: {
         operationId: 'getPetsMeta',
         responses,
+      },
+    },
+  },
+  components: {
+    schemas: {
+      PetWithName: {
+        type: 'object',
+        properties: {
+          id: {
+            type: 'integer',
+            minimum: 1,
+          },
+          name: {
+            type: 'string',
+            example: 'Garfield',
+          },
+        },
+      },
+    },
+    responses: {
+      PetRes: {
+        description: 'ok',
+        content: {
+          'application/json': {
+            schema: {
+              $ref: '#/components/schemas/PetWithName',
+            },
+          },
+        },
+      },
+      PetsListRes: {
+        description: 'ok',
+        content: {
+          'application/json': {
+            schema: {
+              type: 'array',
+              items: {
+                $ref: '#/components/schemas/PetWithName',
+              },
+            },
+          },
+        },
       },
     },
   },
@@ -325,6 +398,75 @@ describe('OpenAPIFrontend', () => {
       const res = await client.getPetsMeta();
       expect(res.data).toEqual(mockResponse);
       expect(mockHandler).toBeCalled();
+    });
+  });
+
+  describe('mock api using openapi-backend', async () => {
+    const mockApi = new OpenAPIBackend({ definition });
+    mockApi.register({
+      notFound: async () => [404, { err: 'not found' }],
+      validationFail: async (c) => [400, { err: c.validation.errors }],
+      notImplemented: async (c) => {
+        const { status, mock } = mockApi.mockResponseForOperation(c.operation.operationId);
+        return [status, mock];
+      },
+    });
+
+    const api = new OpenAPIFrontend({ definition });
+    beforeAll(async () => {
+      await api.init();
+      api.mock((config) =>
+        mockApi.handleRequest({
+          method: config.method,
+          path: config.url,
+          body: config.data,
+          headers: config.headers,
+        }),
+      );
+    });
+
+    test('mocks getPets() using openapi-backend', async () => {
+      const res = await api.client.getPets();
+      expect(res.status).toBe(200);
+      expect(res.data).toEqual([examplePet]);
+    });
+
+    test('mocks createPet(pet) using openapi-backend', async () => {
+      const res = await api.client.createPet(examplePet);
+      expect(res.status).toBe(201);
+      expect(res.data).toEqual(examplePet);
+    });
+
+    test('mocks getPetById(1) using openapi-backend', async () => {
+      const res = await api.client.getPetById(1);
+      expect(res.status).toBe(200);
+      expect(res.data).toEqual(examplePet);
+    });
+
+    test("mocks query('getPetById', 1) using openapi-backend", async () => {
+      const res = await api.client.query('getPetById', 1);
+      expect(res.status).toBe(200);
+      expect(res.data).toEqual(examplePet);
+    });
+
+    test("mocks get('/pets/1') using openapi-backend", async () => {
+      const res = await api.client.get('/pets/1');
+      expect(res.status).toBe(200);
+      expect(res.data).toEqual(examplePet);
+    });
+
+    test("mocks ({ method: 'get', url: '/pets/1' }) using openapi-backend", async () => {
+      const res = await api.client({ method: 'get', url: '/pets/1' });
+      expect(res.status).toBe(200);
+      expect(res.data).toEqual(examplePet);
+    });
+
+    test("mocks getPetById('1a') with 400 validation error using openapi-backend", async () => {
+      expect(api.client.getPetById('1a')).rejects.toThrowError('400');
+    });
+
+    test("mocks get('/unknown') with 404 not found error using openapi-backend", async () => {
+      expect(api.client.get('/unknown')).rejects.toThrowError('404');
     });
   });
 });
