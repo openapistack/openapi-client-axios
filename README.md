@@ -162,6 +162,8 @@ Operation searchPets: `GET /pets?query=dog` can be called with:
 client.searchPets(null, { params: { query: 'dog' } });
 ```
 
+Note the null passed as the first parameter, as searchPets doesn't take a request body payload.
+
 Any arguments passed after the config object will cause OpenAPI backend to throw an Error.
 
 ## Mocking with OpenAPI Backend
