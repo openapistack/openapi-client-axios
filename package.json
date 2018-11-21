@@ -1,7 +1,7 @@
 {
   "name": "openapi-frontend",
   "description": "JavaScript library for consuming OpenAPI-enabled APIs",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "author": "Viljami Kuosmanen <viljami@avoinsorsa.fi>",
   "license": "MIT",
   "keywords": [
@@ -50,7 +50,7 @@
     "@types/swagger-parser": "^4.0.2",
     "jest": "^23.6.0",
     "markdown-toc": "^1.2.0",
-    "openapi-backend": "^1.4.3",
+    "openapi-backend": "^1.4.4",
     "prettier": "^1.14.3",
     "source-map-support": "^0.5.9",
     "ts-jest": "^23.10.4",

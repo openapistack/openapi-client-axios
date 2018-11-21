@@ -46,6 +46,18 @@ const definition: OpenAPIV3.Document = {
             $ref: '#/components/responses/PetsListRes',
           },
         },
+        parameters: [
+          {
+            name: 'q',
+            in: 'query',
+            schema: {
+              type: 'array',
+              items: {
+                type: 'string',
+              },
+            },
+          },
+        ],
       },
       post: {
         operationId: 'createPet',
@@ -235,6 +247,40 @@ describe('OpenAPIFrontend', () => {
       expect(mockHandler).toBeCalled();
     });
 
+    test("getPets(null, { params: { q: 'cats' } }) calls GET /pets?q=cats", async () => {
+      const api = new OpenAPIFrontend({ definition, strict: true });
+      const client = await api.init();
+
+      const mock = new MockAdapter(api.client);
+      const mockResponse = [{ id: 1, name: 'Garfield' }];
+      const mockHandler = jest.fn((config) => [200, mockResponse]);
+      mock.onGet('/pets').reply((config) => mockHandler(config));
+
+      const params = { q: 'cats ' };
+      const res = await client.getPets(null, { params });
+      expect(res.data).toEqual(mockResponse);
+      expect(mockHandler).toBeCalled();
+      const mockContext = mockHandler.mock.calls[mockHandler.mock.calls.length - 1][0];
+      expect(mockContext.params).toEqual(params);
+    });
+
+    test("getPets(null, { params: { q: ['cats', 'dogs'] } }) calls GET /pets?q=cats&q=dogs", async () => {
+      const api = new OpenAPIFrontend({ definition, strict: true });
+      const client = await api.init();
+
+      const mock = new MockAdapter(api.client);
+      const mockResponse = [{ id: 1, name: 'Garfield' }];
+      const mockHandler = jest.fn((config) => [200, mockResponse]);
+      mock.onGet('/pets').reply((config) => mockHandler(config));
+
+      const params = { q: ['cats', 'dogs'] };
+      const res = await client.getPets(null, { params });
+      expect(res.data).toEqual(mockResponse);
+      expect(mockHandler).toBeCalled();
+      const mockContext = mockHandler.mock.calls[mockHandler.mock.calls.length - 1][0];
+      expect(mockContext.params).toEqual(params);
+    });
+
     test("get('/pets') calls GET /pets", async () => {
       const api = new OpenAPIFrontend({ definition, strict: true });
       const client = await api.init();
@@ -399,6 +445,12 @@ describe('OpenAPIFrontend', () => {
       expect(res.data).toEqual(mockResponse);
       expect(mockHandler).toBeCalled();
     });
+
+    test('getPets() with too many arguments throws an error', async () => {
+      const api = new OpenAPIFrontend({ definition, strict: true });
+      const client = await api.init();
+      expect(client.getPets({}, {}, {}, {}, {})).rejects.toThrow();
+    });
   });
 
   describe('mock api using openapi-backend', async () => {
@@ -421,6 +473,7 @@ describe('OpenAPIFrontend', () => {
           path: config.url,
           body: config.data,
           headers: config.headers,
+          query: config.params,
         }),
       );
     });
@@ -459,6 +512,22 @@ describe('OpenAPIFrontend', () => {
       const res = await api.client({ method: 'get', url: '/pets/1' });
       expect(res.status).toBe(200);
       expect(res.data).toEqual(examplePet);
+    });
+
+    test("mocks getPets(null, { params: { q: 'search' } }) using openapi-backend", async () => {
+      const res = await api.client.getPets(null, { params: { q: 'search' } });
+      expect(res.status).toBe(200);
+      expect(res.data).toEqual([examplePet]);
+    });
+
+    test("mocks getPets(null, { params: { q: ['search1', 'search2'] } }) using openapi-backend", async () => {
+      const res = await api.client.getPets(null, { params: { q: ['search1', 'search2'] } });
+      expect(res.status).toBe(200);
+      expect(res.data).toEqual([examplePet]);
+    });
+
+    test("mocks getPets(null, { params: { unknown: '' } }) with 400 error using openapi-backend", async () => {
+      expect(api.client.getPets(null, { params: { unknown: '' } })).rejects.toThrowError('400');
     });
 
     test("mocks getPetById('1a') with 400 validation error using openapi-backend", async () => {

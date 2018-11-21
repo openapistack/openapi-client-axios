@@ -55,6 +55,7 @@ export class OpenAPIFrontend {
 
   public operations: { [operationId: string]: OperationMethod };
   public mockAdapter: MockAdapter;
+  public axiosConfigDefaults: AxiosRequestConfig;
 
   /**
    * Creates an instance of OpenAPIFrontend.
@@ -71,12 +72,13 @@ export class OpenAPIFrontend {
     validate?: boolean;
     mockHandler?: MockHandler;
     mockDelay?: number;
+    axiosConfigDefaults?: AxiosRequestConfig;
   }) {
     const optsWithDefaults = {
       validate: true,
       strict: false,
       mockDelay: 0,
-      handlers: {},
+      axiosConfigDefaults: {},
       ...opts,
     };
     this.inputDocument = optsWithDefaults.definition;
@@ -84,6 +86,7 @@ export class OpenAPIFrontend {
     this.validate = optsWithDefaults.validate;
     this.mockDelay = optsWithDefaults.mockDelay;
     this.mockHandler = optsWithDefaults.mockHandler;
+    this.axiosConfigDefaults = optsWithDefaults.axiosConfigDefaults;
     this.operations = {};
   }
 
@@ -116,11 +119,11 @@ export class OpenAPIFrontend {
     }
 
     // return the created axios instance
-    const instance = axios.create();
+    const instance = axios.create(this.axiosConfigDefaults);
 
-    // set baseURL to the one found in the definition servers
+    // set baseURL to the one found in the definition servers (if not set in axios defaults)
     const baseURL = this.getBaseURL();
-    if (baseURL) {
+    if (baseURL && !this.axiosConfigDefaults.baseURL) {
       instance.defaults.baseURL = baseURL;
     }
 
@@ -220,10 +223,11 @@ export class OpenAPIFrontend {
    * @memberof OpenAPIFrontend
    */
   public createOperationMethod(operation: Operation): OperationMethod {
-    const { method, path } = operation;
+    const { method, path, operationId } = operation;
 
-    return (...args) => {
-      let axiosConfig: AxiosRequestConfig = { method };
+    return async (...args) => {
+      let data: any;
+      let config: AxiosRequestConfig;
 
       // parse path template
       const pathParams = bath(path);
@@ -231,27 +235,20 @@ export class OpenAPIFrontend {
       // handle operation method arguments
       const paramArgs: string[] = [];
       for (const argument of args) {
-        switch (typeof argument) {
-          // the first arguments are always path parameters for operation
-          // the last argument, if of type object is the opts object
-          case 'string':
-            // this is a path param argument
-            paramArgs.push(argument);
-            break;
-          case 'number':
-            // this is a path param argument
-            paramArgs.push(`${argument}`);
-            break;
-          default:
-            if (axiosConfig.data === undefined) {
-              // this is a data argument
-              // you can pass null as the first non param argument if you want to override axios config
-              axiosConfig.data = argument;
-            } else {
-              // this is an axios config override argument
-              axiosConfig = { ...axiosConfig, ...argument };
-            }
-            break;
+        if (paramArgs.length < pathParams.names.length) {
+          // this is a path param argument (string)
+          paramArgs.push(`${argument}`);
+        } else if (data === undefined) {
+          // this is a data argument (any)
+          // you can pass null if you want to override axios config but not supply any data
+          data = argument as any;
+        } else if (config === undefined) {
+          // this is the last config argument, an AxiosRequestConfig override
+          config = argument as AxiosRequestConfig;
+        } else {
+          throw new Error(
+            `Expected a maximum of ${pathParams.names.length + 2} arguments for ${operationId} operation method`,
+          );
         }
       }
 
@@ -270,8 +267,16 @@ export class OpenAPIFrontend {
         }
       });
 
-      // construct URL from path
-      axiosConfig.url = pathParams.path(params);
+      // construct URL from path params
+      const url = pathParams.path(params);
+
+      // construct axios request config
+      const axiosConfig: AxiosRequestConfig = {
+        method,
+        url,
+        data,
+        ...config,
+      };
 
       // do the axios request
       return this.client.request(axiosConfig);

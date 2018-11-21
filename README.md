@@ -114,6 +114,56 @@ async function test() {
 test();
 ```
 
+## Operation methods
+
+OpenAPIFrontend operation methods take in 3 types of arguments:
+
+```javascript
+operationId(...pathParams, data?, config?)
+```
+
+### Path params
+
+The first arguments are the path parameters of the operation in the order they appear in the URL.
+
+Operation getPetOwner: `GET /pets/{petId}/owners/{ownerId}` can be called with:
+
+```javascript
+client.getPetOwner(petId, ownerId)
+```
+
+### Data / Payload
+
+The first argument after all path parameters have been supplied is the data argument. This allows you to send
+request body payloads with your API call.
+
+Operation updatePet: `PUT /pets/{petId}` can be called with:
+
+```javascript
+client.updatePet(petId, { name: 'Odie' })
+```
+
+If there are no path parameters for the operation, the data argument will be the first argument.
+
+```javascript
+client.createPet({ name: 'Garfield' })
+```
+
+### Config object
+
+The argument after the data argument is the config object.
+
+The config object is an [`AxiosRequestConfig`](https://github.com/axios/axios#request-config) object. You can use it to
+override axios request config parameters, such as `headers`, `params`, `timeout`, `withCredentials` and many more.
+
+Operation searchPets: `GET /pets?query=dog` can be called with:
+
+```javascript
+client.searchPets(null, { params: { query: 'dog' } });
+```
+
+Any arguments passed after the config object will cause OpenAPI backend to throw an Error.
+
 ## Mocking with OpenAPI Backend
 
 Combining OpenAPI Frontend with [`openapi-backend`](https://github.com/anttiviljami/openapi-backend) allows you to
@@ -149,6 +199,7 @@ const api = new OpenAPIFrontend({
     mockApi.handleRequest({
       method: config.method,
       path: config.url,
+      query: config.params,
       body: config.data,
       headers: config.headers,
     }),
