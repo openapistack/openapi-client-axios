@@ -14,11 +14,11 @@ export type OperationMethodArgument =
   | OperationMethodDataArgument
   | AxiosRequestConfig;
 export type OperationMethod = (...args: OperationMethodArgument[]) => Promise<AxiosResponse<any>>;
-export interface OpenAPIFrontendExtensions {
+export interface OpenAPIClientAxiosExtensions {
   query(operationId: string, ...args: OperationMethodArgument[]): Promise<AxiosResponse<any>>;
   [operationId: string]: OperationMethod;
 }
-export type OpenAPIClient = AxiosInstance & OpenAPIFrontendExtensions;
+export type OpenAPIClient = AxiosInstance & OpenAPIClientAxiosExtensions;
 
 /**
  * OAS Operation Object containing the path and method so it can be placed in a flat array of operations
@@ -35,12 +35,12 @@ export interface Operation extends OpenAPIV3.OperationObject {
 export type MockHandler = (config: AxiosRequestConfig) => any[] | Promise<any[]>;
 
 /**
- * Main class and the default export of the 'openapi-frontend' module
+ * Main class and the default export of the 'openapi-client-axios' module
  *
  * @export
- * @class OpenAPIFrontend
+ * @class OpenAPIClientAxios
  */
-export class OpenAPIFrontend {
+export class OpenAPIClientAxios {
   public document: Document;
   public inputDocument: Document | string;
   public definition: Document;
@@ -58,13 +58,13 @@ export class OpenAPIFrontend {
   public axiosConfigDefaults: AxiosRequestConfig;
 
   /**
-   * Creates an instance of OpenAPIFrontend.
+   * Creates an instance of OpenAPIClientAxios.
    *
    * @param opts - constructor options
    * @param {Document | string} opts.definition - the OpenAPI definition, file path or Document object
    * @param {boolean} opts.strict - strict mode, throw errors or warn on OpenAPI spec validation errors (default: false)
    * @param {boolean} opts.validate - whether to validate requests with Ajv (default: true)
-   * @memberof OpenAPIFrontend
+   * @memberof OpenAPIClientAxios
    */
   constructor(opts: {
     definition: Document | string;
@@ -91,12 +91,12 @@ export class OpenAPIFrontend {
   }
 
   /**
-   * Initalizes OpenAPIFrontend.
+   * Initalizes OpenAPIClientAxios.
    *
-   * The init() method should be called right after creating a new instance of OpenAPIFrontend
+   * The init() method should be called right after creating a new instance of OpenAPIClientAxios
    *
    * @returns AxiosInstance
-   * @memberof OpenAPIFrontend
+   * @memberof OpenAPIClientAxios
    */
   public async init() {
     try {
@@ -158,7 +158,7 @@ export class OpenAPIFrontend {
    * Returns an instance of OpenAPIClient
    *
    * @returns
-   * @memberof OpenAPIFrontend
+   * @memberof OpenAPIClientAxios
    */
   public async getClient(): Promise<OpenAPIClient> {
     if (!this.initalized) {
@@ -171,7 +171,7 @@ export class OpenAPIFrontend {
    * Sets an axios mock adapter with given handler. Meant to be used with openapi-backend
    *
    * @param {MockHandler} mockHandler
-   * @memberof OpenAPIFrontend
+   * @memberof OpenAPIClientAxios
    */
   public mock(mockHandler: MockHandler, opts?: { mockDelay: number }) {
     this.mockHandler = mockHandler;
@@ -186,7 +186,7 @@ export class OpenAPIFrontend {
    * Validates this.document, which is the parsed OpenAPI document. Throws an error if validation fails.
    *
    * @returns {Document} parsed document
-   * @memberof OpenAPIFrontend
+   * @memberof OpenAPIClientAxios
    */
   public validateDefinition() {
     const { valid, errors } = validateOpenAPI(this.document, 3);
@@ -201,7 +201,7 @@ export class OpenAPIFrontend {
    * Gets the API baseurl defined in the first OpenAPI specification servers property
    *
    * @returns string
-   * @memberof OpenAPIFrontend
+   * @memberof OpenAPIClientAxios
    */
   public getBaseURL(): string {
     if (!this.definition) {
@@ -220,7 +220,7 @@ export class OpenAPIFrontend {
    * (...pathParams, data?, config?) => Promise<AxiosResponse>
    *
    * @param {Operation} operation
-   * @memberof OpenAPIFrontend
+   * @memberof OpenAPIClientAxios
    */
   public createOperationMethod(operation: Operation): OperationMethod {
     const { method, path, operationId } = operation;

@@ -1,5 +1,5 @@
 import path from 'path';
-import { OpenAPIFrontend } from './frontend';
+import { OpenAPIClientAxios } from './client';
 
 import OpenAPIBackend from 'openapi-backend';
 import { OpenAPIV3 } from 'openapi-types';
@@ -161,30 +161,30 @@ const definition: OpenAPIV3.Document = {
   },
 };
 
-describe('OpenAPIFrontend', () => {
+describe('OpenAPIClientAxios', () => {
   describe('init', () => {
     test('can be initalised with a valid OpenAPI document as JS Object', async () => {
       // @TODO: read a complex document with as many features as possible here
-      const api = new OpenAPIFrontend({ definition, strict: true });
+      const api = new OpenAPIClientAxios({ definition, strict: true });
       await api.init();
       expect(api.initalized).toEqual(true);
     });
 
     test('can be initalised using a valid YAML file', async () => {
-      const api = new OpenAPIFrontend({ definition: examplePetAPIYAML, strict: true });
+      const api = new OpenAPIClientAxios({ definition: examplePetAPIYAML, strict: true });
       await api.init();
       expect(api.initalized).toEqual(true);
     });
 
     test('can be initalised using a valid JSON file', async () => {
-      const api = new OpenAPIFrontend({ definition: examplePetAPIJSON, strict: true });
+      const api = new OpenAPIClientAxios({ definition: examplePetAPIJSON, strict: true });
       await api.init();
       expect(api.initalized).toEqual(true);
     });
 
     test('throws an error when initalised with an invalid document in strict mode', async () => {
       const invalid: any = { invalid: 'not openapi' };
-      const api = new OpenAPIFrontend({ definition: invalid, strict: true });
+      const api = new OpenAPIClientAxios({ definition: invalid, strict: true });
       await expect(api.init()).rejects.toThrowError();
     });
 
@@ -192,7 +192,7 @@ describe('OpenAPIFrontend', () => {
       const invalid: any = { invalid: 'not openapi' };
       const warn = console.warn;
       console.warn = jest.fn();
-      const api = new OpenAPIFrontend({ definition: invalid, strict: false });
+      const api = new OpenAPIClientAxios({ definition: invalid, strict: false });
       await api.init();
       expect(console.warn).toBeCalledTimes(1);
       console.warn = warn; // reset console.warn
@@ -201,7 +201,7 @@ describe('OpenAPIFrontend', () => {
 
   describe('client', () => {
     test('has created operation methods for each operationId', async () => {
-      const api = new OpenAPIFrontend({ definition, strict: true });
+      const api = new OpenAPIClientAxios({ definition, strict: true });
       const client = await api.init();
       expect(client).toHaveProperty('getPets');
       expect(client).toHaveProperty('createPet');
@@ -214,13 +214,13 @@ describe('OpenAPIFrontend', () => {
     });
 
     test('has set default baseURL to the first server in config', async () => {
-      const api = new OpenAPIFrontend({ definition, strict: true });
+      const api = new OpenAPIClientAxios({ definition, strict: true });
       const client = await api.init();
       expect(client.defaults.baseURL).toBe(baseURL);
     });
 
     test("query('getPets') calls GET /pets", async () => {
-      const api = new OpenAPIFrontend({ definition, strict: true });
+      const api = new OpenAPIClientAxios({ definition, strict: true });
       const client = await api.init();
 
       const mock = new MockAdapter(api.client);
@@ -234,7 +234,7 @@ describe('OpenAPIFrontend', () => {
     });
 
     test('getPets() calls GET /pets', async () => {
-      const api = new OpenAPIFrontend({ definition, strict: true });
+      const api = new OpenAPIClientAxios({ definition, strict: true });
       const client = await api.init();
 
       const mock = new MockAdapter(api.client);
@@ -248,7 +248,7 @@ describe('OpenAPIFrontend', () => {
     });
 
     test("getPets(null, { params: { q: 'cats' } }) calls GET /pets?q=cats", async () => {
-      const api = new OpenAPIFrontend({ definition, strict: true });
+      const api = new OpenAPIClientAxios({ definition, strict: true });
       const client = await api.init();
 
       const mock = new MockAdapter(api.client);
@@ -265,7 +265,7 @@ describe('OpenAPIFrontend', () => {
     });
 
     test("getPets(null, { params: { q: ['cats', 'dogs'] } }) calls GET /pets?q=cats&q=dogs", async () => {
-      const api = new OpenAPIFrontend({ definition, strict: true });
+      const api = new OpenAPIClientAxios({ definition, strict: true });
       const client = await api.init();
 
       const mock = new MockAdapter(api.client);
@@ -282,7 +282,7 @@ describe('OpenAPIFrontend', () => {
     });
 
     test("get('/pets') calls GET /pets", async () => {
-      const api = new OpenAPIFrontend({ definition, strict: true });
+      const api = new OpenAPIClientAxios({ definition, strict: true });
       const client = await api.init();
 
       const mock = new MockAdapter(api.client);
@@ -296,7 +296,7 @@ describe('OpenAPIFrontend', () => {
     });
 
     test("({ method: 'get', url: '/pets' }) calls GET /pets", async () => {
-      const api = new OpenAPIFrontend({ definition, strict: true });
+      const api = new OpenAPIClientAxios({ definition, strict: true });
       const client = await api.init();
 
       const mock = new MockAdapter(api.client);
@@ -310,7 +310,7 @@ describe('OpenAPIFrontend', () => {
     });
 
     test("query('getPetById', 1) calls GET /pets/1", async () => {
-      const api = new OpenAPIFrontend({ definition, strict: true });
+      const api = new OpenAPIClientAxios({ definition, strict: true });
       const client = await api.init();
 
       const mock = new MockAdapter(api.client);
@@ -324,7 +324,7 @@ describe('OpenAPIFrontend', () => {
     });
 
     test('getPetById(1) calls GET /pets/1', async () => {
-      const api = new OpenAPIFrontend({ definition, strict: true });
+      const api = new OpenAPIClientAxios({ definition, strict: true });
       const client = await api.init();
 
       const mock = new MockAdapter(api.client);
@@ -338,7 +338,7 @@ describe('OpenAPIFrontend', () => {
     });
 
     test("query('createPet', pet) calls POST /pets with JSON payload", async () => {
-      const api = new OpenAPIFrontend({ definition, strict: true });
+      const api = new OpenAPIClientAxios({ definition, strict: true });
       const client = await api.init();
 
       const mock = new MockAdapter(api.client);
@@ -355,7 +355,7 @@ describe('OpenAPIFrontend', () => {
     });
 
     test('createPet(pet) calls POST /pets with JSON payload', async () => {
-      const api = new OpenAPIFrontend({ definition, strict: true });
+      const api = new OpenAPIClientAxios({ definition, strict: true });
       const client = await api.init();
 
       const mock = new MockAdapter(api.client);
@@ -372,7 +372,7 @@ describe('OpenAPIFrontend', () => {
     });
 
     test("query('replacePetById', 1, pet) calls PUT /pets/1 with JSON payload", async () => {
-      const api = new OpenAPIFrontend({ definition, strict: true });
+      const api = new OpenAPIClientAxios({ definition, strict: true });
       const client = await api.init();
 
       const mock = new MockAdapter(api.client);
@@ -389,7 +389,7 @@ describe('OpenAPIFrontend', () => {
     });
 
     test('replacePetById(1, pet) calls PUT /pets/1 with JSON payload', async () => {
-      const api = new OpenAPIFrontend({ definition, strict: true });
+      const api = new OpenAPIClientAxios({ definition, strict: true });
       const client = await api.init();
 
       const mock = new MockAdapter(api.client);
@@ -406,7 +406,7 @@ describe('OpenAPIFrontend', () => {
     });
 
     test('deletePetById(1) calls DELETE /pets/1', async () => {
-      const api = new OpenAPIFrontend({ definition, strict: true });
+      const api = new OpenAPIClientAxios({ definition, strict: true });
       const client = await api.init();
 
       const mock = new MockAdapter(api.client);
@@ -419,7 +419,7 @@ describe('OpenAPIFrontend', () => {
       expect(mockHandler).toBeCalled();
     });
     test('getOwnerByPetId(1) calls GET /pets/1/owner', async () => {
-      const api = new OpenAPIFrontend({ definition, strict: true });
+      const api = new OpenAPIClientAxios({ definition, strict: true });
       const client = await api.init();
 
       const mock = new MockAdapter(api.client);
@@ -433,7 +433,7 @@ describe('OpenAPIFrontend', () => {
     });
 
     test('getPetsMeta() calls GET /pets/meta', async () => {
-      const api = new OpenAPIFrontend({ definition, strict: true });
+      const api = new OpenAPIClientAxios({ definition, strict: true });
       const client = await api.init();
 
       const mock = new MockAdapter(api.client);
@@ -447,7 +447,7 @@ describe('OpenAPIFrontend', () => {
     });
 
     test('getPets() with too many arguments throws an error', async () => {
-      const api = new OpenAPIFrontend({ definition, strict: true });
+      const api = new OpenAPIClientAxios({ definition, strict: true });
       const client = await api.init();
       expect(client.getPets({}, {}, {}, {}, {})).rejects.toThrow();
     });
@@ -464,7 +464,7 @@ describe('OpenAPIFrontend', () => {
       },
     });
 
-    const api = new OpenAPIFrontend({ definition });
+    const api = new OpenAPIClientAxios({ definition });
     beforeAll(async () => {
       await api.init();
       api.mock((config) =>

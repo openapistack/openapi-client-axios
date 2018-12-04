@@ -1,6 +1,6 @@
 {
-  "name": "openapi-frontend",
-  "description": "JavaScript library for consuming OpenAPI-enabled APIs",
+  "name": "openapi-client-axios",
+  "description": "JavaScript client library for consuming OpenAPI-enabled APIs with axios",
   "version": "1.0.3",
   "author": "Viljami Kuosmanen <viljami@avoinsorsa.fi>",
   "license": "MIT",
@@ -8,6 +8,7 @@
     "openapi",
     "swagger",
     "client",
+    "axios",
     "frontend",
     "browser",
     "mock",
@@ -44,19 +45,19 @@
     "swagger-parser": "^6.0.2"
   },
   "devDependencies": {
-    "@types/jest": "^23.3.9",
+    "@types/jest": "^23.3.10",
     "@types/lodash": "^4.14.118",
-    "@types/node": "^10.12.9",
+    "@types/node": "^10.12.12",
     "@types/swagger-parser": "^4.0.2",
     "jest": "^23.6.0",
     "markdown-toc": "^1.2.0",
-    "openapi-backend": "^1.4.4",
-    "prettier": "^1.14.3",
+    "openapi-backend": "^1.6.2",
+    "prettier": "^1.15.3",
     "source-map-support": "^0.5.9",
-    "ts-jest": "^23.10.4",
+    "ts-jest": "^23.10.5",
     "tslint": "^5.11.0",
     "tslint-microsoft-contrib": "^5.2.1",
-    "typescript": "^3.1.6"
+    "typescript": "^3.2.1"
   },
   "scripts": {
     "build": "tsc",

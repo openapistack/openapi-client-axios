@@ -1,3 +1,3 @@
-import { OpenAPIFrontend } from './frontend';
-export default OpenAPIFrontend;
-export * from './frontend';
+import { OpenAPIClientAxios } from './client';
+export default OpenAPIClientAxios;
+export * from './client';
