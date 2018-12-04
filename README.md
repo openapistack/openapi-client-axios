@@ -35,7 +35,7 @@ const OpenAPIClientAxios = require('openapi-client-axios').default;
 const api = new OpenAPIClientAxios({ definition: 'https://example.com/api/openapi.json' });
 api.init()
   .then(client => client.getPetById(1))
-  .then(res => console.log('Here is pet id:1 from the api', res));
+  .then(res => console.log('Here is pet id:1 from the api', res.data));
 ```
 
 With async-await / ES6 syntax:
@@ -48,7 +48,7 @@ api.init();
 
 async function createPet() {
   const res = await api.client.createPet({ name: 'Garfield' });
-  console.log('Pet created', res);
+  console.log('Pet created', res.data);
 }
 ```
 
