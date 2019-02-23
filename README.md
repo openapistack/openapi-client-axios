@@ -124,9 +124,8 @@ client.operationId(...pathParams, data?, config?)
 
 The first argument is the path parameters for the operation.
 
-Operation getPet: `GET /pets/{petId}` can simply be called with:
-
 ```javascript
+// GET /pets/{petId} - getPet
 client.getPet(petId)
 ```
 
@@ -136,6 +135,7 @@ Note that when using an array, the parameters should be in the same order as the
 operation.
 
 ```javascript
+// GET /pets/{petId}/owner/{ownerId} - getPetOwner
 client.getPetOwner({ petId, ownerId })
 // or
 client.getPetOwner([petId, ownerId])
@@ -148,15 +148,15 @@ If no path parameters are required for the operation, the first argument is the 
 The next argument the path parameters is the data argument. This allows you to send request body payloads with your
 API call.
 
-Operation updatePet: `PUT /pets/{petId}` can be called with:
-
 ```javascript
+// PUT /pets/{petId} - updatePet
 client.updatePet(petId, { name: 'Odie' })
 ```
 
 If there are no path parameters for the operation, the data argument will be the first argument.
 
 ```javascript
+// POST /pets - createPet
 client.createPet({ name: 'Garfield' })
 ```
 
@@ -167,9 +167,8 @@ The argument after the data argument is the config object.
 The config object is an [`AxiosRequestConfig`](https://github.com/axios/axios#request-config) object. You can use it to
 override axios request config parameters, such as `headers`, `params`, `timeout`, `withCredentials` and many more.
 
-Operation searchPets: `GET /pets?query=dog` can be called with:
-
 ```javascript
+// GET /pets?query=dog - searchPets
 client.searchPets(null, { params: { query: 'dog' } });
 ```
 
