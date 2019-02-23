@@ -117,7 +117,7 @@ test();
 OpenAPIClientAxios operation methods take in 3 types of arguments:
 
 ```javascript
-client.operationId(...pathParams, data?, config?)
+client.operationId(pathParams?, data?, config?)
 ```
 
 ### Path params
@@ -167,8 +167,10 @@ The last argument is the config object.
 The config object is an [`AxiosRequestConfig`](https://github.com/axios/axios#request-config) object. You can use it to
 override axios request config parameters, such as `headers`, `params`, `timeout`, `withCredentials` and many more.
 
+```javascript
 // PUT /pets/1?fields=name - updatePet
 client.updatePet(1, { name: 'Odie' }, { params: { fields: 'name' } });
+```
 
 If there are no path or data parameters for the operation, the config argument will be the first argument.
 
