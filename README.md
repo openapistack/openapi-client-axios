@@ -149,8 +149,8 @@ The next argument the path parameters is the data argument. This allows you to s
 API call.
 
 ```javascript
-// PUT /pets/{petId} - updatePet
-client.updatePet(petId, { name: 'Odie' })
+// PUT /pets/1 - updatePet
+client.updatePet(1, { name: 'Odie' })
 ```
 
 If there are no path parameters for the operation, the data argument will be the first argument.
@@ -162,17 +162,20 @@ client.createPet({ name: 'Garfield' })
 
 ### Config object
 
-The argument after the data argument is the config object.
+The last argument is the config object.
 
 The config object is an [`AxiosRequestConfig`](https://github.com/axios/axios#request-config) object. You can use it to
 override axios request config parameters, such as `headers`, `params`, `timeout`, `withCredentials` and many more.
 
+// PUT /pets/1?fields=name - updatePet
+client.updatePet(1, { name: 'Odie' }, { params: { fields: 'name' } });
+
+If there are no path or data parameters for the operation, the config argument will be the first argument.
+
 ```javascript
 // GET /pets?query=dog - searchPets
-client.searchPets(null, { params: { query: 'dog' } });
+client.searchPets({ params: { query: 'dog' } });
 ```
-
-Note the null passed as the first parameter, as searchPets doesn't take a request body payload.
 
 Any arguments passed after the config object will cause OpenAPI backend to throw an Error.
 

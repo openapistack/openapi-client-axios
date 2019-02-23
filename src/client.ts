@@ -18,9 +18,23 @@ export type OperationMethodPathParametersArgument =
 export type OperationMethodDataArgument = any;
 export type OperationMethodArguments =
   | [OperationMethodPathParametersArgument?, OperationMethodDataArgument?, AxiosRequestConfig?]
-  | [OperationMethodDataArgument?, AxiosRequestConfig?];
+  | [OperationMethodDataArgument?, AxiosRequestConfig?]
+  | [AxiosRequestConfig?];
 
-export type OperationMethod<Response = any> = (...args: OperationMethodArguments) => Promise<AxiosResponse<Response>>;
+export type OperationMethodAll<Response = any> = (
+  pathParams?: OperationMethodPathParametersArgument,
+  data?: OperationMethodDataArgument,
+  config?: AxiosRequestConfig,
+) => Promise<AxiosResponse<Response>>;
+
+export type OperationMethodNoPathParams<Response = any> = (
+  data?: OperationMethodDataArgument,
+  config?: AxiosRequestConfig,
+) => Promise<AxiosResponse<Response>>;
+
+export type OperationMethodNoParams<Response = any> = (config?: AxiosRequestConfig) => Promise<AxiosResponse<Response>>;
+
+export type OperationMethod = OperationMethodAll | OperationMethodNoPathParams | OperationMethodNoParams;
 export interface OpenAPIClientAxiosOperations {
   [operationId: string]: OperationMethod;
 }
@@ -240,14 +254,15 @@ export class OpenAPIClientAxios {
   public createOperationMethod(operation: Operation): OperationMethod {
     const { method, path, operationId } = operation;
 
-    return async (...args) => {
+    return async (...args: OperationMethodArguments) => {
       // handle operation method arguments
       let i = 0;
 
       // parse path template
       const pathParams = bath(path);
 
-      // check for path param args (depends on whether operation takes in path params)
+      // check for path param args
+      // (depends on whether operation takes in path params)
       let params: Parameters = {};
       if (pathParams.names.length && args[i] !== undefined) {
         if (Array.isArray(args[0])) {
@@ -265,8 +280,10 @@ export class OpenAPIClientAxios {
       }
 
       // check for data argument
+      // (depends on operation method)
       let data: any;
-      if (args[i] !== undefined) {
+      const shouldHaveRequestBody = ['post', 'put', 'patch'].includes(operation.method);
+      if (shouldHaveRequestBody && args[i] !== undefined) {
         data = args[i];
         i++;
       }

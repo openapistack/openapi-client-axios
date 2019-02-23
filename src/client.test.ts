@@ -265,7 +265,7 @@ describe('OpenAPIClientAxios', () => {
       expect(mockHandler).toBeCalled();
     });
 
-    test("getPets(null, { params: { q: 'cats' } }) calls GET /pets?q=cats", async () => {
+    test("getPets({ params: { q: 'cats' } }) calls GET /pets?q=cats", async () => {
       const api = new OpenAPIClientAxios({ definition, strict: true });
       const client = await api.init();
 
@@ -275,14 +275,14 @@ describe('OpenAPIClientAxios', () => {
       mock.onGet('/pets').reply((config) => mockHandler(config));
 
       const params = { q: 'cats ' };
-      const res = await client.getPets(null, { params });
+      const res = await client.getPets({ params });
       expect(res.data).toEqual(mockResponse);
       expect(mockHandler).toBeCalled();
       const mockContext = mockHandler.mock.calls[mockHandler.mock.calls.length - 1][0];
       expect(mockContext.params).toEqual(params);
     });
 
-    test("getPets(null, { params: { q: ['cats', 'dogs'] } }) calls GET /pets?q=cats&q=dogs", async () => {
+    test("getPets({ params: { q: ['cats', 'dogs'] } }) calls GET /pets?q=cats&q=dogs", async () => {
       const api = new OpenAPIClientAxios({ definition, strict: true });
       const client = await api.init();
 
@@ -292,7 +292,7 @@ describe('OpenAPIClientAxios', () => {
       mock.onGet('/pets').reply((config) => mockHandler(config));
 
       const params = { q: ['cats', 'dogs'] };
-      const res = await client.getPets(null, { params });
+      const res = await client.getPets({ params });
       expect(res.data).toEqual(mockResponse);
       expect(mockHandler).toBeCalled();
       const mockContext = mockHandler.mock.calls[mockHandler.mock.calls.length - 1][0];
@@ -554,20 +554,20 @@ describe('OpenAPIClientAxios', () => {
       expect(res.data).toEqual(examplePet);
     });
 
-    test("mocks getPets(null, { params: { q: 'search' } }) using openapi-backend", async () => {
-      const res = await api.client.getPets(null, { params: { q: 'search' } });
+    test("mocks getPets({ params: { q: 'search' } }) using openapi-backend", async () => {
+      const res = await api.client.getPets({ params: { q: 'search' } });
       expect(res.status).toBe(200);
       expect(res.data).toEqual([examplePet]);
     });
 
-    test("mocks getPets(null, { params: { q: ['search1', 'search2'] } }) using openapi-backend", async () => {
-      const res = await api.client.getPets(null, { params: { q: ['search1', 'search2'] } });
+    test("mocks getPets({ params: { q: ['search1', 'search2'] } }) using openapi-backend", async () => {
+      const res = await api.client.getPets({ params: { q: ['search1', 'search2'] } });
       expect(res.status).toBe(200);
       expect(res.data).toEqual([examplePet]);
     });
 
-    test("mocks getPets(null, { params: { unknown: '' } }) with 400 error using openapi-backend", async () => {
-      expect(api.client.getPets(null, { params: { unknown: '' } })).rejects.toThrowError('400');
+    test("mocks getPets({ params: { unknown: '' } }) with 400 error using openapi-backend", async () => {
+      expect(api.client.getPets({ params: { unknown: '' } })).rejects.toThrowError('400');
     });
 
     test("mocks getPetById('1a') with 400 validation error using openapi-backend", async () => {
