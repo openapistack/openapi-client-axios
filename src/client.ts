@@ -5,20 +5,35 @@ import bath from 'bath';
 import { validate as validateOpenAPI } from 'openapi-schema-validation';
 import SwaggerParser from 'swagger-parser';
 import { OpenAPIV3 } from 'openapi-types';
+import { Parameters } from 'bath/_/types';
 
 export type Document = OpenAPIV3.Document;
-export type OperationMethodPathParameterArgument = string | number;
+export type OperationId = Exclude<string, ['query']>;
+
+export type PathParamValue = string | number;
+export type OperationMethodPathParametersArgument =
+  | PathParamValue
+  | PathParamValue[]
+  | { [param: string]: PathParamValue };
 export type OperationMethodDataArgument = any;
-export type OperationMethodArgument =
-  | OperationMethodPathParameterArgument
-  | OperationMethodDataArgument
-  | AxiosRequestConfig;
-export type OperationMethod = (...args: OperationMethodArgument[]) => Promise<AxiosResponse<any>>;
-export interface OpenAPIClientAxiosExtensions {
-  query(operationId: string, ...args: OperationMethodArgument[]): Promise<AxiosResponse<any>>;
+export type OperationMethodArguments =
+  | [OperationMethodPathParametersArgument?, OperationMethodDataArgument?, AxiosRequestConfig?]
+  | [OperationMethodDataArgument?, AxiosRequestConfig?];
+
+export type OperationMethod<Response = any> = (...args: OperationMethodArguments) => Promise<AxiosResponse<Response>>;
+export interface OpenAPIClientAxiosOperations {
   [operationId: string]: OperationMethod;
 }
-export type OpenAPIClient = AxiosInstance & OpenAPIClientAxiosExtensions;
+
+export type QueryMethod<Response = any> = (
+  operationId: string,
+  ...args: OperationMethodArguments
+) => Promise<AxiosResponse<Response>>;
+export interface OpenAPIClientAxiosQuery {
+  query: QueryMethod;
+}
+
+export type OpenAPIClient = AxiosInstance & OpenAPIClientAxiosQuery & OpenAPIClientAxiosOperations;
 
 /**
  * OAS Operation Object containing the path and method so it can be placed in a flat array of operations
@@ -226,34 +241,47 @@ export class OpenAPIClientAxios {
     const { method, path, operationId } = operation;
 
     return async (...args) => {
-      let data: any;
-      let config: AxiosRequestConfig;
+      // handle operation method arguments
+      let i = 0;
 
       // parse path template
       const pathParams = bath(path);
 
-      // handle operation method arguments
-      const paramArgs: string[] = [];
-      for (const argument of args) {
-        if (paramArgs.length < pathParams.names.length) {
-          // this is a path param argument (string)
-          paramArgs.push(`${argument}`);
-        } else if (data === undefined) {
-          // this is a data argument (any)
-          // you can pass null if you want to override axios config but not supply any data
-          data = argument as any;
-        } else if (config === undefined) {
-          // this is the last config argument, an AxiosRequestConfig override
-          config = argument as AxiosRequestConfig;
+      // check for path param args (depends on whether operation takes in path params)
+      let params: Parameters = {};
+      if (pathParams.names.length && args[i] !== undefined) {
+        if (Array.isArray(args[0])) {
+          // array
+          params = _.zipObject(pathParams.names, _.map(args[0], (param) => `${param}`));
+        } else if (typeof args[0] === 'object') {
+          // object
+          params = _.mapValues(args[0], (param) => `${param}`);
         } else {
-          throw new Error(
-            `Expected a maximum of ${pathParams.names.length + 2} arguments for ${operationId} operation method`,
-          );
+          // singular path param
+          const param = `${args[0]}`;
+          params = _.zipObject(pathParams.names, [param]);
         }
+        i++;
       }
 
-      // construct a map of path param names and values
-      const params = _.zipObject(pathParams.names, paramArgs);
+      // check for data argument
+      let data: any;
+      if (args[i] !== undefined) {
+        data = args[i];
+        i++;
+      }
+
+      // check for config argument
+      let config: AxiosRequestConfig;
+      if (args[i] !== undefined) {
+        config = args[i];
+        i++;
+      }
+
+      // too many arguments
+      if (args[i]) {
+        throw new Error(`Expected a maximum of ${i} arguments for ${operationId} operation method`);
+      }
 
       // make sure all path parameters are set
       _.map(_.values(params), (value, index) => {

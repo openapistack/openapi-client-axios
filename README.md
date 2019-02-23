@@ -122,18 +122,31 @@ client.operationId(...pathParams, data?, config?)
 
 ### Path params
 
-The first arguments are the path parameters of the operation in the order they appear in the URL.
+The first argument is the path parameters for the operation.
 
-Operation getPetOwner: `GET /pets/{petId}/owners/{ownerId}` can be called with:
+Operation getPet: `GET /pets/{petId}` can simply be called with:
 
 ```javascript
-client.getPetOwner(petId, ownerId)
+client.getPet(petId)
 ```
+
+If the operation requires more than a single path parameter, use an object or an array.
+
+Note that when using an array, the parameters should be in the same order as they appear in the path template of the
+operation.
+
+```javascript
+client.getPetOwner({ petId, ownerId })
+// or
+client.getPetOwner([petId, ownerId])
+```
+
+If no path parameters are required for the operation, the first argument is the data / payload argument (next section).
 
 ### Data / Payload
 
-The first argument after all path parameters have been supplied is the data argument. This allows you to send
-request body payloads with your API call.
+The next argument the path parameters is the data argument. This allows you to send request body payloads with your
+API call.
 
 Operation updatePet: `PUT /pets/{petId}` can be called with:
 
