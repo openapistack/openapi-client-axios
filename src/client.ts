@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 import MockAdapter from 'axios-mock-adapter';
-import bath from 'bath';
+import bath from 'bath-es5';
 import { validate as validateOpenAPI } from 'openapi-schema-validation';
 import SwaggerParser from 'swagger-parser';
 import { OpenAPIV3 } from 'openapi-types';
