@@ -5,7 +5,7 @@ import bath from 'bath-es5';
 import { validate as validateOpenAPI } from 'openapi-schema-validation';
 import SwaggerParser from 'swagger-parser';
 import { OpenAPIV3 } from 'openapi-types';
-import { Parameters } from 'bath/_/types';
+import { Parameters } from 'bath-es5/_/types';
 
 export type Document = OpenAPIV3.Document;
 export type OperationId = Exclude<string, ['query']>;
@@ -77,7 +77,7 @@ export class OpenAPIClientAxios {
   public strict: boolean;
   public validate: boolean;
   public mockDelay: number;
-  public mockHandler: MockHandler;
+  public mockHandler: MockHandler | undefined;
 
   public initalized: boolean;
   public client: OpenAPIClient;
@@ -232,7 +232,7 @@ export class OpenAPIClientAxios {
    * @returns string
    * @memberof OpenAPIClientAxios
    */
-  public getBaseURL(): string {
+  public getBaseURL(): string | undefined {
     if (!this.definition) {
       return;
     }
@@ -293,6 +293,8 @@ export class OpenAPIClientAxios {
       if (args[i] !== undefined) {
         config = args[i];
         i++;
+      } else {
+        config = {};
       }
 
       // too many arguments
@@ -313,7 +315,7 @@ export class OpenAPIClientAxios {
       });
 
       // construct URL from path params
-      const url = pathParams.path(params);
+      const url = pathParams.path(params) || undefined;
 
       // construct axios request config
       const axiosConfig: AxiosRequestConfig = {
@@ -340,16 +342,19 @@ export class OpenAPIClientAxios {
       .entries()
       .flatMap(([path, pathBaseObject]) => {
         const methods = _.pick(pathBaseObject, ['get', 'put', 'post', 'delete', 'options', 'head', 'patch', 'trace']);
-        return _.map(_.entries(methods), ([method, operation]) => ({
-          ...(operation as OpenAPIV3.OperationObject),
-          path,
-          method,
-          // add the path base object's operations to the operation's parameters
-          parameters: [
-            ...((operation.parameters as OpenAPIV3.ParameterObject[]) || []),
-            ...((pathBaseObject.parameters as OpenAPIV3.ParameterObject[]) || []),
-          ],
-        }));
+        return _.map(_.entries(methods), ([method, operation]) => {
+          const op = operation as OpenAPIV3.OperationObject;
+          return {
+            ...op,
+            path,
+            method,
+            // add the path base object's operations to the operation's parameters
+            parameters: [
+              ...((op.parameters as OpenAPIV3.ParameterObject[]) || []),
+              ...((pathBaseObject.parameters as OpenAPIV3.ParameterObject[]) || []),
+            ],
+          };
+        });
       })
       .value();
   }
@@ -361,7 +366,7 @@ export class OpenAPIClientAxios {
    * @returns {Operation}
    * @memberof OpenAPIBackend
    */
-  public getOperation(operationId: string): Operation {
+  public getOperation(operationId: string): Operation | undefined {
     return _.find(this.getOperations(), { operationId });
   }
 }

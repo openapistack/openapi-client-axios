@@ -1,7 +1,7 @@
 {
   "name": "openapi-client-axios",
   "description": "JavaScript client library for consuming OpenAPI-enabled APIs with axios",
-  "version": "2.1.1",
+  "version": "2.2.0",
   "author": "Viljami Kuosmanen <viljami@avoinsorsa.fi>",
   "license": "MIT",
   "keywords": [
@@ -47,15 +47,15 @@
   "devDependencies": {
     "@types/jest": "^23.3.14",
     "@types/lodash": "^4.14.121",
-    "@types/node": "^10.12.27",
+    "@types/node": "^10.12.29",
     "@types/swagger-parser": "^4.0.3",
     "jest": "^23.6.0",
     "markdown-toc": "^1.2.0",
-    "openapi-backend": "^2.0.1",
+    "openapi-backend": "^2.1.0",
     "prettier": "^1.16.4",
     "source-map-support": "^0.5.10",
     "ts-jest": "^23.10.5",
-    "tslint": "^5.12.1",
+    "tslint": "^5.13.1",
     "tslint-microsoft-contrib": "^5.2.1",
     "typescript": "^3.3.3333"
   },
@@ -64,7 +64,7 @@
     "watch-build": "tsc -w",
     "lint": "tslint --format prose --project .",
     "prettier": "prettier --write src/** __tests__/**",
-    "toc": "./scripts/generate-toc.js",
+    "prepare": "npm run build",
     "test": "NODE_ENV=test jest"
   }
 }

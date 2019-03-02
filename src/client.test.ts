@@ -1,10 +1,9 @@
 import path from 'path';
 import { OpenAPIClientAxios } from './client';
 
-import OpenAPIBackend from 'openapi-backend';
+import OpenAPIBackend, { Context } from 'openapi-backend';
 import { OpenAPIV3 } from 'openapi-types';
 import MockAdapter from 'axios-mock-adapter';
-import { AxiosRequestConfig } from 'axios';
 
 const testsDir = path.join(__dirname, '..', '__tests__');
 
@@ -497,7 +496,7 @@ describe('OpenAPIClientAxios', () => {
     const mockApi = new OpenAPIBackend({ definition });
     mockApi.register({
       notFound: () => [404, { err: 'not found' }],
-      validationFail: (c) => [400, { err: c.validation.errors }],
+      validationFail: (c: Context) => [400, { err: c.validation.errors }],
       notImplemented: (c) => {
         const { status, mock } = mockApi.mockResponseForOperation(c.operation.operationId);
         return [status, mock];
