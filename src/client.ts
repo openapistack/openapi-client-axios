@@ -132,8 +132,10 @@ export class OpenAPIClientAxios {
       // parse the document
       this.document = await SwaggerParser.parse(this.inputDocument);
 
-      // validate the document
-      this.validateDefinition();
+      if (this.validate) {
+        // validate the document
+        this.validateDefinition();
+      }
 
       // dereference the document into definition
       this.definition = await SwaggerParser.dereference(this.document);
