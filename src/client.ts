@@ -47,7 +47,9 @@ export interface OpenAPIClientAxiosQuery {
   query: QueryMethod;
 }
 
-export type OpenAPIClient = AxiosInstance & OpenAPIClientAxiosQuery & OpenAPIClientAxiosOperations;
+export type OpenAPIClient = AxiosInstance &
+  OpenAPIClientAxiosQuery &
+  OpenAPIClientAxiosOperations & { api: OpenAPIClientAxios };
 
 /**
  * OAS Operation Object containing the path and method so it can be placed in a flat array of operations
@@ -166,7 +168,7 @@ export class OpenAPIClientAxios {
     for (const operation of operations) {
       const { operationId } = operation;
       if (operationId) {
-        this.operations[operationId] = this.createOperationMethod(operation);
+        this.operations[operationId] = this.createOperationMethod(operation).bind(this);
         // also add the method to the axios client for syntactic sugar
         this.client[operationId] = this.operations[operationId];
       }
@@ -179,6 +181,9 @@ export class OpenAPIClientAxios {
 
     // add the query method
     this.client.query = (operationId, ...args) => this.operations[operationId](...args);
+
+    // add reference to parent class instance
+    this.client.api = this;
 
     // we are now initalized
     this.initalized = true;
@@ -254,82 +259,96 @@ export class OpenAPIClientAxios {
    * @memberof OpenAPIClientAxios
    */
   public createOperationMethod(operation: Operation): OperationMethod {
-    const { method, path, operationId } = operation;
-
     return async (...args: OperationMethodArguments) => {
-      // handle operation method arguments
-      let i = 0;
-
-      // parse path template
-      const pathParams = bath(path);
-
-      // check for path param args
-      // (depends on whether operation takes in path params)
-      let params: Parameters = {};
-      if (pathParams.names.length && args[i] !== undefined) {
-        if (Array.isArray(args[0])) {
-          // array
-          params = _.zipObject(pathParams.names, _.map(args[0], (param) => `${param}`));
-        } else if (typeof args[0] === 'object') {
-          // object
-          params = _.mapValues(args[0], (param) => `${param}`);
-        } else {
-          // singular path param
-          const param = `${args[0]}`;
-          params = _.zipObject(pathParams.names, [param]);
-        }
-        i++;
-      }
-
-      // check for data argument
-      // (depends on operation method)
-      let data: any;
-      const shouldHaveRequestBody = ['post', 'put', 'patch'].includes(operation.method);
-      if (shouldHaveRequestBody && args[i] !== undefined) {
-        data = args[i];
-        i++;
-      }
-
-      // check for config argument
-      let config: AxiosRequestConfig;
-      if (args[i] !== undefined) {
-        config = args[i];
-        i++;
-      } else {
-        config = {};
-      }
-
-      // too many arguments
-      if (args[i]) {
-        throw new Error(`Expected a maximum of ${i} arguments for ${operationId} operation method`);
-      }
-
-      // make sure all path parameters are set
-      _.map(_.values(params), (value, index) => {
-        if (value === undefined) {
-          const paramName = pathParams.names[index];
-          if (this.strict) {
-            throw new Error(`Missing argument #${index} for path parameter ${paramName}`);
-          }
-          // set the value to "undefined"
-          params[paramName] = 'undefined';
-        }
-      });
-
-      // construct URL from path params
-      const url = pathParams.path(params) || undefined;
-
-      // construct axios request config
-      const axiosConfig: AxiosRequestConfig = {
-        method,
-        url,
-        data,
-        ...config,
-      };
-
+      const axiosConfig = this.getAxiosConfigForOperation(operation, args);
       // do the axios request
       return this.client.request(axiosConfig);
     };
+  }
+
+  /**
+   * Creates an axios config object for operation + arguments
+   * @param {Operation | string} operation
+   * @param {OperationMethodArguments} args
+   * @memberof OpenAPIClientAxios
+   */
+  public getAxiosConfigForOperation(operation: Operation | string, args: OperationMethodArguments) {
+    if (typeof operation === 'string') {
+      operation = this.getOperation(operation);
+    }
+    const { method, path, operationId } = operation;
+
+    // handle operation method arguments
+    let i = 0;
+
+    // parse path template
+    const pathParams = bath(path);
+
+    // check for path param args
+    // (depends on whether operation takes in path params)
+    let params: Parameters = {};
+    if (pathParams.names.length && args[i] !== undefined) {
+      if (Array.isArray(args[0])) {
+        // array
+        params = _.zipObject(pathParams.names, _.map(args[0], (param) => `${param}`));
+      } else if (typeof args[0] === 'object') {
+        // object
+        params = _.mapValues(args[0], (param) => `${param}`);
+      } else {
+        // singular path param
+        const param = `${args[0]}`;
+        params = _.zipObject(pathParams.names, [param]);
+      }
+      i++;
+    }
+
+    // check for data argument
+    // (depends on operation method)
+    let data: any;
+    const shouldHaveRequestBody = ['post', 'put', 'patch'].includes(operation.method);
+    if (shouldHaveRequestBody && args[i] !== undefined) {
+      data = args[i];
+      i++;
+    }
+
+    // check for config argument
+    let config: AxiosRequestConfig;
+    if (args[i] !== undefined) {
+      config = args[i];
+      i++;
+    } else {
+      config = {};
+    }
+
+    // too many arguments
+    if (args[i]) {
+      throw new Error(`Expected a maximum of ${i} arguments for ${operationId} operation method`);
+    }
+
+    // make sure all path parameters are set
+    _.map(_.values(params), (value, index) => {
+      if (value === undefined) {
+        const paramName = pathParams.names[index];
+        if (this.strict) {
+          throw new Error(`Missing argument #${index} for path parameter ${paramName}`);
+        }
+        // set the value to "undefined"
+        params[paramName] = 'undefined';
+      }
+    });
+
+    // construct URL from path params
+    const url = pathParams.path(params) || undefined;
+
+    // construct axios request config
+    const axiosConfig: AxiosRequestConfig = {
+      method,
+      url,
+      data,
+      ...config,
+    };
+
+    return axiosConfig;
   }
 
   /**

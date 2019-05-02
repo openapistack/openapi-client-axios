@@ -181,55 +181,6 @@ client.searchPets({ params: { query: 'dog' } });
 
 Any arguments passed after the config object will cause OpenAPI backend to throw an Error.
 
-## Mocking with OpenAPI Backend
-
-Combining `openapi-client-axios` with [`openapi-backend`](https://github.com/anttiviljami/openapi-backend) allows you to
-easily mock your API backend while developing client applications.
-
-OpenAPI Backend uses [OpenAPI examples objects](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#example-object)
-and [JSON Schema definitions](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#schema-object)
-to mock responses using your OpenAPI specification document. Routing and input validation is also automatically enabled
-when using the `handleRequest()` method.
-
-Example:
-```javascript
-import OpenAPIClientAxios from 'openapi-client-axios';
-import OpenAPIBackend from 'openapi-backend';
-
-const definition = './openapi.yml';
-
-// create the mock API
-const mockApi = new OpenAPIBackend({ definition });
-mockApi.register({
-  notFound: () => [404, { err: 'not found' }],
-  validationFail: (c) => [400, { err: c.validation.errors }],
-  notImplemented: (c) => {
-    const { status, mock } = mockApi.mockResponseForOperation(c.operation.operationId);
-    return [status, mock];
-  },
-});
-
-// create the client with a mockHandler using OpenAPIBackend.handleRequest()
-const api = new OpenAPIClientAxios({
-  definition,
-  mockHandler: (config) =>
-    mockApi.handleRequest({
-      method: config.method,
-      path: config.url,
-      query: config.params,
-      body: config.data,
-      headers: config.headers,
-    }),
-});
-
-// init both the mock api backend and the client
-mockApi.init()
-  .then(() => api.init())
-  .then((client) => {
-    // all calls using OpenAPIClient will now be handled by the mocked OpenAPI backend
-  });
-```
-
 ## Contributing
 
 OpenAPI Client Axios is Free and Open Source Software. Issues and pull requests are more than welcome!
