@@ -9,6 +9,7 @@
     "no-string-literal": false,
     "object-literal-key-quotes": false,
     "no-console": false,
-    "trailing-comma": [true, {"multiline": "always", "singleline": "never", "esSpecCompliant": true}]
+    "trailing-comma": [true, {"multiline": "always", "singleline": "never", "esSpecCompliant": true}],
+    "semicolon": [true, "always", "ignore-bound-class-methods"]
   }
 }

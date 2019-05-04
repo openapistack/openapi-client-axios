@@ -129,7 +129,7 @@ export class OpenAPIClientAxios {
    * @returns AxiosInstance
    * @memberof OpenAPIClientAxios
    */
-  public async init() {
+  public init = async () => {
     try {
       // parse the document
       this.document = await SwaggerParser.parse(this.inputDocument);
@@ -168,7 +168,7 @@ export class OpenAPIClientAxios {
     for (const operation of operations) {
       const { operationId } = operation;
       if (operationId) {
-        this.operations[operationId] = this.createOperationMethod(operation).bind(this);
+        this.operations[operationId] = this.createOperationMethod(operation);
         // also add the method to the axios client for syntactic sugar
         this.client[operationId] = this.operations[operationId];
       }
@@ -188,7 +188,7 @@ export class OpenAPIClientAxios {
     // we are now initalized
     this.initalized = true;
     return this.client;
-  }
+  };
 
   /**
    * Returns an instance of OpenAPIClient
@@ -196,12 +196,12 @@ export class OpenAPIClientAxios {
    * @returns
    * @memberof OpenAPIClientAxios
    */
-  public async getClient(): Promise<OpenAPIClient> {
+  public getClient = async () => {
     if (!this.initalized) {
       return this.init();
     }
     return this.client;
-  }
+  };
 
   /**
    * Sets an axios mock adapter with given handler. Meant to be used with openapi-backend
@@ -209,14 +209,14 @@ export class OpenAPIClientAxios {
    * @param {MockHandler} mockHandler
    * @memberof OpenAPIClientAxios
    */
-  public mock(mockHandler: MockHandler, opts?: { mockDelay: number }) {
+  public mock = (mockHandler: MockHandler, opts?: { mockDelay: number }) => {
     this.mockHandler = mockHandler;
     if (opts && opts.mockDelay !== undefined) {
       this.mockDelay = opts.mockDelay;
     }
     this.mockAdapter = new MockAdapter(this.client, { delayResponse: this.mockDelay });
     this.mockAdapter.onAny().reply(this.mockHandler);
-  }
+  };
 
   /**
    * Validates this.document, which is the parsed OpenAPI document. Throws an error if validation fails.
@@ -224,14 +224,14 @@ export class OpenAPIClientAxios {
    * @returns {Document} parsed document
    * @memberof OpenAPIClientAxios
    */
-  public validateDefinition() {
+  public validateDefinition = () => {
     const { valid, errors } = validateOpenAPI(this.document, 3);
     if (!valid) {
       const prettyErrors = JSON.stringify(errors, null, 2);
       throw new Error(`Document is not valid OpenAPI. ${errors.length} validation errors:\n${prettyErrors}`);
     }
     return this.document;
-  }
+  };
 
   /**
    * Gets the API baseurl defined in the first OpenAPI specification servers property
@@ -239,17 +239,23 @@ export class OpenAPIClientAxios {
    * @returns string
    * @memberof OpenAPIClientAxios
    */
-  public getBaseURL(): string | undefined {
+  public getBaseURL = (operation?: Operation): string | undefined => {
     if (!this.definition) {
-      return;
+      return undefined;
     }
-
-    if (!this.definition.servers || this.definition.servers.length < 1) {
-      return;
+    if (operation) {
+      if (typeof operation === 'string') {
+        operation = this.getOperation(operation);
+      }
+      if (operation.servers && operation.servers[0]) {
+        return operation.servers[0].url;
+      }
     }
-
-    return this.definition.servers[0].url;
-  }
+    if (this.definition.servers && this.definition.servers[0]) {
+      return this.definition.servers[0].url;
+    }
+    return undefined;
+  };
 
   /**
    * Creates an axios method for an operation
@@ -258,13 +264,13 @@ export class OpenAPIClientAxios {
    * @param {Operation} operation
    * @memberof OpenAPIClientAxios
    */
-  public createOperationMethod(operation: Operation): OperationMethod {
+  public createOperationMethod = (operation: Operation): OperationMethod => {
     return async (...args: OperationMethodArguments) => {
       const axiosConfig = this.getAxiosConfigForOperation(operation, args);
       // do the axios request
       return this.client.request(axiosConfig);
     };
-  }
+  };
 
   /**
    * Creates an axios config object for operation + arguments
@@ -272,11 +278,11 @@ export class OpenAPIClientAxios {
    * @param {OperationMethodArguments} args
    * @memberof OpenAPIClientAxios
    */
-  public getAxiosConfigForOperation(operation: Operation | string, args: OperationMethodArguments) {
+  public getAxiosConfigForOperation = (operation: Operation | string, args: OperationMethodArguments) => {
     if (typeof operation === 'string') {
       operation = this.getOperation(operation);
     }
-    const { method, path, operationId } = operation;
+    const { method, path, operationId, servers } = operation;
 
     // handle operation method arguments
     let i = 0;
@@ -348,8 +354,13 @@ export class OpenAPIClientAxios {
       ...config,
     };
 
+    // allow overriding baseURL with operation / path specific servers
+    if (servers && servers[0]) {
+      axiosConfig.baseURL = servers[0].url;
+    }
+
     return axiosConfig;
-  }
+  };
 
   /**
    * Flattens operations into a simple array of Operation objects easy to work with
@@ -357,28 +368,29 @@ export class OpenAPIClientAxios {
    * @returns {Operation[]}
    * @memberof OpenAPIBackend
    */
-  public getOperations(): Operation[] {
+  public getOperations = (): Operation[] => {
     const paths = _.get(this.definition, 'paths', {});
     return _.chain(paths)
       .entries()
-      .flatMap(([path, pathBaseObject]) => {
-        const methods = _.pick(pathBaseObject, ['get', 'put', 'post', 'delete', 'options', 'head', 'patch', 'trace']);
+      .flatMap(([path, pathObject]) => {
+        const methods = _.pick(pathObject, ['get', 'put', 'post', 'delete', 'options', 'head', 'patch', 'trace']);
         return _.map(_.entries(methods), ([method, operation]) => {
-          const op = operation as OpenAPIV3.OperationObject;
-          return {
-            ...op,
+          const op: Operation = {
+            ...(operation as OpenAPIV3.OperationObject),
             path,
             method,
-            // add the path base object's operations to the operation's parameters
-            parameters: [
-              ...((op.parameters as OpenAPIV3.ParameterObject[]) || []),
-              ...((pathBaseObject.parameters as OpenAPIV3.ParameterObject[]) || []),
-            ],
           };
+          if (pathObject.parameters) {
+            op.parameters = [...(op.parameters || []), ...pathObject.parameters];
+          }
+          if (pathObject.servers) {
+            op.servers = [...(op.servers || []), ...pathObject.servers];
+          }
+          return op;
         });
       })
       .value();
-  }
+  };
 
   /**
    * Gets a single operation based on operationId
@@ -387,7 +399,7 @@ export class OpenAPIClientAxios {
    * @returns {Operation}
    * @memberof OpenAPIBackend
    */
-  public getOperation(operationId: string): Operation | undefined {
+  public getOperation = (operationId: string): Operation | undefined => {
     return _.find(this.getOperations(), { operationId });
-  }
+  };
 }

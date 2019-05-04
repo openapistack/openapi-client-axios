@@ -11,6 +11,7 @@ const examplePetAPIJSON = path.join(testsDir, 'resources', 'example-pet-api.open
 const examplePetAPIYAML = path.join(testsDir, 'resources', 'example-pet-api.openapi.yml');
 
 const baseURL = 'http://localhost:8080';
+const baseURLV2 = 'http://localhost:8080/v2';
 
 const responses: OpenAPIV3.ResponsesObject = {
   200: { description: 'ok' },
@@ -132,6 +133,13 @@ const definition: OpenAPIV3.Document = {
         responses,
       },
     },
+    '/pets/relative': {
+      servers: [{ url: baseURLV2 }],
+      get: {
+        operationId: 'getPetsRelative',
+        responses,
+      },
+    },
   },
   components: {
     schemas: {
@@ -228,6 +236,7 @@ describe('OpenAPIClientAxios', () => {
       expect(client).toHaveProperty('getOwnerByPetId');
       expect(client).toHaveProperty('getPetOwner');
       expect(client).toHaveProperty('getPetsMeta');
+      expect(client).toHaveProperty('getPetsRelative');
     });
 
     test('has set default baseURL to the first server in config', async () => {
@@ -488,6 +497,19 @@ describe('OpenAPIClientAxios', () => {
 
       const res = await client.getPetsMeta();
       expect(res.data).toEqual(mockResponse);
+      expect(mockHandler).toBeCalled();
+    });
+
+    test('getPetsRelative() calls GET /v2/pets/relative', async () => {
+      const api = new OpenAPIClientAxios({ definition, strict: true });
+      const client = await api.init();
+
+      const mock = new MockAdapter(api.client);
+      const mockHandler = jest.fn((config) => [200, config.baseURL]);
+      mock.onGet('/pets/relative').reply((config) => mockHandler(config));
+
+      const res = await client.getPetsRelative();
+      expect(res.data).toEqual(baseURLV2);
       expect(mockHandler).toBeCalled();
     });
   });
