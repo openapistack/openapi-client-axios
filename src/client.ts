@@ -1,69 +1,29 @@
 import _ from 'lodash';
-import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
-import MockAdapter from 'axios-mock-adapter';
+import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
 import bath from 'bath-es5';
 import { validate as validateOpenAPI } from 'openapi-schema-validation';
 import SwaggerParser from 'swagger-parser';
-import { OpenAPIV3 } from 'openapi-types';
-import { Parameters } from 'bath-es5/_/types';
-
-export type Document = OpenAPIV3.Document;
-export type OperationId = Exclude<string, ['query']>;
-
-export type PathParamValue = string | number;
-export type OperationMethodPathParametersArgument =
-  | PathParamValue
-  | PathParamValue[]
-  | { [param: string]: PathParamValue };
-export type OperationMethodDataArgument = any;
-export type OperationMethodArguments =
-  | [OperationMethodPathParametersArgument?, OperationMethodDataArgument?, AxiosRequestConfig?]
-  | [OperationMethodDataArgument?, AxiosRequestConfig?]
-  | [AxiosRequestConfig?];
-
-export type OperationMethodAll<Response = any> = (
-  pathParams?: OperationMethodPathParametersArgument,
-  data?: OperationMethodDataArgument,
-  config?: AxiosRequestConfig,
-) => Promise<AxiosResponse<Response>>;
-
-export type OperationMethodNoPathParams<Response = any> = (
-  data?: OperationMethodDataArgument,
-  config?: AxiosRequestConfig,
-) => Promise<AxiosResponse<Response>>;
-
-export type OperationMethodNoParams<Response = any> = (config?: AxiosRequestConfig) => Promise<AxiosResponse<Response>>;
-
-export type OperationMethod = OperationMethodAll | OperationMethodNoPathParams | OperationMethodNoParams;
-export interface OpenAPIClientAxiosOperations {
-  [operationId: string]: OperationMethod;
-}
-
-export type QueryMethod<Response = any> = (
-  operationId: string,
-  ...args: OperationMethodArguments
-) => Promise<AxiosResponse<Response>>;
-export interface OpenAPIClientAxiosQuery {
-  query: QueryMethod;
-}
-
-export type OpenAPIClient = AxiosInstance &
-  OpenAPIClientAxiosQuery &
-  OpenAPIClientAxiosOperations & { api: OpenAPIClientAxios };
+import QueryString from 'query-string';
+import {
+  OpenAPIV3,
+  Document,
+  Operation,
+  OperationMethod,
+  OperationMethodArguments,
+  UnknownOperationMethods,
+  RequestConfig,
+  ParamsArray,
+  ParamType,
+  HttpMethod,
+} from './types/client';
 
 /**
- * OAS Operation Object containing the path and method so it can be placed in a flat array of operations
- *
- * @export
- * @interface Operation
- * @extends {OpenAPIV3.OperationObject}
+ * OpenAPIClient is an AxiosInstance extended with operation methods
  */
-export interface Operation extends OpenAPIV3.OperationObject {
-  path: string;
-  method: string;
-}
-
-export type MockHandler = (config: AxiosRequestConfig) => any[] | Promise<any[]>;
+export type OpenAPIClient<OperationMethods> = AxiosInstance &
+  OperationMethods & {
+    api: OpenAPIClientAxios;
+  };
 
 /**
  * Main class and the default export of the 'openapi-client-axios' module
@@ -78,14 +38,11 @@ export class OpenAPIClientAxios {
 
   public strict: boolean;
   public validate: boolean;
-  public mockDelay: number;
-  public mockHandler: MockHandler | undefined;
 
   public initalized: boolean;
-  public client: OpenAPIClient;
+  public client: OpenAPIClient<UnknownOperationMethods>;
 
-  public operations: { [operationId: string]: OperationMethod };
-  public mockAdapter: MockAdapter;
+  public operations: UnknownOperationMethods;
   public axiosConfigDefaults: AxiosRequestConfig;
 
   /**
@@ -101,8 +58,6 @@ export class OpenAPIClientAxios {
     definition: Document | string;
     strict?: boolean;
     validate?: boolean;
-    mockHandler?: MockHandler;
-    mockDelay?: number;
     axiosConfigDefaults?: AxiosRequestConfig;
   }) {
     const optsWithDefaults = {
@@ -115,8 +70,6 @@ export class OpenAPIClientAxios {
     this.inputDocument = optsWithDefaults.definition;
     this.strict = optsWithDefaults.strict;
     this.validate = optsWithDefaults.validate;
-    this.mockDelay = optsWithDefaults.mockDelay;
-    this.mockHandler = optsWithDefaults.mockHandler;
     this.axiosConfigDefaults = optsWithDefaults.axiosConfigDefaults;
     this.operations = {};
   }
@@ -161,7 +114,7 @@ export class OpenAPIClientAxios {
     }
 
     // from here on, we want to handle the client as an extended axios client instance
-    this.client = instance as OpenAPIClient;
+    this.client = instance as OpenAPIClient<{ [operationId: string]: OperationMethod<any> }>;
 
     // create methods for operationIds
     const operations = this.getOperations();
@@ -173,14 +126,6 @@ export class OpenAPIClientAxios {
         this.client[operationId] = this.operations[operationId];
       }
     }
-
-    // mock the api using the given handler
-    if (this.mockHandler) {
-      this.mock(this.mockHandler, { mockDelay: this.mockDelay });
-    }
-
-    // add the query method
-    this.client.query = (operationId, ...args) => this.operations[operationId](...args);
 
     // add reference to parent class instance
     this.client.api = this;
@@ -201,21 +146,6 @@ export class OpenAPIClientAxios {
       return this.init();
     }
     return this.client;
-  };
-
-  /**
-   * Sets an axios mock adapter with given handler. Meant to be used with openapi-backend
-   *
-   * @param {MockHandler} mockHandler
-   * @memberof OpenAPIClientAxios
-   */
-  public mock = (mockHandler: MockHandler, opts?: { mockDelay: number }) => {
-    this.mockHandler = mockHandler;
-    if (opts && opts.mockDelay !== undefined) {
-      this.mockDelay = opts.mockDelay;
-    }
-    this.mockAdapter = new MockAdapter(this.client, { delayResponse: this.mockDelay });
-    this.mockAdapter.onAny().reply(this.mockHandler);
   };
 
   /**
@@ -264,7 +194,7 @@ export class OpenAPIClientAxios {
    * @param {Operation} operation
    * @memberof OpenAPIClientAxios
    */
-  public createOperationMethod = (operation: Operation): OperationMethod => {
+  public createOperationMethod = (operation: Operation): OperationMethod<any> => {
     return async (...args: OperationMethodArguments) => {
       const axiosConfig = this.getAxiosConfigForOperation(operation, args);
       // do the axios request
@@ -274,92 +204,136 @@ export class OpenAPIClientAxios {
 
   /**
    * Creates an axios config object for operation + arguments
-   * @param {Operation | string} operation
-   * @param {OperationMethodArguments} args
    * @memberof OpenAPIClientAxios
    */
   public getAxiosConfigForOperation = (operation: Operation | string, args: OperationMethodArguments) => {
     if (typeof operation === 'string') {
       operation = this.getOperation(operation);
     }
-    const { method, path, operationId, servers } = operation;
-
-    // handle operation method arguments
-    let i = 0;
-
-    // parse path template
-    const pathParams = bath(path);
-
-    // check for path param args
-    // (depends on whether operation takes in path params)
-    let params: Parameters = {};
-    if (pathParams.names.length && args[i] !== undefined) {
-      if (Array.isArray(args[0])) {
-        // array
-        params = _.zipObject(pathParams.names, _.map(args[0], (param) => `${param}`));
-      } else if (typeof args[0] === 'object') {
-        // object
-        params = _.mapValues(args[0], (param) => `${param}`);
-      } else {
-        // singular path param
-        const param = `${args[0]}`;
-        params = _.zipObject(pathParams.names, [param]);
-      }
-      i++;
-    }
-
-    // check for data argument
-    // (depends on operation method)
-    let data: any;
-    const shouldHaveRequestBody = ['post', 'put', 'patch'].includes(operation.method);
-    if (shouldHaveRequestBody && args[i] !== undefined) {
-      data = args[i];
-      i++;
-    }
-
-    // check for config argument
-    let config: AxiosRequestConfig;
-    if (args[i] !== undefined) {
-      config = args[i];
-      i++;
-    } else {
-      config = {};
-    }
-
-    // too many arguments
-    if (args[i]) {
-      throw new Error(`Expected a maximum of ${i} arguments for ${operationId} operation method`);
-    }
-
-    // make sure all path parameters are set
-    _.map(_.values(params), (value, index) => {
-      if (value === undefined) {
-        const paramName = pathParams.names[index];
-        if (this.strict) {
-          throw new Error(`Missing argument #${index} for path parameter ${paramName}`);
-        }
-        // set the value to "undefined"
-        params[paramName] = 'undefined';
-      }
-    });
-
-    // construct URL from path params
-    const url = pathParams.path(params) || undefined;
+    const request = this.getRequestConfigForOperation(operation, args);
 
     // construct axios request config
     const axiosConfig: AxiosRequestConfig = {
-      method,
-      url,
-      data,
-      ...config,
+      method: request.method,
+      url: request.path,
+      data: request.payload,
+      params: request.query,
+      headers: request.headers,
     };
 
     // allow overriding baseURL with operation / path specific servers
+    const { servers } = operation;
     if (servers && servers[0]) {
       axiosConfig.baseURL = servers[0].url;
     }
 
-    return axiosConfig;
+    // allow overriding any parameters in AxiosRequestConfig
+    const [parameters, data, config] = args;
+    return config ? _.merge(axiosConfig, config) : axiosConfig;
+  };
+
+  /**
+   * Creates a generic request config object for operation + arguments
+   * @memberof OpenAPIClientAxios
+   */
+  public getRequestConfigForOperation = (operation: Operation | string, args: OperationMethodArguments) => {
+    if (typeof operation === 'string') {
+      operation = this.getOperation(operation);
+    }
+
+    const pathParams = {} as RequestConfig['pathParams'];
+    const query = {} as RequestConfig['query'];
+    const headers = {} as RequestConfig['headers'];
+    const cookies = {} as RequestConfig['cookies'];
+
+    const setRequestParam = (name: string, value: any, type: ParamType) => {
+      switch (type) {
+        case ParamType.Path:
+          pathParams[name] = value;
+          break;
+        case ParamType.Query:
+          query[name] = value;
+          break;
+        case ParamType.Header:
+          headers[name] = value;
+          break;
+        case ParamType.Cookie:
+          cookies[name] = value;
+          break;
+      }
+    };
+
+    const getParamType = (paramName: string): ParamType => {
+      const param = _.find((operation as Operation).parameters, { name: paramName }) as OpenAPIV3.ParameterObject;
+      if (param) {
+        return param.in as ParamType;
+      }
+      // default all params to query if operation doesn't specify param
+      return ParamType.Query;
+    };
+
+    const getFirstOperationParam = () => {
+      const firstRequiredParam = _.find((operation as Operation).parameters, {
+        required: true,
+      }) as OpenAPIV3.ParameterObject;
+      if (firstRequiredParam) {
+        return firstRequiredParam;
+      }
+      const firstParam = _.first((operation as Operation).parameters) as OpenAPIV3.ParameterObject;
+      if (firstParam) {
+        return firstParam;
+      }
+    };
+
+    const [paramsArg, payload] = args;
+    if (_.isArray(paramsArg)) {
+      // ParamsArray
+      for (const param of paramsArg as ParamsArray) {
+        setRequestParam(param.name, param.value, param.in || getParamType(param.name));
+      }
+    } else if (typeof paramsArg === 'object') {
+      // ParamsObject
+      for (const name in paramsArg) {
+        if (paramsArg[name]) {
+          setRequestParam(name, paramsArg[name], getParamType(name));
+        }
+      }
+    } else if (!_.isNil(paramsArg)) {
+      const firstParam = getFirstOperationParam();
+      if (!firstParam) {
+        throw new Error(`No parameters found for operation ${operation.operationId}`);
+      }
+      setRequestParam(firstParam.name, paramsArg, firstParam.in as ParamType);
+    }
+
+    // path parameters
+    const pathBuilder = bath(operation.path);
+    // make sure all path parameters are set
+    for (const name of pathBuilder.names) {
+      const value = pathParams[name];
+      pathParams[name] = `${value}`;
+    }
+    const path = pathBuilder.path(pathParams);
+
+    // query parameters
+    const queryString = QueryString.stringify(query);
+
+    // full url with query string
+    const url = `${this.getBaseURL(operation)}${path}${queryString ? `?${queryString}` : ''}`;
+
+    // construct request config
+    const config: RequestConfig = {
+      method: operation.method,
+      url,
+      path,
+      pathParams,
+      query,
+      queryString,
+      headers,
+      cookies,
+      payload,
+    };
+    return config;
   };
 
   /**
@@ -373,12 +347,12 @@ export class OpenAPIClientAxios {
     return _.chain(paths)
       .entries()
       .flatMap(([path, pathObject]) => {
-        const methods = _.pick(pathObject, ['get', 'put', 'post', 'delete', 'options', 'head', 'patch', 'trace']);
+        const methods = _.pick(pathObject, _.values(HttpMethod));
         return _.map(_.entries(methods), ([method, operation]) => {
           const op: Operation = {
             ...(operation as OpenAPIV3.OperationObject),
             path,
-            method,
+            method: method as HttpMethod,
           };
           if (pathObject.parameters) {
             op.parameters = [...(op.parameters || []), ...pathObject.parameters];
