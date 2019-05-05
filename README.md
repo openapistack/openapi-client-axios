@@ -75,7 +75,7 @@ baseURL from OpenAPI definitions and extended with extra operation methods for c
 
 It also has a reference to OpenAPIClientAxios at `client.api`
 
-# Operation methods
+## Operation methods
 
 OpenAPIClientAxios operation methods take 3 arguments:
 
