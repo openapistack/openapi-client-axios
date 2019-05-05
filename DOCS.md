@@ -175,6 +175,8 @@ Creates an axios config for operation + arguments to be used for calling the API
 
 This function calls `.getRequestConfigForOperation()` internally and maps the values to be suitable for axios.
 
+Returns an [AxiosRequestConfig](https://github.com/axios/axios#request-config) object
+
 Example:
 ```javascript
 const request = api.getAxiosConfigForOperation('getPets', [{ petId: 1 }])
@@ -281,7 +283,8 @@ A `RequestConfig` object gets created as part of every operation method call.
 
 It represents a generic HTTP request to be executed.
 
-A request config object can be created without calling an operation method using `.getRequestConfigForOperation()`
+A request config object can be created without calling an operation method using
+[`.getRequestConfigForOperation()`](#getrequestconfigforoperationoperation-args)
 
 ```javascript
 import { RequestConfig } from 'openapi-client-axios';
