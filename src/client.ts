@@ -140,7 +140,7 @@ export class OpenAPIClientAxios {
       }
 
       // dereference the document into definition
-      this.definition = await SwaggerParser.dereference(this.document);
+      this.definition = await SwaggerParser.dereference(_.cloneDeep(this.document));
     } catch (err) {
       if (this.strict) {
         // in strict-mode, fail hard and re-throw the error
