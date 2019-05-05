@@ -18,7 +18,7 @@ and importing them via YAML or JSON files or by just passing an object
   - `client.updatePet(1, payload)`
 - [x] Built on top of the robust [axios](https://github.com/axios/axios) JavaScript library
 - [x] Isomorphic, works both in browser and Node.js
-- [ ] Generate TypeScript definitions (.d.ts) for your APIs with full IntelliSense support
+- [x] Generate TypeScript definitions (.d.ts) for your APIs with full IntelliSense support
 
 ## Quick Start
 
@@ -119,6 +119,39 @@ override axios request config parameters, such as `headers`, `timeout`, `withCre
 // POST /user - createUser
 client.createUser(null, { user: 'admin', pass: '123' }, { headers: { 'x-api-key': 'secret' } });
 ```
+
+## Generating types for clients
+
+`openapi-client-axios` comes with a tool called `typegen` to generate typescript type files (.d.ts) for 
+OpenAPIClient instances using an OpenAPI definition.
+
+```
+Usage: typegen [file]
+
+Options:
+  --help     Show help                                                 [boolean]
+  --version  Show version number                                       [boolean]
+
+Examples:
+  typegen ./openapi.yml > client.d.ts  - generate a type definition file
+```
+
+The output of `typegen` exports a type called `Client`, which can be used for instances of `OpenAPIClient`;
+
+```typescript
+import { Client } from './client.d.ts';
+
+const client = await api.init<Client>();
+```
+
+Both the `api.getClient()` and `api.init()` methods support passing in a Client type.
+
+````typescript
+import { Client as PetStoreClient } from './client.d.ts';
+
+const client = await api.init<PetStoreClient>();
+const client = await api.getClient<PetStoreClient>();
+````
 
 ## Contributing
 

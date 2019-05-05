@@ -4,6 +4,9 @@
   "version": "2.4.0",
   "author": "Viljami Kuosmanen <viljami@avoinsorsa.fi>",
   "license": "MIT",
+  "bin": {
+    "typegen": "./bin/typegen"
+  },
   "keywords": [
     "openapi",
     "swagger",
@@ -45,11 +48,14 @@
     "swagger-parser": "^6.0.5"
   },
   "devDependencies": {
+    "@anttiviljami/dtsgenerator": "^2.0.7",
     "@types/jest": "^23.3.14",
     "@types/lodash": "^4.14.121",
     "@types/node": "^10.12.29",
     "@types/swagger-parser": "^4.0.3",
+    "@types/yargs": "^13.0.0",
     "axios-mock-adapter": "^1.16.0",
+    "indent-string": "^4.0.0",
     "jest": "^23.6.0",
     "markdown-toc": "^1.2.0",
     "prettier": "^1.16.4",
@@ -57,7 +63,8 @@
     "ts-jest": "^23.10.5",
     "tslint": "^5.13.1",
     "tslint-microsoft-contrib": "^5.2.1",
-    "typescript": "^3.3.3333"
+    "typescript": "^3.3.3333",
+    "yargs": "^13.2.2"
   },
   "scripts": {
     "build": "tsc",

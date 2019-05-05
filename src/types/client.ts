@@ -1,4 +1,4 @@
-import { AxiosResponse, AxiosRequestConfig, AxiosInstance } from 'axios';
+import { AxiosResponse, AxiosRequestConfig } from 'axios';
 import { OpenAPIV3 } from 'openapi-types';
 export * from 'openapi-types';
 
@@ -40,17 +40,18 @@ export interface ExplicitParamValue {
   name: string;
   in?: ParamType | string;
 }
-export interface ParamsObject {
+export interface UnknownParamsObject {
   [parameter: string]: ImplicitParamValue | ImplicitParamValue[];
 }
 export type ParamsArray = ExplicitParamValue[];
 export type SingleParam = ImplicitParamValue;
-export type Parameters = ParamsObject | ParamsArray | SingleParam;
+export type Parameters<ParamsObject> = ParamsObject | ParamsArray | SingleParam;
 export type RequestPayload = any; // should we type this?
-export type OperationMethodArguments = [Parameters?, RequestPayload?, AxiosRequestConfig?];
-export type OperationMethod<Response> = (...args: OperationMethodArguments) => Promise<AxiosResponse<Response>>;
+export type OperationMethodArguments = [Parameters<UnknownParamsObject>?, RequestPayload?, AxiosRequestConfig?];
+export type OperationResponse<Response> = Promise<AxiosResponse<Response>>;
+export type UnknownOperationMethod = (...args: OperationMethodArguments) => OperationResponse<any>;
 export interface UnknownOperationMethods {
-  [operationId: string]: OperationMethod<any>;
+  [operationId: string]: UnknownOperationMethod;
 }
 
 /**

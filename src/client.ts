@@ -8,7 +8,7 @@ import {
   OpenAPIV3,
   Document,
   Operation,
-  OperationMethod,
+  UnknownOperationMethod,
   OperationMethodArguments,
   UnknownOperationMethods,
   RequestConfig,
@@ -40,7 +40,7 @@ export class OpenAPIClientAxios {
   public validate: boolean;
 
   public initalized: boolean;
-  public client: OpenAPIClient<UnknownOperationMethods>;
+  public instance: any;
 
   public operations: UnknownOperationMethods;
   public axiosConfigDefaults: AxiosRequestConfig;
@@ -74,6 +74,23 @@ export class OpenAPIClientAxios {
     this.operations = {};
   }
 
+  get client(): OpenAPIClient<UnknownOperationMethods> {
+    return this.instance;
+  }
+
+  /**
+   * Returns an instance of OpenAPIClient
+   *
+   * @returns
+   * @memberof OpenAPIClientAxios
+   */
+  public getClient = async <Client = OpenAPIClient<UnknownOperationMethods>>() => {
+    if (!this.initalized) {
+      return this.init();
+    }
+    return this.instance as Client;
+  };
+
   /**
    * Initalizes OpenAPIClientAxios.
    *
@@ -82,7 +99,7 @@ export class OpenAPIClientAxios {
    * @returns AxiosInstance
    * @memberof OpenAPIClientAxios
    */
-  public init = async () => {
+  public init = async <Client = OpenAPIClient<UnknownOperationMethods>>() => {
     try {
       // parse the document
       this.document = await SwaggerParser.parse(this.inputDocument);
@@ -114,7 +131,7 @@ export class OpenAPIClientAxios {
     }
 
     // from here on, we want to handle the client as an extended axios client instance
-    this.client = instance as OpenAPIClient<{ [operationId: string]: OperationMethod<any> }>;
+    this.instance = instance;
 
     // create methods for operationIds
     const operations = this.getOperations();
@@ -123,29 +140,16 @@ export class OpenAPIClientAxios {
       if (operationId) {
         this.operations[operationId] = this.createOperationMethod(operation);
         // also add the method to the axios client for syntactic sugar
-        this.client[operationId] = this.operations[operationId];
+        this.instance[operationId] = this.operations[operationId];
       }
     }
 
     // add reference to parent class instance
-    this.client.api = this;
+    this.instance.api = this;
 
     // we are now initalized
     this.initalized = true;
-    return this.client;
-  };
-
-  /**
-   * Returns an instance of OpenAPIClient
-   *
-   * @returns
-   * @memberof OpenAPIClientAxios
-   */
-  public getClient = async () => {
-    if (!this.initalized) {
-      return this.init();
-    }
-    return this.client;
+    return this.instance as Client;
   };
 
   /**
@@ -194,7 +198,7 @@ export class OpenAPIClientAxios {
    * @param {Operation} operation
    * @memberof OpenAPIClientAxios
    */
-  public createOperationMethod = (operation: Operation): OperationMethod<any> => {
+  public createOperationMethod = (operation: Operation): UnknownOperationMethod => {
     return async (...args: OperationMethodArguments) => {
       const axiosConfig = this.getAxiosConfigForOperation(operation, args);
       // do the axios request

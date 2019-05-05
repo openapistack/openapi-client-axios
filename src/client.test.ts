@@ -34,11 +34,6 @@ const ownerId: OpenAPIV3.ParameterObject = {
   },
 };
 
-const examplePet = {
-  id: 1,
-  name: 'Garfield',
-};
-
 const definition: OpenAPIV3.Document = {
   openapi: '3.0.0',
   info: {

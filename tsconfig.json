@@ -15,13 +15,7 @@
     "rootDir": "src/",
     "outDir": "",
     "sourceMap": true,
-    "declaration": true,
-    "paths": {
-      "*": [
-        "node_modules/*",
-        "src/types/*"
-      ]
-    }
+    "declaration": true
   },
   "include": [
     "src/**/*"
