@@ -38,7 +38,7 @@ export type ImplicitParamValue = string | number;
 export interface ExplicitParamValue {
   value: string | number;
   name: string;
-  in?: ParamType;
+  in?: ParamType | string;
 }
 export interface ParamsObject {
   [parameter: string]: ImplicitParamValue | ImplicitParamValue[];

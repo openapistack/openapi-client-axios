@@ -244,6 +244,19 @@ describe('OpenAPIClientAxios', () => {
       expect(client.defaults.baseURL).toBe(baseURL);
     });
 
+    test('can override axios default config', async () => {
+      const api = new OpenAPIClientAxios({
+        definition,
+        strict: true,
+        axiosConfigDefaults: { maxRedirects: 1, withCredentials: true },
+      });
+      const client = await api.init();
+      expect(client.defaults.maxRedirects).toBe(1);
+      expect(client.defaults.withCredentials).toBe(true);
+    });
+  });
+
+  describe('operation methods', () => {
     test('getPets() calls GET /pets', async () => {
       const api = new OpenAPIClientAxios({ definition, strict: true });
       const client = await api.init();
@@ -258,7 +271,7 @@ describe('OpenAPIClientAxios', () => {
       expect(mockHandler).toBeCalled();
     });
 
-    test("getPets({ params: { q: 'cats' } }) calls GET /pets?q=cats", async () => {
+    test("getPets({ q: 'cats' }) calls GET /pets?q=cats", async () => {
       const api = new OpenAPIClientAxios({ definition, strict: true });
       const client = await api.init();
 
@@ -275,7 +288,7 @@ describe('OpenAPIClientAxios', () => {
       expect(mockContext.params).toEqual(params);
     });
 
-    test("getPets({ params: { q: ['cats', 'dogs'] } }) calls GET /pets?q=cats&q=dogs", async () => {
+    test("getPets({ q: ['cats', 'dogs'] }) calls GET /pets?q=cats&q=dogs", async () => {
       const api = new OpenAPIClientAxios({ definition, strict: true });
       const client = await api.init();
 
@@ -292,30 +305,16 @@ describe('OpenAPIClientAxios', () => {
       expect(mockContext.params).toEqual(params);
     });
 
-    test("get('/pets') calls GET /pets", async () => {
+    test('getPetById({ petId: 1 }) calls GET /pets/1', async () => {
       const api = new OpenAPIClientAxios({ definition, strict: true });
       const client = await api.init();
 
       const mock = new MockAdapter(api.client);
-      const mockResponse = [{ id: 1, name: 'Garfield' }];
+      const mockResponse = { id: 1, name: 'Garfield' };
       const mockHandler = jest.fn((config) => [200, mockResponse]);
-      mock.onGet('/pets').reply((config) => mockHandler(config));
+      mock.onGet('/pets/1').reply((config) => mockHandler(config));
 
-      const res = await client.get('/pets');
-      expect(res.data).toEqual(mockResponse);
-      expect(mockHandler).toBeCalled();
-    });
-
-    test("({ method: 'get', url: '/pets' }) calls GET /pets", async () => {
-      const api = new OpenAPIClientAxios({ definition, strict: true });
-      const client = await api.init();
-
-      const mock = new MockAdapter(api.client);
-      const mockResponse = [{ id: 1, name: 'Garfield' }];
-      const mockHandler = jest.fn((config) => [200, mockResponse]);
-      mock.onGet('/pets').reply((config) => mockHandler(config));
-
-      const res = await client({ method: 'get', url: '/pets' });
+      const res = await client.getPetById({ petId: 1 });
       expect(res.data).toEqual(mockResponse);
       expect(mockHandler).toBeCalled();
     });
@@ -330,6 +329,35 @@ describe('OpenAPIClientAxios', () => {
       mock.onGet('/pets/1').reply((config) => mockHandler(config));
 
       const res = await client.getPetById(1);
+      expect(res.data).toEqual(mockResponse);
+      expect(mockHandler).toBeCalled();
+    });
+
+    test('getPetById([{ name: "petId", value: "1", in: "path" }]) calls GET /pets/1', async () => {
+      const api = new OpenAPIClientAxios({ definition, strict: true });
+      const client = await api.init();
+
+      const mock = new MockAdapter(api.client);
+      const mockResponse = { id: 1, name: 'Garfield' };
+      const mockHandler = jest.fn((config) => [200, mockResponse]);
+      mock.onGet('/pets/1').reply((config) => mockHandler(config));
+
+      const res = await client.getPetById([{ name: 'petId', value: '1', in: 'path' }]);
+      expect(res.data).toEqual(mockResponse);
+      expect(mockHandler).toBeCalled();
+    });
+
+    // tslint:disable-next-line
+    test('getPetById([{ name: "petId", value: "1", in: "path" }, { name: "new", value: "2", in: "query" }]) calls GET /pets/1?new=2', async () => {
+      const api = new OpenAPIClientAxios({ definition, strict: true });
+      const client = await api.init();
+
+      const mock = new MockAdapter(api.client);
+      const mockResponse = { id: 1, name: 'Garfield' };
+      const mockHandler = jest.fn((config) => [200, mockResponse]);
+      mock.onGet('/pets/1').reply((config) => mockHandler(config));
+
+      const res = await client.getPetById([{ name: 'petId', value: '1', in: 'path' }]);
       expect(res.data).toEqual(mockResponse);
       expect(mockHandler).toBeCalled();
     });
@@ -447,6 +475,141 @@ describe('OpenAPIClientAxios', () => {
 
       const res = await client.getPetsRelative();
       expect(res.data).toEqual(baseURLV2);
+      expect(mockHandler).toBeCalled();
+    });
+  });
+
+  describe('request config', () => {
+    test('getPets() calls GET /pets', async () => {
+      const api = new OpenAPIClientAxios({ definition, strict: true });
+      const client = await api.init();
+      const config = api.getRequestConfigForOperation('getPets', []);
+
+      expect(config.method).toEqual('get');
+      expect(config.path).toEqual('/pets');
+    });
+
+    test('getPets({ q: "cat" }) calls GET /pets?q=cat', async () => {
+      const api = new OpenAPIClientAxios({ definition, strict: true });
+      const client = await api.init();
+      const config = api.getRequestConfigForOperation('getPets', [{ q: 'cat' }]);
+
+      expect(config.method).toEqual('get');
+      expect(config.path).toEqual('/pets');
+      expect(config.url).toMatch('/pets?q=cat');
+      expect(config.query).toEqual({ q: 'cat' });
+      expect(config.queryString).toEqual('q=cat');
+    });
+
+    test('getPetById({ petId: 1 }) calls GET /pets/1', async () => {
+      const api = new OpenAPIClientAxios({ definition, strict: true });
+      const client = await api.init();
+      const config = api.getRequestConfigForOperation('getPetById', [{ petId: 1 }]);
+
+      expect(config.method).toEqual('get');
+      expect(config.path).toEqual('/pets/1');
+      expect(config.pathParams).toEqual({ petId: '1' });
+    });
+
+    test('getPetById(1) calls GET /pets/1', async () => {
+      const api = new OpenAPIClientAxios({ definition, strict: true });
+      const client = await api.init();
+      const config = api.getRequestConfigForOperation('getPetById', [1]);
+
+      expect(config.method).toEqual('get');
+      expect(config.path).toEqual('/pets/1');
+      expect(config.pathParams).toEqual({ petId: '1' });
+    });
+
+    test('createPet(null, pet) calls POST /pets with JSON payload', async () => {
+      const api = new OpenAPIClientAxios({ definition, strict: true });
+      const client = await api.init();
+      const pet = { name: 'Garfield' };
+      const config = api.getRequestConfigForOperation('createPet', [null, pet]);
+
+      expect(config.method).toEqual('post');
+      expect(config.path).toEqual('/pets');
+      expect(config.payload).toEqual(pet);
+    });
+
+    test('replacePetById(1, pet) calls PUT /pets/1 with JSON payload', async () => {
+      const api = new OpenAPIClientAxios({ definition, strict: true });
+      const client = await api.init();
+      const pet = { id: 1, name: 'Garfield' };
+      const config = api.getRequestConfigForOperation('replacePetById', [1, pet]);
+
+      expect(config.method).toEqual('put');
+      expect(config.path).toEqual('/pets/1');
+      expect(config.pathParams).toEqual({ petId: '1' });
+      expect(config.payload).toEqual(pet);
+    });
+
+    test('deletePetById(1) calls DELETE /pets/1', async () => {
+      const api = new OpenAPIClientAxios({ definition, strict: true });
+      const client = await api.init();
+      const config = api.getRequestConfigForOperation('deletePetById', [1]);
+
+      expect(config.method).toEqual('delete');
+      expect(config.path).toEqual('/pets/1');
+      expect(config.pathParams).toEqual({ petId: '1' });
+    });
+
+    test('getOwnerByPetId(1) calls GET /pets/1/owner', async () => {
+      const api = new OpenAPIClientAxios({ definition, strict: true });
+      const client = await api.init();
+      const config = api.getRequestConfigForOperation('getOwnerByPetId', [1]);
+
+      expect(config.method).toEqual('get');
+      expect(config.path).toEqual('/pets/1/owner');
+      expect(config.pathParams).toEqual({ petId: '1' });
+    });
+
+    test('getPetOwner({ petId: 1, ownerId: 2 }) calls GET /pets/1/owner/2', async () => {
+      const api = new OpenAPIClientAxios({ definition, strict: true });
+      const client = await api.init();
+      const config = api.getRequestConfigForOperation('getPetOwner', [{ petId: 1, ownerId: 2 }]);
+
+      expect(config.method).toEqual('get');
+      expect(config.path).toEqual('/pets/1/owner/2');
+      expect(config.pathParams).toEqual({ petId: '1', ownerId: '2' });
+    });
+
+    test('getPetsMeta() calls GET /pets/meta', async () => {
+      const api = new OpenAPIClientAxios({ definition, strict: true });
+      const client = await api.init();
+      const config = api.getRequestConfigForOperation('getPetsMeta', []);
+
+      expect(config.method).toEqual('get');
+      expect(config.path).toEqual('/pets/meta');
+    });
+  });
+
+  describe('axios methods', () => {
+    test("get('/pets') calls GET /pets", async () => {
+      const api = new OpenAPIClientAxios({ definition, strict: true });
+      const client = await api.init();
+
+      const mock = new MockAdapter(api.client);
+      const mockResponse = [{ id: 1, name: 'Garfield' }];
+      const mockHandler = jest.fn((config) => [200, mockResponse]);
+      mock.onGet('/pets').reply((config) => mockHandler(config));
+
+      const res = await client.get('/pets');
+      expect(res.data).toEqual(mockResponse);
+      expect(mockHandler).toBeCalled();
+    });
+
+    test("({ method: 'get', url: '/pets' }) calls GET /pets", async () => {
+      const api = new OpenAPIClientAxios({ definition, strict: true });
+      const client = await api.init();
+
+      const mock = new MockAdapter(api.client);
+      const mockResponse = [{ id: 1, name: 'Garfield' }];
+      const mockHandler = jest.fn((config) => [200, mockResponse]);
+      mock.onGet('/pets').reply((config) => mockHandler(config));
+
+      const res = await client({ method: 'get', url: '/pets' });
+      expect(res.data).toEqual(mockResponse);
       expect(mockHandler).toBeCalled();
     });
   });

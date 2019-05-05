@@ -246,7 +246,7 @@ export class OpenAPIClientAxios {
     const headers = {} as RequestConfig['headers'];
     const cookies = {} as RequestConfig['cookies'];
 
-    const setRequestParam = (name: string, value: any, type: ParamType) => {
+    const setRequestParam = (name: string, value: any, type: ParamType | string) => {
       switch (type) {
         case ParamType.Path:
           pathParams[name] = value;
