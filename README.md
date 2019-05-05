@@ -126,6 +126,9 @@ client.createUser(null, { user: 'admin', pass: '123' }, { headers: { 'x-api-key'
 OpenAPIClient instances using an OpenAPI definition.
 
 ```
+$ npm install -g openapi-client-axios
+$ typegen
+
 Usage: typegen [file]
 
 Options:
