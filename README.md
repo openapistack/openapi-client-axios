@@ -58,13 +58,16 @@ async function createPet() {
 
 ## Client
 
+OpenAPI Client Axios uses [operationIds](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.0.md#operation-object)
+in OpenAPIv3 definitions to call API operations.
+
 After initalizing `OpenAPIClientAxios`, an axios client instance extended with OpenAPI capabilities is exposed.
 
 Example:
 ```javascript
 const api = new OpenAPIClientAxios({ definition: 'https://example.com/api/openapi.json' });
 api.init().then((client) => {
-  // ...
+  client.updatePet(1, { age: 12 });
 });
 ```
 
