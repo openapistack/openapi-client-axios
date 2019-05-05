@@ -51,7 +51,8 @@ export class OpenAPIClientAxios {
    * @param opts - constructor options
    * @param {Document | string} opts.definition - the OpenAPI definition, file path or Document object
    * @param {boolean} opts.strict - strict mode, throw errors or warn on OpenAPI spec validation errors (default: false)
-   * @param {boolean} opts.validate - whether to validate requests with Ajv (default: true)
+   * @param {boolean} opts.validate - whether to validate the input document document (default: true)
+   * @param {boolean} opts.axiosConfigDefaults - default axios config for the instance
    * @memberof OpenAPIClientAxios
    */
   constructor(opts: {
@@ -63,7 +64,6 @@ export class OpenAPIClientAxios {
     const optsWithDefaults = {
       validate: true,
       strict: false,
-      mockDelay: 0,
       axiosConfigDefaults: {},
       ...opts,
     };
@@ -74,12 +74,19 @@ export class OpenAPIClientAxios {
     this.operations = {};
   }
 
+  /**
+   * Returns the instance of OpenAPIClient
+   *
+   * @readonly
+   * @type {OpenAPIClient<UnknownOperationMethods>}
+   * @memberof OpenAPIClientAxios
+   */
   get client(): OpenAPIClient<UnknownOperationMethods> {
     return this.instance;
   }
 
   /**
-   * Returns an instance of OpenAPIClient
+   * Returns the instance of OpenAPIClient
    *
    * @returns
    * @memberof OpenAPIClientAxios
@@ -92,7 +99,7 @@ export class OpenAPIClientAxios {
   };
 
   /**
-   * Initalizes OpenAPIClientAxios.
+   * Initalizes OpenAPIClientAxios and creates the axios client instance
    *
    * The init() method should be called right after creating a new instance of OpenAPIClientAxios
    *
@@ -189,21 +196,6 @@ export class OpenAPIClientAxios {
       return this.definition.servers[0].url;
     }
     return undefined;
-  };
-
-  /**
-   * Creates an axios method for an operation
-   * (...pathParams, data?, config?) => Promise<AxiosResponse>
-   *
-   * @param {Operation} operation
-   * @memberof OpenAPIClientAxios
-   */
-  public createOperationMethod = (operation: Operation): UnknownOperationMethod => {
-    return async (...args: OperationMethodArguments) => {
-      const axiosConfig = this.getAxiosConfigForOperation(operation, args);
-      // do the axios request
-      return this.client.request(axiosConfig);
-    };
   };
 
   /**
@@ -379,5 +371,20 @@ export class OpenAPIClientAxios {
    */
   public getOperation = (operationId: string): Operation | undefined => {
     return _.find(this.getOperations(), { operationId });
+  };
+
+  /**
+   * Creates an axios method for an operation
+   * (...pathParams, data?, config?) => Promise<AxiosResponse>
+   *
+   * @param {Operation} operation
+   * @memberof OpenAPIClientAxios
+   */
+  private createOperationMethod = (operation: Operation): UnknownOperationMethod => {
+    return async (...args: OperationMethodArguments) => {
+      const axiosConfig = this.getAxiosConfigForOperation(operation, args);
+      // do the axios request
+      return this.client.request(axiosConfig);
+    };
   };
 }

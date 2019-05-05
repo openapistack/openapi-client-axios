@@ -20,6 +20,10 @@ and importing them via YAML or JSON files or by just passing an object
 - [x] Isomorphic, works both in browser and Node.js
 - [x] Generate TypeScript definitions (.d.ts) for your APIs with full IntelliSense support
 
+## Documentation
+
+See [DOCS.md](https://github.com/anttiviljami/openapi-client-axios/blob/master/DOCS.md)
+
 ## Quick Start
 
 ```
@@ -51,6 +55,23 @@ async function createPet() {
   console.log('Pet created', res.data);
 }
 ```
+
+## Client
+
+After initalizing `OpenAPIClientAxios`, an axios client instance extended with OpenAPI capabilities is exposed.
+
+Example:
+```javascript
+const api = new OpenAPIClientAxios({ definition: 'https://example.com/api/openapi.json' });
+api.init().then((client) => {
+  // ...
+});
+```
+
+`client` is an [axios instance](https://github.com/axios/axios#creating-an-instance) initalized with
+baseURL from OpenAPI definitions and extended with extra operation methods for calling API operations.
+
+It also has a reference to OpenAPIClientAxios at `client.api`
 
 # Operation methods
 
