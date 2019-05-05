@@ -45,11 +45,15 @@ export interface UnknownParamsObject {
 }
 export type ParamsArray = ExplicitParamValue[];
 export type SingleParam = ImplicitParamValue;
-export type Parameters<ParamsObject> = ParamsObject | ParamsArray | SingleParam;
+export type Parameters<ParamsObject = UnknownParamsObject> = ParamsObject | ParamsArray | SingleParam;
 export type RequestPayload = any; // should we type this?
-export type OperationMethodArguments = [Parameters<UnknownParamsObject>?, RequestPayload?, AxiosRequestConfig?];
+export type OperationMethodArguments = [Parameters?, RequestPayload?, AxiosRequestConfig?];
 export type OperationResponse<Response> = Promise<AxiosResponse<Response>>;
-export type UnknownOperationMethod = (...args: OperationMethodArguments) => OperationResponse<any>;
+export type UnknownOperationMethod = (
+  parameters?: Parameters,
+  data?: RequestPayload,
+  config?: AxiosRequestConfig,
+) => OperationResponse<any>;
 export interface UnknownOperationMethods {
   [operationId: string]: UnknownOperationMethod;
 }
