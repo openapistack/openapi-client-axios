@@ -76,7 +76,7 @@ will look for the first required parameter for the operation. Usually this is wi
 client.getPet(1)
 ```
 
-Alternatively, you can explicitly specify parameters in array form. This method allows you to set custom parameters not defined 
+Alternatively, you can explicitly specify parameters in array form. This method allows you to set custom parameters not defined
 in the OpenAPI spec.
 
 ```javascript
@@ -120,15 +120,18 @@ override axios request config parameters, such as `headers`, `timeout`, `withCre
 client.createUser(null, { user: 'admin', pass: '123' }, { headers: { 'x-api-key': 'secret' } });
 ```
 
-## Generating types for clients
+## Generating type files (.d.ts)
 
-`openapi-client-axios` comes with a tool called `typegen` to generate typescript type files (.d.ts) for 
-OpenAPIClient instances using an OpenAPI definition.
+![TypeScript IntelliSense](intellisense.gif)
+
+`openapi-client-axios` comes with a tool called `typegen` to generate typescript type files (.d.ts) for
+OpenAPIClient instances using an OpenAPI definition file.
 
 ```
 $ npm install -g openapi-client-axios
-$ typegen
+```
 
+```
 Usage: typegen [file]
 
 Options:
@@ -141,12 +144,6 @@ Examples:
 
 The output of `typegen` exports a type called `Client`, which can be used for instances of `OpenAPIClient`;
 
-```typescript
-import { Client } from './client.d.ts';
-
-const client = await api.init<Client>();
-```
-
 Both the `api.getClient()` and `api.init()` methods support passing in a Client type.
 
 ````typescript
@@ -154,6 +151,13 @@ import { Client as PetStoreClient } from './client.d.ts';
 
 const client = await api.init<PetStoreClient>();
 const client = await api.getClient<PetStoreClient>();
+````
+
+`typegen` supports using both local and remote URLs for OpenAPI definition files.
+
+````
+$ typegen ./petstore.yaml
+$ typegen https://raw.githubusercontent.com/OAI/OpenAPI-Specification/master/examples/v3.0/petstore.yaml
 ````
 
 ## Contributing
