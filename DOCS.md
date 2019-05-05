@@ -14,7 +14,6 @@
   - [.getClient()](#getclient)
   - [.getBaseURL(operation?)](#getbaseurloperation)
     - [Parameter: operation](#parameter-operation)
-  - [.validateDefinition()](#validatedefinition)
   - [.getRequestConfigForOperation(operation, args)](#getrequestconfigforoperationoperation-args)
     - [Parameter: operation](#parameter-operation)
     - [Parameter: args](#parameter-args)
@@ -140,12 +139,6 @@ Optional. The Operation object or operationId that may override the baseURL with
 property.
 
 Type: `Operation` or `string` (operationId)
-
-### .validateDefinition()
-
-Validates and returns the parsed document. Throws an error if validation fails.
-
-*NOTE: This method can't be called before `init()` is complete.*
 
 ### .getRequestConfigForOperation(operation, args)
 
