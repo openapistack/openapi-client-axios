@@ -3,6 +3,8 @@
 <!-- toc -->
 
 - [Installation](#installation)
+- [Getting Started](#getting-started)
+- [Authentication](#authentication)
 - [Class OpenAPIClientAxios](#class-openapiclientaxios)
   - [new OpenAPIClientAxios(opts)](#new-openapiclientaxiosopts)
     - [Parameter: opts](#parameter-opts)
@@ -39,15 +41,60 @@ npm install --save openapi-client-axios
 
 ES6 import syntax:
 ```javascript
-import OpenAPIBackend from 'openapi-client-axios';
+import OpenAPIClientAxios from 'openapi-client-axios';
 ```
 
 CommonJS require syntax:
 ```javascript
-const OpenAPIBackend = require('openapi-client-axios').default;
+const OpenAPIClientAxios = require('openapi-client-axios').default;
 ```
 
 The main `OpenAPIClientAxios` class is exported as the default export for the `'openapi-client-axios'` module.
+
+## Getting Started
+
+OpenAPI Client Axios uses [operationIds](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.0.md#operation-object)
+in OpenAPIv3 definitions to call API operations.
+
+Below is a simple example of how you would call an operation called `getPets()` with `openapi-client-axios`.
+
+```javascript
+const api = new OpenAPIClientAxios({ definition: './petstore.yml' });
+const client = await api.init();
+const res = await api.getPets(); // res.data will contain the result of the API call
+```
+
+## Authentication
+
+OpenAPI Client Axios can be used both in the browser or in the backend on Node.js.
+
+In the browser, you generally want let the browser handle authentication for you, so make sure to initalise your
+`OpenAPIClientAxios` with `withCredentials: true` so axios knows automatically to send cookies to the API.
+
+```javascript
+// in the browser
+const api = new OpenAPIClientAxios({
+  definition,
+  axiosConfigDefaults: {
+    withCredentials: true,
+  },
+});
+```
+
+With Node.js, you will need to handle authentication yourself. Make sure to send the appropriate headers alongside your
+requests. Here is an example of simple API key authentication:
+
+```javascript
+// on Node.js
+const api = new OpenAPIClientAxios({
+  definition,
+  axiosConfigDefaults: {
+    headers: {
+      'x-api-key': 'secret',
+    },
+  },
+});
+```
 
 ## Class OpenAPIClientAxios
 
@@ -60,7 +107,7 @@ Creates an instance of OpenAPIClientAxios and returns it.
 
 Example:
 ```javascript
-const api = new OpenAPIBackend({
+const api = new OpenAPIClientAxios({
   definition: './openapi.yml',
   strict: true,
   validate: true,
