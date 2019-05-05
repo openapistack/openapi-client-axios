@@ -28,6 +28,7 @@
   - [Data](#data)
   - [Config](#config)
 - [Request Config Object](#request-config-object)
+- [Typegen](#typegen)
 
 <!-- tocstop -->
 
@@ -201,7 +202,13 @@ When OpenAPIClientAxios is initalised, a member
 
 The client instance can be accessed either directly via `api.client` getter, or `api.getClient()`.
 
-Vice versa, the parent OpenAPIClientAxios instance can be accessed from the client via `client.api`.
+The member axios client instance is a regular instance of axios with [Operation Methods](#operation-method) created to
+provide an easy JavaScript API to call API operations.
+
+In addition to operation methods, the Axios client instance baseURL is pre-configured to match the first OpenAPI
+definition [servers](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.0.md#serverObject) property.
+
+The parent OpenAPIClientAxios instance can also be accessed from the client via `client.api`.
 
 ## Operation Method
 
@@ -334,7 +341,7 @@ Examples:
   typegen ./openapi.yml > client.d.ts  - generate a type definition file
 ```
 
-The output of `typegen` exports a type called `Client`, which can be used for client instances.
+The output of `typegen` exports a type called `Client`, which can be used for [client instances](#axios-client-instance).
 
 Both the [`.getClient()`](#getclient) and [`api.init()`](#init) methods support passing in a Client type.
 

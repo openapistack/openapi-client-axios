@@ -164,7 +164,7 @@ Examples:
   typegen ./openapi.yml > client.d.ts  - generate a type definition file
 ```
 
-The output of `typegen` exports a type called `Client`, which can be used for instances of `OpenAPIClient`;
+The output of `typegen` exports a type called `Client`, which can be used for instances created with `OpenAPIClientAxios`.
 
 Both the `api.getClient()` and `api.init()` methods support passing in a Client type.
 
