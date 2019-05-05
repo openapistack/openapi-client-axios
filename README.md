@@ -168,19 +168,19 @@ The output of `typegen` exports a type called `Client`, which can be used for in
 
 Both the `api.getClient()` and `api.init()` methods support passing in a Client type.
 
-````typescript
+```typescript
 import { Client as PetStoreClient } from './client.d.ts';
 
 const client = await api.init<PetStoreClient>();
 const client = await api.getClient<PetStoreClient>();
-````
+```
 
 `typegen` supports using both local and remote URLs for OpenAPI definition files.
 
-````
+```
 $ typegen ./petstore.yaml
 $ typegen https://raw.githubusercontent.com/OAI/OpenAPI-Specification/master/examples/v3.0/petstore.yaml
-````
+```
 
 ## Contributing
 
