@@ -86,7 +86,7 @@ export class OpenAPIClientAxios {
    */
   public getClient = async <Client = OpenAPIClient<UnknownOperationMethods>>() => {
     if (!this.initalized) {
-      return this.init();
+      return this.init<Client>();
     }
     return this.instance as Client;
   };
