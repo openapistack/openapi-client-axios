@@ -11,15 +11,14 @@ JavaScript client library for consuming OpenAPI-enabled APIs with [axios](https:
 
 - [x] Create API clients by describing them in [OpenAPI specification](https://github.com/OAI/OpenAPI-Specification)
 and importing them via YAML or JSON files or by just passing an object
-- [x] Call API operations with your preferred syntax:
-  - `client.updatePet(1, pet)` - operation methods
-  - `client.query('updatePet', 1, pet)` - query method
-  - `client.put('/pets/1', pet)` - axios method aliases
-  - `client({ method: 'put', url: '/pets/1', data: pet })` - axios basic
+- [x] Easy to use API to call API operations using JavaScript methods
+  - `client.getPet(1)`
+  - `client.searchPets()`
+  - `client.searchPets({ ids: [1, 2, 3] })`
+  - `client.updatePet(1, payload)`
 - [x] Built on top of the robust [axios](https://github.com/axios/axios) JavaScript library
 - [x] Isomorphic, works both in browser and Node.js
-- [x] Option to mock API backends using [openapi-backend](https://github.com/anttiviljami/openapi-backend)
-- [x] TypeScript types included
+- [x] Generate TypeScript definitions (.d.ts) for your APIs with full IntelliSense support
 
 ## Quick Start
 
@@ -47,117 +46,66 @@ const api = new OpenAPIClientAxios({ definition: 'https://example.com/api/openap
 api.init();
 
 async function createPet() {
-  const res = await api.client.createPet({ name: 'Garfield' });
+  const res = await api.client.createPet(null, { name: 'Garfield' });
   console.log('Pet created', res.data);
 }
 ```
 
-## Calling API operations
+# Operation methods
 
-After initalizing `OpenAPIClientAxios`, an axios instance extended with OpenAPI capabilities is exposed.
-
-Example:
-```javascript
-const api = new OpenAPIClientAxios({ definition: 'https://example.com/api/openapi.json' });
-api.init().then((client) => {
-  // ...
-});
-```
-
-The exposed `client` is an [axios instance](https://github.com/axios/axios#creating-an-instance) initalized with
-baseURL from OpenAPI definitions and extended with extra methods for calling API operations.
-
-There are four different ways to call API operations:
-
-1. `client.updatePet(1, pet)` - operation methods
-2. `client.query('updatePet', 1, pet)` - query method
-3. `client.put('/pets/1', pet)` - axios method aliases
-4. `client({ method: 'put', url: '/pets/1', data: pet })` - axios basic
-
-Example:
-```javascript
-const api = new OpenAPIClientAxios({
-  definition: {
-    openapi: '3.0.1',
-    info: {
-      title: 'Petstore',
-      version: '1.0.0',
-    },
-    servers: [{ url: 'http://localhost:9000' }], // petstore api
-    paths: {
-      '/pets': {
-        get: {
-          operationId: 'getPets',
-          responses: {
-            200: { description: 'ok' },
-          },
-        },
-      },
-    },
-  },
-});
-
-async function test() {
-  const client = await api.init();
-
-  const res1 = await client.getPets();
-  const res2 = await client.query('getPets');
-  const res3 = await client.get('/pets');
-  const res4 = await client({ method: 'get', url: '/pets' });
-
-  assert.deepEqual(res1.data, res2.data);
-  assert.deepEqual(res1.data, res3.data);
-  assert.deepEqual(res1.data, res4.data);
-}
-test();
-```
-
-## Operation methods
-
-OpenAPIClientAxios operation methods take in 3 types of arguments:
+OpenAPIClientAxios operation methods take 3 arguments:
 
 ```javascript
-client.operationId(pathParams?, data?, config?)
+client.operationId(parameters?, data?, config?)
 ```
 
-### Path params
+### Parameters
 
-The first argument is the path parameters for the operation.
+The first argument is used to pass parameters available for the operation.
+
+```javascript
+// GET /pets/{petId}/owner?id={ownerId} - getPetOwner
+client.getPetOwner({ petId: '1', ownerId: '2' })
+```
+
+For syntactic sugar purposes, you can also specify a single implicit parameter value, in which case OpenAPIClientAxios
+will look for the first required parameter for the operation. Usually this is will be a path parameter.
 
 ```javascript
 // GET /pets/{petId} - getPet
-client.getPet(petId)
+client.getPet(1)
 ```
 
-If the operation requires more than a single path parameter, use an object or an array.
-
-Note that when using an array, the parameters should be in the same order as they appear in the path template of the
-operation.
+Alternatively, you can explicitly specify parameters in array form. This method allows you to set custom parameters not defined 
+in the OpenAPI spec.
 
 ```javascript
-// GET /pets/{petId}/owner/{ownerId} - getPetOwner
-client.getPetOwner({ petId, ownerId })
-// or
-client.getPetOwner([petId, ownerId])
+// GET /pets?search=Garfield - searchPets
+client.searchPets([{ name: 'search', value: 'Garfield', in: 'query' }])
 ```
 
-If no path parameters are required for the operation, the first argument is the data / payload argument (next section).
+The type of the parameters can be any of:
+- query
+- header
+- path
+- cookie
 
-### Data / Payload
+### Payload
 
-The next argument the path parameters is the data argument. This allows you to send request body payloads with your
-API call.
+The second argument is used to pass the requestPayload
 
 ```javascript
 // PUT /pets/1 - updatePet
 client.updatePet(1, { name: 'Odie' })
 ```
 
-If there are no path parameters for the operation, the data argument will be the first argument.
+More complex payloads, such as Node.js streams or FormData supported by Axios are also supported.
+
+The first argument can be set to null if there are no parameters required for the operation.
 
 ```javascript
 // POST /pets - createPet
-client.createPet({ name: 'Garfield' })
+client.updatePet(null, { name: 'Garfield' })
 ```
 
 ### Config object
@@ -165,21 +113,45 @@ client.createPet({ name: 'Garfield' })
 The last argument is the config object.
 
 The config object is an [`AxiosRequestConfig`](https://github.com/axios/axios#request-config) object. You can use it to
-override axios request config parameters, such as `headers`, `params`, `timeout`, `withCredentials` and many more.
+override axios request config parameters, such as `headers`, `timeout`, `withCredentials` and many more.
 
 ```javascript
-// PUT /pets/1?fields=name - updatePet
-client.updatePet(1, { name: 'Odie' }, { params: { fields: 'name' } });
+// POST /user - createUser
+client.createUser(null, { user: 'admin', pass: '123' }, { headers: { 'x-api-key': 'secret' } });
 ```
 
-If there are no path or data parameters for the operation, the config argument will be the first argument.
+## Generating types for clients
 
-```javascript
-// GET /pets?query=dog - searchPets
-client.searchPets({ params: { query: 'dog' } });
+`openapi-client-axios` comes with a tool called `typegen` to generate typescript type files (.d.ts) for 
+OpenAPIClient instances using an OpenAPI definition.
+
+```
+Usage: typegen [file]
+
+Options:
+  --help     Show help                                                 [boolean]
+  --version  Show version number                                       [boolean]
+
+Examples:
+  typegen ./openapi.yml > client.d.ts  - generate a type definition file
 ```
 
-Any arguments passed after the config object will cause OpenAPI backend to throw an Error.
+The output of `typegen` exports a type called `Client`, which can be used for instances of `OpenAPIClient`;
+
+```typescript
+import { Client } from './client.d.ts';
+
+const client = await api.init<Client>();
+```
+
+Both the `api.getClient()` and `api.init()` methods support passing in a Client type.
+
+````typescript
+import { Client as PetStoreClient } from './client.d.ts';
+
+const client = await api.init<PetStoreClient>();
+const client = await api.getClient<PetStoreClient>();
+````
 
 ## Contributing
 
