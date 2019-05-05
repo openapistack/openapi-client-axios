@@ -1,7 +1,6 @@
 import path from 'path';
 import { OpenAPIClientAxios } from './client';
 
-import OpenAPIBackend, { Context } from 'openapi-backend';
 import { OpenAPIV3 } from 'openapi-types';
 import MockAdapter from 'axios-mock-adapter';
 
@@ -511,92 +510,6 @@ describe('OpenAPIClientAxios', () => {
       const res = await client.getPetsRelative();
       expect(res.data).toEqual(baseURLV2);
       expect(mockHandler).toBeCalled();
-    });
-  });
-
-  describe('mock api using openapi-backend', async () => {
-    const mockApi = new OpenAPIBackend({ definition });
-    mockApi.register({
-      notFound: () => [404, { err: 'not found' }],
-      validationFail: (c: Context) => [400, { err: c.validation.errors }],
-      notImplemented: (c) => {
-        const { status, mock } = mockApi.mockResponseForOperation(c.operation.operationId);
-        return [status, mock];
-      },
-    });
-
-    const api = new OpenAPIClientAxios({ definition });
-    beforeAll(async () => {
-      await api.init();
-      api.mock((config) =>
-        mockApi.handleRequest({
-          method: config.method,
-          path: config.url.replace(config.baseURL, ''),
-          body: config.data,
-          headers: config.headers,
-          query: config.params,
-        }),
-      );
-    });
-
-    test('mocks getPets() using openapi-backend', async () => {
-      const res = await api.client.getPets();
-      expect(res.status).toBe(200);
-      expect(res.data).toEqual([examplePet]);
-    });
-
-    test('mocks createPet(pet) using openapi-backend', async () => {
-      const res = await api.client.createPet(examplePet);
-      expect(res.status).toBe(201);
-      expect(res.data).toEqual(examplePet);
-    });
-
-    test('mocks getPetById(1) using openapi-backend', async () => {
-      const res = await api.client.getPetById(1);
-      expect(res.status).toBe(200);
-      expect(res.data).toEqual(examplePet);
-    });
-
-    test("mocks query('getPetById', 1) using openapi-backend", async () => {
-      const res = await api.client.query('getPetById', 1);
-      expect(res.status).toBe(200);
-      expect(res.data).toEqual(examplePet);
-    });
-
-    test("mocks get('/pets/1') using openapi-backend", async () => {
-      const res = await api.client.get('/pets/1');
-      expect(res.status).toBe(200);
-      expect(res.data).toEqual(examplePet);
-    });
-
-    test("mocks ({ method: 'get', url: '/pets/1' }) using openapi-backend", async () => {
-      const res = await api.client({ method: 'get', url: '/pets/1' });
-      expect(res.status).toBe(200);
-      expect(res.data).toEqual(examplePet);
-    });
-
-    test("mocks getPets({ params: { q: 'search' } }) using openapi-backend", async () => {
-      const res = await api.client.getPets({ params: { q: 'search' } });
-      expect(res.status).toBe(200);
-      expect(res.data).toEqual([examplePet]);
-    });
-
-    test("mocks getPets({ params: { q: ['search1', 'search2'] } }) using openapi-backend", async () => {
-      const res = await api.client.getPets({ params: { q: ['search1', 'search2'] } });
-      expect(res.status).toBe(200);
-      expect(res.data).toEqual([examplePet]);
-    });
-
-    test("mocks getPets({ params: { unknown: '' } }) with 400 error using openapi-backend", async () => {
-      expect(api.client.getPets({ params: { unknown: '' } })).rejects.toThrowError('400');
-    });
-
-    test("mocks getPetById('1a') with 400 validation error using openapi-backend", async () => {
-      expect(api.client.getPetById('1a')).rejects.toThrowError('400');
-    });
-
-    test("mocks get('/unknown') with 404 not found error using openapi-backend", async () => {
-      expect(api.client.get('/unknown')).rejects.toThrowError('404');
     });
   });
 });
