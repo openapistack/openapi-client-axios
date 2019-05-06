@@ -13,12 +13,14 @@
     - [Parameter: opts.validate](#parameter-optsvalidate)
     - [Parameter: opts.axiosConfigDefaults](#parameter-optsaxiosconfigdefaults)
   - [.init()](#init)
+  - [.initSync()](#initsync)
   - [.getClient()](#getclient)
   - [.getBaseURL(operation?)](#getbaseurloperation)
     - [Parameter: operation](#parameter-operation)
   - [.getRequestConfigForOperation(operation, args)](#getrequestconfigforoperationoperation-args)
     - [Parameter: operation](#parameter-operation)
     - [Parameter: args](#parameter-args)
+  - [.getAxiosInstance()](#getaxiosinstance)
   - [.getAxiosConfigForOperation(operation, args)](#getaxiosconfigforoperationoperation-args)
     - [Parameter: operation](#parameter-operation)
     - [Parameter: args](#parameter-args)
@@ -161,9 +163,20 @@ Example:
 await api.init();
 ```
 
+### .initSync()
+
+Synchronous version of [`.init()`](#init)
+
+Note: Only works when the input definition is a valid OpenAPI v3 object and doesn't contain any remote $refs.
+
+Example:
+```javascript
+api.initSync();
+```
+
 ### .getClient()
 
-Returns a promise of the axios instance.
+Returns a promise of the member axios instance. Will run .init() if API is not initalised yet.
 
 Example:
 ```javascript
@@ -209,6 +222,14 @@ Type: `Operation` or `string` (operationId)
 The operation method arguments.
 
 Type: `OperationMethodArguments`
+
+### .getAxiosInstance()
+
+Creates a new axios instance, extends it and returns it.
+
+While initalising with [`.init()`](#init) or [.initSync() OpenAPIClientAxios calls this function to create the member client.
+
+Note: Requires the API to be initalised first if run outside of .init() methods.
 
 ### .getAxiosConfigForOperation(operation, args)
 
