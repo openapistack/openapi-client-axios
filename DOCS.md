@@ -152,11 +152,15 @@ Type: [`AxiosRequestConfig`](https://github.com/axios/axios#request-config)
 
 ### .init()
 
-Initalizes OpenAPIClientAxios and creates the axios client instance.
+Initalizes OpenAPIClientAxios
 
-The init() method should be called right after creating a new instance of OpenAPIClientAxios.
+Returns a promise of the created member axios instance.
 
-Returns a promise of the axios instance.
+1. Parses the input definition into a JS object. If the input definition is a URL, it will be resolved
+2. (optional) Validates the definition object
+3. Dereferences the definition for use. Will resolve any remote $refs
+4. Creates the member axios instance
+5. Sets `api.initialised = true` and returns the created axios instance
 
 Example:
 ```javascript
@@ -166,6 +170,8 @@ await api.init();
 ### .initSync()
 
 Synchronous version of [`.init()`](#init)
+
+Initalizes OpenAPIClientAxios and creates the axios client instance.
 
 Note: Only works when the input definition is a valid OpenAPI v3 object and doesn't contain any remote $refs.
 
@@ -227,7 +233,7 @@ Type: `OperationMethodArguments`
 
 Creates a new axios instance, extends it and returns it.
 
-While initalising with [`.init()`](#init) or [.initSync() OpenAPIClientAxios calls this function to create the member client.
+While initalising with [`.init()`](#init) or [.initSync()](#initsync) OpenAPIClientAxios calls this function to create the member client.
 
 Note: Requires the API to be initalised first if run outside of .init() methods.
 
