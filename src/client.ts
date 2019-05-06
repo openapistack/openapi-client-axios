@@ -20,7 +20,7 @@ import {
 /**
  * OpenAPIClient is an AxiosInstance extended with operation methods
  */
-export type OpenAPIClient<OperationMethods> = AxiosInstance &
+export type OpenAPIClient<OperationMethods = UnknownOperationMethods> = AxiosInstance &
   OperationMethods & {
     api: OpenAPIClientAxios;
   };
@@ -78,11 +78,11 @@ export class OpenAPIClientAxios {
    * Returns the instance of OpenAPIClient
    *
    * @readonly
-   * @type {OpenAPIClient<UnknownOperationMethods>}
+   * @type {OpenAPIClient}
    * @memberof OpenAPIClientAxios
    */
-  get client(): OpenAPIClient<UnknownOperationMethods> {
-    return this.instance;
+  get client() {
+    return this.instance as OpenAPIClient;
   }
 
   /**
@@ -91,7 +91,7 @@ export class OpenAPIClientAxios {
    * @returns
    * @memberof OpenAPIClientAxios
    */
-  public getClient = async <Client = OpenAPIClient<UnknownOperationMethods>>() => {
+  public getClient = async <Client = OpenAPIClient>() => {
     if (!this.initalized) {
       return this.init<Client>();
     }
@@ -229,7 +229,10 @@ export class OpenAPIClientAxios {
   };
 
   /**
-   * Creates a generic request config object for operation + arguments
+   * Creates a generic request config object for operation + arguments.
+   *
+   * This function contains the logic that handles operation method parameters.
+   *
    * @memberof OpenAPIClientAxios
    */
   public getRequestConfigForOperation = (operation: Operation | string, args: OperationMethodArguments) => {
