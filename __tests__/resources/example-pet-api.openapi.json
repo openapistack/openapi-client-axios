@@ -12,7 +12,7 @@
     }
   ],
   "servers": [
-    { 
+    {
       "url": "http://localhost:8080"
     }
   ],
@@ -63,6 +63,7 @@
             "description": "Pet created succesfully"
           }
         },
+        "parameters": [],
         "requestBody": {
           "$ref": "#/components/requestBodies/PetPayload"
         }
@@ -184,11 +185,11 @@
         ]
       }
     },
-    "/pets/{id}/human": {
+    "/pets/{id}/owner": {
       "get": {
-        "operationId": "getHumanByPetId",
-        "summary": "Get a pet's human",
-        "description": "Get the human for a pet",
+        "operationId": "getOwnerByPetId",
+        "summary": "Get a pet's owner",
+        "description": "Get the owner for a pet",
         "tags": [
           "pets"
         ],
@@ -213,9 +214,67 @@
         ]
       }
     },
+    "/pets/{petId}/owner/{ownerId}": {
+      "get": {
+        "operationId": "getPetOwner",
+        "summary": "Get owner by id",
+        "description": "Get the owner for a pet",
+        "tags": [
+          "pets"
+        ],
+        "parameters": [
+          {
+            "name": "petId",
+            "in": "path",
+            "description": "Unique identifier for pet in database",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/PetId"
+            }
+          },
+          {
+            "name": "ownerId",
+            "in": "path",
+            "description": "Unique identifier for owner in database",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/PetId"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Human corresponding owner id"
+          },
+          "404": {
+            "description": "Human or pet not found"
+          }
+        }
+      }
+    },
     "/pets/meta": {
       "get": {
         "operationId": "getPetsMeta",
+        "summary": "Get pet metadata",
+        "description": "Returns a list of metadata about pets and their relations in the database",
+        "tags": [
+          "pets"
+        ],
+        "responses": {
+          "200": {
+            "description": "Metadata for pets"
+          }
+        }
+      }
+    },
+    "/pets/relative": {
+      "servers": [
+        {
+          "url": "baseURLV2"
+        }
+      ],
+      "get": {
+        "operationId": "getPetsRelative",
         "summary": "Get pet metadata",
         "description": "Returns a list of metadata about pets and their relations in the database",
         "tags": [

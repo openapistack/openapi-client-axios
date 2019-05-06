@@ -43,6 +43,7 @@
   "dependencies": {
     "axios": "^0.18.0",
     "bath-es5": "^2.1.3",
+    "json-schema-deref-sync": "^0.10.0",
     "lodash": "^4.17.11",
     "openapi-types": "^1.3.4",
     "query-string": "^6.5.0",

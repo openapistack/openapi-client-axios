@@ -33,8 +33,10 @@ describe('typegen', () => {
     expect(operationTypings).toMatch('replacePetById');
     expect(operationTypings).toMatch('updatePetById');
     expect(operationTypings).toMatch('deletePetById');
-    expect(operationTypings).toMatch('getHumanByPetId');
+    expect(operationTypings).toMatch('getOwnerByPetId');
+    expect(operationTypings).toMatch('getPetOwner');
     expect(operationTypings).toMatch('getPetsMeta');
+    expect(operationTypings).toMatch('getPetsRelative');
   });
 
   test('exports a Client', async () => {

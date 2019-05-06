@@ -4,6 +4,7 @@ import bath from 'bath-es5';
 import { validate as validateOpenAPI } from 'openapi-schema-validation';
 import SwaggerParser from 'swagger-parser';
 import QueryString from 'query-string';
+import dereference from 'json-schema-deref-sync';
 import {
   OpenAPIV3,
   Document,
@@ -42,7 +43,6 @@ export class OpenAPIClientAxios {
   public initalized: boolean;
   public instance: any;
 
-  public operations: UnknownOperationMethods;
   public axiosConfigDefaults: AxiosRequestConfig;
 
   /**
@@ -71,7 +71,6 @@ export class OpenAPIClientAxios {
     this.strict = optsWithDefaults.strict;
     this.validate = optsWithDefaults.validate;
     this.axiosConfigDefaults = optsWithDefaults.axiosConfigDefaults;
-    this.operations = {};
   }
 
   /**
@@ -99,25 +98,22 @@ export class OpenAPIClientAxios {
   };
 
   /**
-   * Initalizes OpenAPIClientAxios and creates the axios client instance
+   * Initalizes OpenAPIClientAxios and creates a member axios client instance
    *
    * The init() method should be called right after creating a new instance of OpenAPIClientAxios
    *
    * @returns AxiosInstance
    * @memberof OpenAPIClientAxios
    */
-  public init = async <Client = OpenAPIClient<UnknownOperationMethods>>() => {
-    try {
-      // parse the document
-      this.document = await SwaggerParser.parse(this.inputDocument);
+  public init = async <Client = OpenAPIClient>() => {
+    // parse the document
+    this.document = await SwaggerParser.parse(this.inputDocument);
 
+    try {
       if (this.validate) {
         // validate the document
         this.validateDefinition();
       }
-
-      // dereference the document into definition
-      this.definition = await SwaggerParser.dereference(_.cloneDeep(this.document));
     } catch (err) {
       if (this.strict) {
         // in strict-mode, fail hard and re-throw the error
@@ -128,8 +124,66 @@ export class OpenAPIClientAxios {
       }
     }
 
-    // return the created axios instance
-    const instance = axios.create(this.axiosConfigDefaults);
+    // dereference the document into definition
+    this.definition = await SwaggerParser.dereference(_.cloneDeep(this.document));
+
+    // create axios instance
+    this.instance = this.createAxiosInstance();
+
+    // we are now initalized
+    this.initalized = true;
+    return this.client;
+  };
+
+  /**
+   * Synchronous version of .init()
+   *
+   * Note: Only works when the input definition is a valid OpenAPI v3 object and doesn't contain remote $refs.
+   *
+   * @memberof OpenAPIClientAxios
+   */
+  public initSync = <Client = OpenAPIClient>() => {
+    if (typeof this.inputDocument !== 'object') {
+      throw new Error(`.initSync() can't be called with a non-object definition. Please use .init()`);
+    }
+
+    // set document
+    this.document = this.inputDocument;
+
+    try {
+      if (this.validate) {
+        // validate the document
+        this.validateDefinition();
+      }
+    } catch (err) {
+      if (this.strict) {
+        // in strict-mode, fail hard and re-throw the error
+        throw err;
+      } else {
+        // just emit a warning about the validation errors
+        console.warn(err);
+      }
+    }
+
+    // dereference the document into definition
+    this.definition = dereference(this.inputDocument);
+
+    // create axios instance
+    this.instance = this.createAxiosInstance();
+
+    // we are now initalized
+    this.initalized = true;
+    return this.instance as Client;
+  };
+
+  /**
+   * Creates a new axios instance, extends it and returns it
+   *
+   * @memberof OpenAPIClientAxios
+   */
+  public createAxiosInstance = <Client = OpenAPIClient>() => {
+    // create axios instance
+    const instance = axios.create(this.axiosConfigDefaults) as OpenAPIClient;
 
     // set baseURL to the one found in the definition servers (if not set in axios defaults)
     const baseURL = this.getBaseURL();
@@ -137,26 +191,18 @@ export class OpenAPIClientAxios {
       instance.defaults.baseURL = baseURL;
     }
 
-    // from here on, we want to handle the client as an extended axios client instance
-    this.instance = instance;
-
     // create methods for operationIds
     const operations = this.getOperations();
     for (const operation of operations) {
       const { operationId } = operation;
       if (operationId) {
-        this.operations[operationId] = this.createOperationMethod(operation);
-        // also add the method to the axios client for syntactic sugar
-        this.instance[operationId] = this.operations[operationId];
+        instance[operationId] = this.createOperationMethod(operation);
       }
     }
 
     // add reference to parent class instance
-    this.instance.api = this;
-
-    // we are now initalized
-    this.initalized = true;
-    return this.instance as Client;
+    instance.api = this;
+    return (instance as any) as Client;
   };
 
   /**

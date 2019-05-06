@@ -1,5 +1,5 @@
 import path from 'path';
-import { OpenAPIClientAxios } from './client';
+import { OpenAPIClientAxios, OpenAPIClient } from './client';
 
 import { OpenAPIV3 } from 'openapi-types';
 import MockAdapter from 'axios-mock-adapter';
@@ -180,24 +180,42 @@ const definition: OpenAPIV3.Document = {
 };
 
 describe('OpenAPIClientAxios', () => {
+  const checkHasOperationMethods = (client: OpenAPIClient) => {
+    expect(client).toHaveProperty('getPets');
+    expect(client).toHaveProperty('createPet');
+    expect(client).toHaveProperty('getPetById');
+    expect(client).toHaveProperty('replacePetById');
+    expect(client).toHaveProperty('updatePetById');
+    expect(client).toHaveProperty('deletePetById');
+    expect(client).toHaveProperty('getOwnerByPetId');
+    expect(client).toHaveProperty('getPetOwner');
+    expect(client).toHaveProperty('getPetsMeta');
+    expect(client).toHaveProperty('getPetsRelative');
+  };
+
   describe('init', () => {
     test('can be initalised with a valid OpenAPI document as JS Object', async () => {
-      // @TODO: read a complex document with as many features as possible here
       const api = new OpenAPIClientAxios({ definition, strict: true });
       await api.init();
       expect(api.initalized).toEqual(true);
+      expect(api.client.api).toBe(api);
+      checkHasOperationMethods(api.client);
     });
 
     test('can be initalised using a valid YAML file', async () => {
       const api = new OpenAPIClientAxios({ definition: examplePetAPIYAML, strict: true });
       await api.init();
       expect(api.initalized).toEqual(true);
+      expect(api.client.api).toBe(api);
+      checkHasOperationMethods(api.client);
     });
 
     test('can be initalised using a valid JSON file', async () => {
       const api = new OpenAPIClientAxios({ definition: examplePetAPIJSON, strict: true });
       await api.init();
       expect(api.initalized).toEqual(true);
+      expect(api.client.api).toBe(api);
+      checkHasOperationMethods(api.client);
     });
 
     test('throws an error when initalised with an invalid document in strict mode', async () => {
@@ -207,7 +225,7 @@ describe('OpenAPIClientAxios', () => {
     });
 
     test('emits a warning when initalised with an invalid OpenAPI document not in strict mode', async () => {
-      const invalid: any = { invalid: 'not openapi' };
+      const invalid: any = { ...definition, invalid: 'not openapi' };
       const warn = console.warn;
       console.warn = jest.fn();
       const api = new OpenAPIClientAxios({ definition: invalid, strict: false });
@@ -217,22 +235,38 @@ describe('OpenAPIClientAxios', () => {
     });
   });
 
-  describe('client', () => {
-    test('has created operation methods for each operationId', async () => {
+  describe('initSync', () => {
+    test('can be initalised synchronously with a valid OpenAPI document as JS Object', () => {
       const api = new OpenAPIClientAxios({ definition, strict: true });
-      const client = await api.init();
-      expect(client).toHaveProperty('getPets');
-      expect(client).toHaveProperty('createPet');
-      expect(client).toHaveProperty('getPetById');
-      expect(client).toHaveProperty('replacePetById');
-      expect(client).toHaveProperty('updatePetById');
-      expect(client).toHaveProperty('deletePetById');
-      expect(client).toHaveProperty('getOwnerByPetId');
-      expect(client).toHaveProperty('getPetOwner');
-      expect(client).toHaveProperty('getPetsMeta');
-      expect(client).toHaveProperty('getPetsRelative');
+      api.initSync();
+      expect(api.initalized).toEqual(true);
+      expect(api.client.api).toBe(api);
+      checkHasOperationMethods(api.client);
     });
 
+    test('throws an error when initalised using a file URL', () => {
+      const api = new OpenAPIClientAxios({ definition: examplePetAPIYAML, strict: true });
+      expect(api.initSync).toThrowError();
+    });
+
+    test('throws an error when initalised with an invalid document in strict mode', () => {
+      const invalid: any = { invalid: 'not openapi' };
+      const api = new OpenAPIClientAxios({ definition: invalid, strict: true });
+      expect(api.initSync).toThrowError();
+    });
+
+    test('emits a warning when initalised with an invalid OpenAPI document not in strict mode', () => {
+      const invalid: any = { ...definition, invalid: 'not openapi' };
+      const warn = console.warn;
+      console.warn = jest.fn();
+      const api = new OpenAPIClientAxios({ definition: invalid, strict: false });
+      api.initSync();
+      expect(console.warn).toBeCalledTimes(1);
+      console.warn = warn; // reset console.warn
+    });
+  });
+
+  describe('client', () => {
     test('has set default baseURL to the first server in config', async () => {
       const api = new OpenAPIClientAxios({ definition, strict: true });
       const client = await api.init();
