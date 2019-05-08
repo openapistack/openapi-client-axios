@@ -90,7 +90,7 @@ export class OpenAPIClientAxios {
    * @returns
    * @memberof OpenAPIClientAxios
    */
-  public getClient = async <Client = OpenAPIClient>() => {
+  public getClient = async <Client = OpenAPIClient>(): Promise<Client> => {
     if (!this.initalized) {
       return this.init<Client>();
     }
@@ -105,7 +105,7 @@ export class OpenAPIClientAxios {
    * @returns AxiosInstance
    * @memberof OpenAPIClientAxios
    */
-  public init = async <Client = OpenAPIClient>() => {
+  public init = async <Client = OpenAPIClient>(): Promise<Client> => {
     // parse the document
     this.document = await SwaggerParser.parse(this.inputDocument);
 
@@ -132,7 +132,7 @@ export class OpenAPIClientAxios {
 
     // we are now initalized
     this.initalized = true;
-    return this.client;
+    return this.instance as Client;
   };
 
   /**
@@ -142,7 +142,7 @@ export class OpenAPIClientAxios {
    *
    * @memberof OpenAPIClientAxios
    */
-  public initSync = <Client = OpenAPIClient>() => {
+  public initSync = <Client = OpenAPIClient>(): Client => {
     if (typeof this.inputDocument !== 'object') {
       throw new Error(`.initSync() can't be called with a non-object definition. Please use .init()`);
     }
@@ -181,7 +181,7 @@ export class OpenAPIClientAxios {
    *
    * @memberof OpenAPIClientAxios
    */
-  public createAxiosInstance = <Client = OpenAPIClient>() => {
+  public createAxiosInstance = <Client = OpenAPIClient>(): Client => {
     // create axios instance
     const instance = axios.create(this.axiosConfigDefaults) as OpenAPIClient;
 
