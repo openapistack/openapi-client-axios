@@ -1,13 +1,12 @@
 import _ from 'lodash';
 import yargs from 'yargs';
 import indent from 'indent-string';
-import Consumer from '../';
+import OpenAPIClientAxios, { Document } from '../';
 import DtsGenerator from '@anttiviljami/dtsgenerator/dist/core/dtsGenerator';
 import { parseSchema } from '@anttiviljami/dtsgenerator/dist/core/jsonSchema';
 import ReferenceResolver from '@anttiviljami/dtsgenerator/dist/core/referenceResolver';
 import SchemaConvertor, { ExportedType } from '@anttiviljami/dtsgenerator/dist/core/schemaConvertor';
 import WriteProcessor from '@anttiviljami/dtsgenerator/dist/core/writeProcessor';
-import { Document } from '../types/client';
 
 export async function main() {
   const argv = yargs
@@ -21,7 +20,7 @@ export async function main() {
 }
 
 export async function generateTypesForDocument(definition: Document | string) {
-  const api = new Consumer({ definition });
+  const api = new OpenAPIClientAxios({ definition });
   await api.init();
 
   const processor = new WriteProcessor({ indentSize: 2, indentChar: ' ' });
@@ -47,7 +46,7 @@ export async function generateTypesForDocument(definition: Document | string) {
   return [imports, schemaTypes, operationTypings];
 }
 
-export function generateOperationMethodTypings(api: Consumer, exportTypes: ExportedType[]) {
+export function generateOperationMethodTypings(api: OpenAPIClientAxios, exportTypes: ExportedType[]) {
   const operations = api.getOperations();
 
   const operationTypings = operations.map(({ operationId, summary, description }) => {

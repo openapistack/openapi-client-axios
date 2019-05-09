@@ -1,12 +1,19 @@
 {
   "name": "openapi-client-axios-typegen",
   "description": "Typescript type generator for openapi-client-axios",
-  "version": "1.0.2",
+  "version": "1.0.4",
   "author": "Viljami Kuosmanen <viljami@avoinsorsa.fi>",
   "license": "MIT",
   "bin": {
     "typegen": "./typegen"
   },
+  "files": [
+    "typegen",
+    "*.js",
+    "*.d.ts",
+    "**/*.js",
+    "**/*.d.ts"
+  ],
   "keywords": [
     "openapi",
     "swagger",
@@ -35,6 +42,6 @@
   },
   "devDependencies": {},
   "scripts": {
-    "prepack": "sed -i -e 's/require(\\\"..\\/\\\")/require(\\\"openapi-client-axios\\\")/g' ./typegen.js"
+    "prepack": "./prepack.sh"
   }
 }
