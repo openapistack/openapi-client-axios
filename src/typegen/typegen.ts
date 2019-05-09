@@ -1,13 +1,13 @@
 import _ from 'lodash';
 import yargs from 'yargs';
-import Consumer from '.';
 import indent from 'indent-string';
+import Consumer from '../';
 import DtsGenerator from '@anttiviljami/dtsgenerator/dist/core/dtsGenerator';
 import { parseSchema } from '@anttiviljami/dtsgenerator/dist/core/jsonSchema';
 import ReferenceResolver from '@anttiviljami/dtsgenerator/dist/core/referenceResolver';
 import SchemaConvertor, { ExportedType } from '@anttiviljami/dtsgenerator/dist/core/schemaConvertor';
 import WriteProcessor from '@anttiviljami/dtsgenerator/dist/core/writeProcessor';
-import { Document } from './types/client';
+import { Document } from '../types/client';
 
 export async function main() {
   const argv = yargs

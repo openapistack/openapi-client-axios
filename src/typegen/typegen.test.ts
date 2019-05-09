@@ -2,7 +2,7 @@ import path from 'path';
 import ts from 'typescript';
 import { generateTypesForDocument } from './typegen';
 
-const rootDir = path.join(__dirname, '..');
+const rootDir = path.join(__dirname, '..', '..');
 const testsDir = path.join(rootDir, '__tests__');
 
 const examplePetAPIYAML = path.join(testsDir, 'resources', 'example-pet-api.openapi.yml');

@@ -392,7 +392,7 @@ const requestConfig = {
 OpenAPIClient instances using an OpenAPI definition file.
 
 ```
-$ npm install -g openapi-client-axios
+$ npm install -g openapi-client-axios-typegen
 ```
 
 ```
