@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
+import axios, { AxiosInstance, AxiosRequestConfig, Method } from 'axios';
 import bath from 'bath-es5';
 import { validate as validateOpenAPI } from 'openapi-schema-validation';
 import SwaggerParser from 'swagger-parser';
@@ -256,7 +256,7 @@ export class OpenAPIClientAxios {
 
     // construct axios request config
     const axiosConfig: AxiosRequestConfig = {
-      method: request.method,
+      method: request.method as Method,
       url: request.path,
       data: request.payload,
       params: request.query,
