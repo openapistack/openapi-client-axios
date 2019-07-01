@@ -7,6 +7,7 @@ import { parseSchema } from '@anttiviljami/dtsgenerator/dist/core/jsonSchema';
 import ReferenceResolver from '@anttiviljami/dtsgenerator/dist/core/referenceResolver';
 import SchemaConvertor, { ExportedType } from '@anttiviljami/dtsgenerator/dist/core/schemaConvertor';
 import WriteProcessor from '@anttiviljami/dtsgenerator/dist/core/writeProcessor';
+import SwaggerParser from 'swagger-parser';
 
 export async function main() {
   const argv = yargs
@@ -26,7 +27,9 @@ export async function generateTypesForDocument(definition: Document | string) {
   const processor = new WriteProcessor({ indentSize: 2, indentChar: ' ' });
   const resolver = new ReferenceResolver();
   const convertor = new SchemaConvertor(processor);
-  resolver.registerSchema(parseSchema(api.document));
+
+  const rootSchema = await SwaggerParser.bundle(definition);
+  resolver.registerSchema(parseSchema(rootSchema));
 
   const generator = new DtsGenerator(resolver, convertor);
   const schemaTypes = await generator.generate();
