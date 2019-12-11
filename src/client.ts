@@ -364,7 +364,7 @@ export class OpenAPIClientAxios {
     const path = pathBuilder.path(pathParams);
 
     // query parameters
-    const queryString = QueryString.stringify(query);
+    const queryString = QueryString.stringify(query, { arrayFormat: 'none' });
 
     // full url with query string
     const url = `${this.getBaseURL(operation)}${path}${queryString ? `?${queryString}` : ''}`;
