@@ -80,14 +80,3 @@ export interface Operation extends OpenAPIV3.OperationObject {
   path: string;
   method: HttpMethod;
 }
-
-/**
- * Parameter serialization methods supported by query-string
- */
-export type ParameterSerialization = 'none' | 'comma' | 'index' | 'bracket';
-export interface ParameterSerializationOpts {
-  // path?: ParameterSerialization;
-  query?: ParameterSerialization;
-  // header?: ParameterSerialization;
-  // cookie?: ParameterSerialization;
-}

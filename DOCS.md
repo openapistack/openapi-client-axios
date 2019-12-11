@@ -11,7 +11,6 @@
     - [Parameter: opts.definition](#parameter-optsdefinition)
     - [Parameter: opts.strict](#parameter-optsstrict)
     - [Parameter: opts.validate](#parameter-optsvalidate)
-    - [Parameter: opts.parameterSerialization](#parameter-optsparameterserialization)
     - [Parameter: opts.axiosConfigDefaults](#parameter-optsaxiosconfigdefaults)
   - [.init()](#init)
   - [.initSync()](#initsync)
@@ -120,9 +119,6 @@ const api = new OpenAPIClientAxios({
       'Cache-Control': 'no-cache',
     },
   },
-  parameterSerialization: {
-    query: 'none',
-  },
 });
 ```
 
@@ -147,12 +143,6 @@ Type: `boolean`
 Optional. Whether to validate the input document (default: true)
 
 Type: `boolean`
-
-#### Parameter: opts.parameterSerialization
-
-Optional. Override method for serializing parameters using [`query-string`](https://www.npmjs.com/package/query-string#arrayformat-1) opts.
-
-Type: `ParameterSerializationOpts`
 
 #### Parameter: opts.axiosConfigDefaults
 

@@ -16,7 +16,6 @@ import {
   ParamsArray,
   ParamType,
   HttpMethod,
-  ParameterSerializationOpts,
 } from './types/client';
 
 /**
@@ -45,7 +44,6 @@ export class OpenAPIClientAxios {
   public instance: any;
 
   public axiosConfigDefaults: AxiosRequestConfig;
-  public parameterSerialization: ParameterSerializationOpts;
 
   /**
    * Creates an instance of OpenAPIClientAxios.
@@ -67,14 +65,12 @@ export class OpenAPIClientAxios {
       validate: true,
       strict: false,
       axiosConfigDefaults: {},
-      parameterSerialization: {},
       ...opts,
     };
     this.inputDocument = optsWithDefaults.definition;
     this.strict = optsWithDefaults.strict;
     this.validate = optsWithDefaults.validate;
     this.axiosConfigDefaults = optsWithDefaults.axiosConfigDefaults;
-    this.parameterSerialization = optsWithDefaults.parameterSerialization;
   }
 
   /**
@@ -365,7 +361,7 @@ export class OpenAPIClientAxios {
     const path = pathBuilder.path(pathParams);
 
     // query parameters
-    const queryString = QueryString.stringify(query, { arrayFormat: this.parameterSerialization.query || 'none' });
+    const queryString = QueryString.stringify(query);
 
     // full url with query string
     const url = `${this.getBaseURL(operation)}${path}${queryString ? `?${queryString}` : ''}`;
