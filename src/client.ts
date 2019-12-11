@@ -64,8 +64,11 @@ export class OpenAPIClientAxios {
     const optsWithDefaults = {
       validate: true,
       strict: false,
-      axiosConfigDefaults: {},
       ...opts,
+      axiosConfigDefaults: {
+        paramsSerializer: (params) => QueryString.stringify(params, { arrayFormat: 'none' }),
+        ...(opts.axiosConfigDefaults || {}),
+      } as AxiosRequestConfig,
     };
     this.inputDocument = optsWithDefaults.definition;
     this.strict = optsWithDefaults.strict;
