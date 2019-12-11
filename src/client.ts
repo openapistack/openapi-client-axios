@@ -62,7 +62,6 @@ export class OpenAPIClientAxios {
     strict?: boolean;
     validate?: boolean;
     axiosConfigDefaults?: AxiosRequestConfig;
-    parameterSerialization?: ParameterSerializationOpts;
   }) {
     const optsWithDefaults = {
       validate: true,
