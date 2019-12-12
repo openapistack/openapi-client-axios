@@ -101,7 +101,7 @@
     "lint": "tslint --format prose --project .",
     "prettier": "prettier --write src/** __tests__/**",
     "toc": "./scripts/generate-toc.js",
-    "prepare": "npm run build",
+    "prepare": "npm run build:all",
     "test": "env-cmd jest",
     "uglify": "node ./scripts-uglify.js ./uglify-options.js client && node ./scripts-uglify.js ./uglify-options.node.js typegen"
   }
