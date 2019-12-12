@@ -43,6 +43,6 @@
   },
   "devDependencies": {},
   "scripts": {
-    "prepack": "./prepack.sh"
+    "prepack_": "./prepack.sh"
   }
 }

@@ -1,2 +1,2 @@
 #!/usr/bin/env node
-require('./typegen.js').main();
+require('./typegen.min.js').main();
