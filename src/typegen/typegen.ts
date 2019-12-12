@@ -1,4 +1,30 @@
-import _ from 'lodash';
+import _filter from 'lodash-es/filter';
+import _map from 'lodash-es/map';
+import _find from 'lodash-es/find';
+import _isEmpty from 'lodash-es/isEmpty';
+import _mapValues from 'lodash-es/mapValues';
+
+const chainableFunctions = {
+  _filter,
+  _map,
+};
+
+const _chain = (input: any) => {
+ let value = input;
+ const wrapper = {
+   ..._mapValues(
+     chainableFunctions,
+     (f: any) => (...args: any[]) => {
+       // lodash always puts input as the first argument
+       value = f(value, ...args);
+       return wrapper;
+     },
+   ),
+   value: () => value,
+ };
+ return wrapper;
+};
+
 import yargs from 'yargs';
 import indent from 'indent-string';
 import OpenAPIClientAxios, { Document } from '../';
@@ -54,28 +80,28 @@ export function generateOperationMethodTypings(api: OpenAPIClientAxios, exportTy
 
   const operationTypings = operations.map(({ operationId, summary, description }) => {
     // parameters arg
-    const parameterTypePaths = _.chain([
-      _.find(exportTypes, { schemaRef: `#/paths/${operationId}/pathParameters` }),
-      _.find(exportTypes, { schemaRef: `#/paths/${operationId}/queryParameters` }),
-      _.find(exportTypes, { schemaRef: `#/paths/${operationId}/headerParameters` }),
-      _.find(exportTypes, { schemaRef: `#/paths/${operationId}/cookieParameters` }),
-    ])
-      .filter()
-      .map('path')
+    const parameterTypePaths = (_chain([
+      _find(exportTypes, { schemaRef: `#/paths/${operationId}/pathParameters` }),
+      _find(exportTypes, { schemaRef: `#/paths/${operationId}/queryParameters` }),
+      _find(exportTypes, { schemaRef: `#/paths/${operationId}/headerParameters` }),
+      _find(exportTypes, { schemaRef: `#/paths/${operationId}/cookieParameters` }),
+    ]) as any)
+      ._filter()
+      ._map('path')
       .value();
-    const parametersType = !_.isEmpty(parameterTypePaths) ? parameterTypePaths.join(' & ') : 'UnknownParamsObject';
+    const parametersType = !_isEmpty(parameterTypePaths) ? parameterTypePaths.join(' & ') : 'UnknownParamsObject';
     const parametersArg = `parameters?: Parameters<${parametersType}>`;
 
     // payload arg
-    const requestBodyType = _.find(exportTypes, { schemaRef: `#/paths/${operationId}/requestBody` });
+    const requestBodyType = _find(exportTypes, { schemaRef: `#/paths/${operationId}/requestBody` });
     const dataArg = `data?: ${requestBodyType ? requestBodyType.path : 'any'}`;
 
     // return type
-    const responseTypePaths = _.chain(exportTypes)
-      .filter(({ schemaRef }) => schemaRef.startsWith(`#/paths/${operationId}/responses`))
-      .map('path')
+    const responseTypePaths = (_chain(exportTypes) as any)
+      ._filter(({ schemaRef }: any) => schemaRef.startsWith(`#/paths/${operationId}/responses`))
+      ._map('path')
       .value();
-    const responseType = !_.isEmpty(responseTypePaths) ? responseTypePaths.join(' | ') : 'any';
+    const responseType = !_isEmpty(responseTypePaths) ? responseTypePaths.join(' | ') : 'any';
     const returnType = `OperationResponse<${responseType}>`;
 
     const operationArgs = [parametersArg, dataArg, 'config?: AxiosRequestConfig'];
@@ -84,7 +110,7 @@ export function generateOperationMethodTypings(api: OpenAPIClientAxios, exportTy
       .join(',\n')}  \n): ${returnType}`;
 
     // comment for type
-    const content = _.filter([summary, description]).join('\n\n');
+    const content = _filter([summary, description]).join('\n\n');
     const comment =
       '/**\n' +
       indent(content === '' ? operationId : `${operationId} - ${content}`, 1, {

@@ -1,0 +1,92 @@
+{
+    "standalone": {
+        "browser": true,
+        "cjs": true,
+        "es": true,
+        "schemas": {
+            "swagger": true,
+            "oapi1": true,
+            "oapi2": true,
+            "oapi3": true
+        },
+        "formats": {
+            "json": true,
+            "yaml": true
+        },
+        "sync": true,
+        "externals": false
+    },
+    "standard.node": {
+        "browser": false,
+        "cjs": true,
+        "es": false,
+        "schemas": {
+            "swagger": true,
+            "oapi1": true,
+            "oapi2": true,
+            "oapi3": true
+        },
+        "formats": {
+            "json": true,
+            "yaml": true
+        },
+        "sync": true,
+        "externals": true
+    },
+    "standard": {
+        "browser": true,
+        "cjs": true,
+        "es": true,
+        "schemas": {
+            "swagger": true,
+            "oapi1": true,
+            "oapi2": true,
+            "oapi3": true
+        },
+        "formats": {
+            "json": true,
+            "yaml": true
+        },
+        "sync": true,
+        "externals": true
+    },
+    "flyweight": {
+        "browser": true,
+        "cjs": true,
+        "es": true,
+        "schemas": {
+            "swagger": false,
+            "oapi1": false,
+            "oapi2": false,
+            "oapi3": true
+        },
+        "formats": {
+            "json": true,
+            "yaml": false
+        },
+        "sync": false,
+        "externals": true,
+        "ignoreValidators": [
+            "isMobilePhone",
+            "isCurrency",
+            "isIP",
+            "isISO31661Alpha3",
+            "isMimeType",
+            "isISO31661Alpha2",
+            "isPostalCode",
+            "isFQDN",
+            "isIdentityCard",
+            "isISBN",
+            "isCreditCard",
+            "isISIN",
+            "isISSN",
+            "isIPRange",
+            "isMACAddress",
+            "isLatLong",
+            "isMongoId",
+            "isJWT",
+            "isMagnetURI",
+            "isHexColor"
+        ]
+    }
+}

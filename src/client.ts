@@ -1,4 +1,39 @@
-import _ from 'lodash';
+import _merge from 'lodash-es/merge';
+import _find from 'lodash-es/find';
+import _first from 'lodash-es/first';
+import _isArray from 'lodash-es/isArray';
+import _isNil from 'lodash-es/isNil';
+import _get from 'lodash-es/get';
+import _pick from 'lodash-es/pick';
+import _map from 'lodash-es/map';
+import _entries from 'lodash-es/entries';
+import _values from 'lodash-es/values';
+import _flatMap from 'lodash-es/flatMap';
+import _mapValues from 'lodash-es/mapValues';
+
+// https://github.com/lodash/lodash/issues/3298
+
+const chainableFunctions = {
+  _entries,
+  _flatMap,
+};
+
+const _chain = (input: any) => {
+ let value = input;
+ const wrapper = {
+   ..._mapValues(
+     chainableFunctions,
+     (f: any) => (...args: any[]) => {
+       // lodash always puts input as the first argument
+       value = f(value, ...args);
+       return wrapper;
+     },
+   ),
+   value: () => value,
+ };
+ return wrapper;
+};
+
 import axios, { AxiosInstance, AxiosRequestConfig, Method } from 'axios';
 import bath from 'bath-es5';
 import { validate as validateOpenAPI } from 'openapi-schema-validation';
@@ -146,10 +181,10 @@ export class OpenAPIClientAxios {
     if (typeof this.inputDocument !== 'object') {
       throw new Error(`.initSync() can't be called with a non-object definition. Please use .init()`);
     }
-
+    
     // set document
     this.document = this.inputDocument;
-
+    
     try {
       if (this.validate) {
         // validate the document
@@ -164,13 +199,13 @@ export class OpenAPIClientAxios {
         console.warn(err);
       }
     }
-
+    
     // dereference the document into definition
     this.definition = dereference(this.inputDocument);
-
+    
     // create axios instance
     this.instance = this.createAxiosInstance();
-
+    
     // we are now initalized
     this.initalized = true;
     return this.instance as Client;
@@ -271,7 +306,7 @@ export class OpenAPIClientAxios {
 
     // allow overriding any parameters in AxiosRequestConfig
     const [parameters, data, config] = args;
-    return config ? _.merge(axiosConfig, config) : axiosConfig;
+    return config ? _merge(axiosConfig, config) : axiosConfig;
   };
 
   /**
@@ -309,7 +344,7 @@ export class OpenAPIClientAxios {
     };
 
     const getParamType = (paramName: string): ParamType => {
-      const param = _.find((operation as Operation).parameters, { name: paramName }) as OpenAPIV3.ParameterObject;
+      const param = _find((operation as Operation).parameters, { name: paramName }) as OpenAPIV3.ParameterObject;
       if (param) {
         return param.in as ParamType;
       }
@@ -318,20 +353,20 @@ export class OpenAPIClientAxios {
     };
 
     const getFirstOperationParam = () => {
-      const firstRequiredParam = _.find((operation as Operation).parameters, {
+      const firstRequiredParam = _find((operation as Operation).parameters, {
         required: true,
       }) as OpenAPIV3.ParameterObject;
       if (firstRequiredParam) {
         return firstRequiredParam;
       }
-      const firstParam = _.first((operation as Operation).parameters) as OpenAPIV3.ParameterObject;
+      const firstParam = _first((operation as Operation).parameters) as OpenAPIV3.ParameterObject;
       if (firstParam) {
         return firstParam;
       }
     };
 
     const [paramsArg, payload] = args;
-    if (_.isArray(paramsArg)) {
+    if (_isArray(paramsArg)) {
       // ParamsArray
       for (const param of paramsArg as ParamsArray) {
         setRequestParam(param.name, param.value, param.in || getParamType(param.name));
@@ -343,7 +378,7 @@ export class OpenAPIClientAxios {
           setRequestParam(name, paramsArg[name], getParamType(name));
         }
       }
-    } else if (!_.isNil(paramsArg)) {
+    } else if (!_isNil(paramsArg)) {
       const firstParam = getFirstOperationParam();
       if (!firstParam) {
         throw new Error(`No parameters found for operation ${operation.operationId}`);
@@ -388,12 +423,12 @@ export class OpenAPIClientAxios {
    * @memberof OpenAPIBackend
    */
   public getOperations = (): Operation[] => {
-    const paths = _.get(this.definition, 'paths', {});
-    return _.chain(paths)
-      .entries()
-      .flatMap(([path, pathObject]) => {
-        const methods = _.pick(pathObject, _.values(HttpMethod));
-        return _.map(_.entries(methods), ([method, operation]) => {
+    const paths = _get(this.definition, 'paths', {});
+    return (_chain(paths) as any)
+      ._entries()
+      ._flatMap(([path, pathObject]: any[]) => {
+        const methods = _pick(pathObject, _values(HttpMethod));
+        return _map(_entries(methods), ([method, operation]) => {
           const op: Operation = {
             ...(operation as OpenAPIV3.OperationObject),
             path,
@@ -419,7 +454,7 @@ export class OpenAPIClientAxios {
    * @memberof OpenAPIBackend
    */
   public getOperation = (operationId: string): Operation | undefined => {
-    return _.find(this.getOperations(), { operationId });
+    return _find(this.getOperations(), { operationId });
   };
 
   /**

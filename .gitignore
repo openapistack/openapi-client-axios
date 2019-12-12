@@ -1,4 +1,6 @@
 # build
+dist
+dist_tsc
 *.js
 *.js.map
 *.d.ts
@@ -12,3 +14,9 @@
 # npm
 node_modules
 npm_debug.log*
+
+!*babelrc*
+!*uglify*
+!*rollup*
+!*jest*
+!*release*
