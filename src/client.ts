@@ -273,7 +273,7 @@ export class OpenAPIClientAxios {
     }
 
     // allow overriding any parameters in AxiosRequestConfig
-    const [parameters, data, config] = args;
+    const [, , config] = args;
     return config ? _.merge(axiosConfig, config) : axiosConfig;
   };
 
