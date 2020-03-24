@@ -39,7 +39,7 @@
   ],
   "dependencies": {
     "axios": "^0.19.0",
-    "bath-es5": "^3.0.0",
+    "bath-es5": "^3.0.3",
     "json-schema-deref-sync": "^0.10.0",
     "lodash": "^4.17.15",
     "openapi-schema-validation": "^0.4.2",
