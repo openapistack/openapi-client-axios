@@ -21,19 +21,32 @@ jobs:
     if: startsWith(github.ref, 'refs/tags/')
     needs:
       - test
-    strategy:
-      matrix:
-        project_dir:
-          - .
-          - typegen
     steps:
       - uses: actions/checkout@v1
       - uses: actions/setup-node@v1
         with:
           registry-url: https://registry.npmjs.org/
       - run: npm ci
-        working-directory: ${{ matrix.project_dir }}
-      - run: npm publish || true
-        working-directory: ${{ matrix.project_dir }}
+      - run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+  publish-typegen:
+    name: Publish openapi-client-axios-typegen
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+    needs:
+      - test
+    steps:
+      - uses: actions/checkout@v1
+      - uses: actions/setup-node@v1
+        with:
+          registry-url: https://registry.npmjs.org/
+      - run: npm ci
+        working-directory: .
+      - run: npm ci
+        working-directory: typegen
+      - run: npm publish
+        working-directory: typegen
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
