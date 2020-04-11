@@ -1,4 +1,5 @@
 # OpenAPI Client Axios
+[![CI](https://github.com/anttiviljami/openapi-client-axios/workflows/CI/badge.svg)](https://github.com/anttiviljami/openapi-client-axios/actions?query=workflow%3ACI)
 [![Build Status](https://travis-ci.org/anttiviljami/openapi-client-axios.svg?branch=master)](https://travis-ci.org/anttiviljami/openapi-client-axios)
 [![Dependencies](https://david-dm.org/anttiviljami/openapi-client-axios.svg)](https://david-dm.org/anttiviljami/openapi-client-axios)
 [![npm version](https://img.shields.io/npm/v/openapi-client-axios.svg)](https://www.npmjs.com/package/openapi-client-axios)
