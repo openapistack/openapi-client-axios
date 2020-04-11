@@ -147,7 +147,7 @@ client.createUser(null, { user: 'admin', pass: '123' }, { headers: { 'x-api-key'
 
 ## Generating type files (.d.ts)
 
-![TypeScript IntelliSense](intellisense.gif)
+![TypeScript IntelliSense](typegen/intellisense.gif)
 
 `openapi-client-axios` comes with a tool called `typegen` to generate typescript type files (.d.ts) for
 OpenAPIClient instances using an OpenAPI definition file.
