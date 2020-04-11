@@ -21,16 +21,18 @@ jobs:
     if: startsWith(github.ref, 'refs/tags/')
     needs:
       - test
+    matrix:
+      project_dir:
+        - .
+        - typegen
     steps:
       - uses: actions/checkout@v1
       - uses: actions/setup-node@v1
         with:
           registry-url: https://registry.npmjs.org/
       - run: npm ci
+        working-directory: ${{ matrix.project_dir }}
       - run: npm publish || true
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-      - run: npm publish || true
-        working-directory: ./typegen
+        working-directory: ${{ matrix.project_dir }}
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
