@@ -16,14 +16,19 @@ import {
   ParamsArray,
   ParamType,
   HttpMethod,
+  UnknownPathsDictionary,
 } from './types/client';
 
 /**
  * OpenAPIClient is an AxiosInstance extended with operation methods
  */
-export type OpenAPIClient<OperationMethods = UnknownOperationMethods> = AxiosInstance &
+export type OpenAPIClient<
+  OperationMethods = UnknownOperationMethods,
+  PathsDictionary = UnknownPathsDictionary
+> = AxiosInstance &
   OperationMethods & {
     api: OpenAPIClientAxios;
+    paths: PathsDictionary;
   };
 
 /**
@@ -200,6 +205,25 @@ export class OpenAPIClientAxios {
       const { operationId } = operation;
       if (operationId) {
         instance[operationId] = this.createOperationMethod(operation);
+      }
+    }
+
+    // create paths dictionary
+    // Example: api.paths['/pets/{id}'].get({ id: 1 });
+    instance.paths = {};
+    for (const path in this.definition.paths) {
+      if (this.definition.paths[path]) {
+        if (!instance.paths[path]) {
+          instance.paths[path] = {};
+        }
+        const methods = this.definition.paths[path];
+        for (const m in methods) {
+          if (methods[m as HttpMethod] && _.includes(Object.values(HttpMethod), m)) {
+            const method = m as HttpMethod;
+            const operation = _.find(this.getOperations(), { path, method });
+            instance.paths[path][method] = this.createOperationMethod(operation);
+          }
+        }
       }
     }
 

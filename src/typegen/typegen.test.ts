@@ -39,6 +39,16 @@ describe('typegen', () => {
     expect(operationTypings).toMatch('getPetsRelative');
   });
 
+  test('exports PathsDictionary', async () => {
+    expect(operationTypings).toMatch('export interface PathsDictionary');
+    expect(operationTypings).toMatch(`['/pets']`);
+    expect(operationTypings).toMatch(`['/pets/{id}']`);
+    expect(operationTypings).toMatch(`['/pets/{id}/owner']`);
+    expect(operationTypings).toMatch(`['/pets/{petId}/owner/{ownerId}']`);
+    expect(operationTypings).toMatch(`['/pets/meta']`);
+    expect(operationTypings).toMatch(`['/pets/relative']`);
+  });
+
   test('exports a Client', async () => {
     expect(operationTypings).toMatch('export type Client =');
   });

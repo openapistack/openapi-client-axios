@@ -146,6 +146,23 @@ override axios request config parameters, such as `headers`, `timeout`, `withCre
 client.createUser(null, { user: 'admin', pass: '123' }, { headers: { 'x-api-key': 'secret' } });
 ```
 
+## Paths Dictionary
+
+OpenAPI Client Axios also allows calling API operations via their path and HTTP
+method, using the paths dictionary.
+
+Example:
+
+```javascript
+client.paths['/pets'].get(); // GET /pets, same as calling client.getPets()
+client.paths['/pets'].post(); // POST /pets
+client.paths['/pets/{petId}'].put(1); // PUT /pets/1
+client.paths['/pets/{petId}/owner/{ownerId}'].get({ petId: 1, ownerId: 2 }) ; // GET /pets/1/owner/2
+```
+
+This allows calling operation methods without using their operationIds, which
+may be sometimes preferred.
+
 ## Generating type files (.d.ts)
 
 ![TypeScript IntelliSense](typegen/intellisense.gif)
