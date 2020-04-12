@@ -586,16 +586,16 @@ describe('OpenAPIClientAxios', () => {
       expect(mockHandler).toBeCalled();
     });
 
-    test('getOwnerByPetId(1) calls GET /pets/1/owner', async () => {
+    test(`paths['/pets/{petId}/owner/{ownerId}'].get({ petId: 1, ownerId: 2 }) calls GET /pets/1/owner/2`, async () => {
       const api = new OpenAPIClientAxios({ definition, strict: true });
       const client = await api.init();
 
       const mock = new MockAdapter(api.client);
       const mockResponse = { name: 'Jon' };
       const mockHandler = jest.fn((config) => [200, mockResponse]);
-      mock.onGet('/pets/1/owner').reply((config) => mockHandler(config));
+      mock.onGet('/pets/1/owner/2').reply((config) => mockHandler(config));
 
-      const res = await client.getOwnerByPetId(1);
+      const res = await client.paths['/pets/{petId}/owner/{ownerId}'].get({ petId: 1, ownerId: 2 });
       expect(res.data).toEqual(mockResponse);
       expect(mockHandler).toBeCalled();
     });
