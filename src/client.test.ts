@@ -311,6 +311,7 @@ describe('OpenAPIClientAxios', () => {
 
       const params = { q: 'cats ' };
       const res = await client.getPets(params);
+
       expect(res.data).toEqual(mockResponse);
       expect(mockHandler).toBeCalled();
       const mockContext = mockHandler.mock.calls[mockHandler.mock.calls.length - 1][0];

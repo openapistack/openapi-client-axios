@@ -84,6 +84,6 @@ export interface Operation extends OpenAPIV3.OperationObject {
 /**
  * A dictionary of paths and their methods
  */
-export interface PathsOperationDict {
+export interface UnknownPathsDictionary {
   [path: string]: { [method in HttpMethod]?: UnknownOperationMethod };
 }
