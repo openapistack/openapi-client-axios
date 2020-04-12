@@ -386,6 +386,26 @@ const requestConfig = {
 }
 ```
 
+## Paths Dictionary
+
+In addition to operationIds, OpenAPIClient also allows calling operation
+methods, using the operations' path and HTTP method.
+
+The paths dictionary contains each path found in the OAS definition as keys,
+and an object with each registered operation method as the value.
+
+Example:
+
+```javascript
+client.paths['/pets'].get(); // GET /pets, same as calling client.getPets()
+client.paths['/pets'].post(); // POST /pets
+client.paths['/pets/{petId}'].put(1); // PUT /pets/1
+client.paths['/pets/{petId}/owner/{ownerId}'].get({ petId: 1, ownerId: 2 }) ; // GET /pets/1/owner/2
+```
+
+This allows calling operation methods without using their operationIds, which
+may be sometimes preferred.
+
 ## Typegen
 
 `openapi-client-axios` comes with a tool called `typegen` to generate typescript type files (.d.ts) for
