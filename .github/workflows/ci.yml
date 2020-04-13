@@ -48,7 +48,7 @@ jobs:
         working-directory: .
       - run: npm ci
         working-directory: typegen
-      - run: npm publish
+      - run: npm publish || true
         working-directory: typegen
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
