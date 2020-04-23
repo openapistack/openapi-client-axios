@@ -36,7 +36,7 @@
   "main": "typegen.js",
   "types": "typegen.d.ts",
   "dependencies": {
-    "@anttiviljami/dtsgenerator": "^2.0.7",
+    "@anttiviljami/dtsgenerator": "^2.5.0",
     "indent-string": "^4.0.0",
     "openapi-client-axios": "*",
     "swagger-parser": "^9.0.1",
