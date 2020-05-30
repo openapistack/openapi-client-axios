@@ -72,7 +72,13 @@ function generateMethodForOperation(methodName: string, operation: Operation, ex
   // return type
   const responseTypePaths = _.chain(exportTypes)
     .filter(({ schemaRef }) => schemaRef.startsWith(`#/paths/${operationId}/responses`))
-    .map('path')
+    .map(({ path }) =>
+      path
+        .split('.')
+        // Operation.Responses.200 => Operation.Responses.$200
+        .map((key, i) => (i === path.split('.').length - 1 ? `$${key}` : key))
+        .join('.'),
+    )
     .value();
   const responseType = !_.isEmpty(responseTypePaths) ? responseTypePaths.join(' | ') : 'any';
   const returnType = `OperationResponse<${responseType}>`;
