@@ -10,6 +10,7 @@ const examplePetAPIJSON = path.join(testsDir, 'resources', 'example-pet-api.open
 const examplePetAPIYAML = path.join(testsDir, 'resources', 'example-pet-api.openapi.yml');
 
 const baseURL = 'http://localhost:8080';
+const baseURLAlternative = 'http://localhost:9090/';
 const baseURLV2 = 'http://localhost:8080/v2';
 
 const responses: OpenAPIV3.ResponsesObject = {
@@ -40,7 +41,7 @@ const definition: OpenAPIV3.Document = {
     title: 'api',
     version: '1.0.0',
   },
-  servers: [{ url: baseURL }],
+  servers: [{ url: baseURL }, { url: baseURLAlternative }],
   paths: {
     '/pets': {
       get: {
@@ -214,6 +215,14 @@ describe('OpenAPIClientAxios', () => {
       const api = new OpenAPIClientAxios({ definition: examplePetAPIJSON, strict: true });
       await api.init();
       expect(api.initalized).toEqual(true);
+      expect(api.client.api).toBe(api);
+      checkHasOperationMethods(api.client);
+    });
+
+    test('can be initalised using alternative server', async () => {
+      const api = new OpenAPIClientAxios({ definition, server: 1});
+      await api.init();
+      expect(api.getBaseURL()).toEqual(baseURLAlternative);
       expect(api.client.api).toBe(api);
       checkHasOperationMethods(api.client);
     });

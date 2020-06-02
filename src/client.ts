@@ -50,6 +50,8 @@ export class OpenAPIClientAxios {
 
   public axiosConfigDefaults: AxiosRequestConfig;
 
+  private defaultServer: number;
+
   /**
    * Creates an instance of OpenAPIClientAxios.
    *
@@ -65,10 +67,12 @@ export class OpenAPIClientAxios {
     strict?: boolean;
     validate?: boolean;
     axiosConfigDefaults?: AxiosRequestConfig;
+    server?: number
   }) {
     const optsWithDefaults = {
       validate: true,
       strict: false,
+      server: 0,
       ...opts,
       axiosConfigDefaults: {
         paramsSerializer: (params) => QueryString.stringify(params, { arrayFormat: 'none' }),
@@ -79,6 +83,7 @@ export class OpenAPIClientAxios {
     this.strict = optsWithDefaults.strict;
     this.validate = optsWithDefaults.validate;
     this.axiosConfigDefaults = optsWithDefaults.axiosConfigDefaults;
+    this.defaultServer = optsWithDefaults.server;
   }
 
   /**
@@ -265,8 +270,8 @@ export class OpenAPIClientAxios {
         return operation.servers[0].url;
       }
     }
-    if (this.definition.servers && this.definition.servers[0]) {
-      return this.definition.servers[0].url;
+    if (this.definition.servers && this.definition.servers[this.defaultServer]) {
+      return this.definition.servers[this.defaultServer].url;
     }
     return undefined;
   };
