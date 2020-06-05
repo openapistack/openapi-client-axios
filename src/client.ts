@@ -16,7 +16,8 @@ import {
   ParamsArray,
   ParamType,
   HttpMethod,
-  UnknownPathsDictionary, Server,
+  UnknownPathsDictionary,
+  Server,
 } from './types/client';
 
 /**
@@ -67,7 +68,7 @@ export class OpenAPIClientAxios {
     strict?: boolean;
     validate?: boolean;
     axiosConfigDefaults?: AxiosRequestConfig;
-    withServer?: number | string | Server
+    withServer?: number | string | Server;
   }) {
     const optsWithDefaults = {
       validate: true,

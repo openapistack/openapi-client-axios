@@ -41,10 +41,13 @@ const definition: OpenAPIV3.Document = {
     title: 'api',
     version: '1.0.0',
   },
-  servers: [{ url: baseURL }, {
-    url: baseURLAlternative,
-    description: 'Alternative server',
-  }],
+  servers: [
+    { url: baseURL },
+    {
+      url: baseURLAlternative,
+      description: 'Alternative server',
+    },
+  ],
   paths: {
     '/pets': {
       get: {
@@ -223,7 +226,7 @@ describe('OpenAPIClientAxios', () => {
     });
 
     test('can be initalised using alternative server using index', async () => {
-      const api = new OpenAPIClientAxios({ definition, withServer: 1});
+      const api = new OpenAPIClientAxios({ definition, withServer: 1 });
       await api.init();
       expect(api.getBaseURL()).toEqual(baseURLAlternative);
       expect(api.client.api).toBe(api);
@@ -231,7 +234,7 @@ describe('OpenAPIClientAxios', () => {
     });
 
     test('can be initalised using alternative server using description', async () => {
-      const api = new OpenAPIClientAxios({ definition, withServer: 'Alternative server'});
+      const api = new OpenAPIClientAxios({ definition, withServer: 'Alternative server' });
       await api.init();
       expect(api.getBaseURL()).toEqual(baseURLAlternative);
       expect(api.client.api).toBe(api);
@@ -240,7 +243,7 @@ describe('OpenAPIClientAxios', () => {
 
     test('can be initalised using alternative server using object', async () => {
       const url = 'http://examplde.com/v5';
-      const api = new OpenAPIClientAxios({ definition, withServer: {url}});
+      const api = new OpenAPIClientAxios({ definition, withServer: { url } });
       await api.init();
       expect(api.getBaseURL()).toEqual(url);
       expect(api.client.api).toBe(api);
@@ -248,7 +251,7 @@ describe('OpenAPIClientAxios', () => {
     });
 
     test('can be initalised using default baseUrl resolver', async () => {
-      const api = new OpenAPIClientAxios({ definition});
+      const api = new OpenAPIClientAxios({ definition });
       await api.init();
       expect(api.getBaseURL()).toEqual(baseURL);
       expect(api.client.api).toBe(api);
@@ -274,7 +277,7 @@ describe('OpenAPIClientAxios', () => {
 
   describe('withServer', () => {
     test('can set default server as object', async () => {
-      const api = new OpenAPIClientAxios({ definition});
+      const api = new OpenAPIClientAxios({ definition });
       await api.init();
       expect(api.getBaseURL()).toEqual(baseURL);
       const newServer = {
@@ -285,7 +288,7 @@ describe('OpenAPIClientAxios', () => {
       expect(api.getBaseURL()).toEqual(newServer.url);
     });
     test('can set default server by using description', async () => {
-      const api = new OpenAPIClientAxios({ definition});
+      const api = new OpenAPIClientAxios({ definition });
       await api.init();
       expect(api.getBaseURL()).toEqual(baseURL);
       const newServer = 'Alternative server';
@@ -293,7 +296,7 @@ describe('OpenAPIClientAxios', () => {
       expect(api.getBaseURL()).toEqual(baseURLAlternative);
     });
     test('can set default server by index', async () => {
-      const api = new OpenAPIClientAxios({ definition});
+      const api = new OpenAPIClientAxios({ definition });
       await api.init();
       expect(api.getBaseURL()).toEqual(baseURL);
       const newServer = 1;
