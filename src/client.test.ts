@@ -41,7 +41,10 @@ const definition: OpenAPIV3.Document = {
     title: 'api',
     version: '1.0.0',
   },
-  servers: [{ url: baseURL }, { url: baseURLAlternative }],
+  servers: [{ url: baseURL }, {
+    url: baseURLAlternative,
+    description: 'Alternative server',
+  }],
   paths: {
     '/pets': {
       get: {
@@ -219,10 +222,35 @@ describe('OpenAPIClientAxios', () => {
       checkHasOperationMethods(api.client);
     });
 
-    test('can be initalised using alternative server', async () => {
-      const api = new OpenAPIClientAxios({ definition, server: 1});
+    test('can be initalised using alternative server using index', async () => {
+      const api = new OpenAPIClientAxios({ definition, withServer: 1});
       await api.init();
       expect(api.getBaseURL()).toEqual(baseURLAlternative);
+      expect(api.client.api).toBe(api);
+      checkHasOperationMethods(api.client);
+    });
+
+    test('can be initalised using alternative server using description', async () => {
+      const api = new OpenAPIClientAxios({ definition, withServer: 'Alternative server'});
+      await api.init();
+      expect(api.getBaseURL()).toEqual(baseURLAlternative);
+      expect(api.client.api).toBe(api);
+      checkHasOperationMethods(api.client);
+    });
+
+    test('can be initalised using alternative server using object', async () => {
+      const url = 'http://examplde.com/v5';
+      const api = new OpenAPIClientAxios({ definition, withServer: {url}});
+      await api.init();
+      expect(api.getBaseURL()).toEqual(url);
+      expect(api.client.api).toBe(api);
+      checkHasOperationMethods(api.client);
+    });
+
+    test('can be initalised using default baseUrl resolver', async () => {
+      const api = new OpenAPIClientAxios({ definition});
+      await api.init();
+      expect(api.getBaseURL()).toEqual(baseURL);
       expect(api.client.api).toBe(api);
       checkHasOperationMethods(api.client);
     });
@@ -241,6 +269,36 @@ describe('OpenAPIClientAxios', () => {
       await api.init();
       expect(console.warn).toBeCalledTimes(1);
       console.warn = warn; // reset console.warn
+    });
+  });
+
+  describe('withServer', () => {
+    test('can set default server as object', async () => {
+      const api = new OpenAPIClientAxios({ definition});
+      await api.init();
+      expect(api.getBaseURL()).toEqual(baseURL);
+      const newServer = {
+        url: 'http://example.com/apiv4',
+        description: 'example api v4',
+      };
+      api.withServer(newServer);
+      expect(api.getBaseURL()).toEqual(newServer.url);
+    });
+    test('can set default server by using description', async () => {
+      const api = new OpenAPIClientAxios({ definition});
+      await api.init();
+      expect(api.getBaseURL()).toEqual(baseURL);
+      const newServer = 'Alternative server';
+      api.withServer(newServer);
+      expect(api.getBaseURL()).toEqual(baseURLAlternative);
+    });
+    test('can set default server by index', async () => {
+      const api = new OpenAPIClientAxios({ definition});
+      await api.init();
+      expect(api.getBaseURL()).toEqual(baseURL);
+      const newServer = 1;
+      api.withServer(newServer);
+      expect(api.getBaseURL()).toEqual(baseURLAlternative);
     });
   });
 

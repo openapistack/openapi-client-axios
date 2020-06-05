@@ -7,6 +7,8 @@ export * from 'openapi-types';
  */
 export type Document = OpenAPIV3.Document;
 
+export type Server = OpenAPIV3.ServerObject;
+
 /**
  * OpenAPI allowed HTTP methods
  */
