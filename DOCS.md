@@ -113,6 +113,7 @@ const api = new OpenAPIClientAxios({
   definition: './openapi.yml',
   strict: true,
   validate: true,
+  withServer: 0,
   axiosConfigDefaults: {
     withCredentials: true,
     headers: {
@@ -143,6 +144,12 @@ Type: `boolean`
 Optional. Whether to validate the input document (default: true)
 
 Type: `boolean`
+
+#### Parameter: opts.withServer
+
+The default server to use. Either by index, description or a full server object to override with.
+
+Type: `number`, `string` or [Server Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.0.md#serverObject
 
 #### Parameter: opts.axiosConfigDefaults
 
@@ -188,6 +195,27 @@ Example:
 ```javascript
 const client = await api.getClient();
 ```
+
+### .withServer(server)
+
+Set the default server base url to use for client.
+
+
+#### Parameter: server
+
+The default server to use. Either an index, description or a full server object to override with.
+
+Example:
+```javascript
+// by index
+api.withServer(1);
+// by description property
+api.withServer('EU server');
+// by server object (override)
+api.withServer({ url: 'https://example.com/api/', description: 'Eu Server' });
+```
+
+Type: `number`, `string` or [Server Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.0.md#serverObject)
 
 ### .getBaseURL(operation?)
 

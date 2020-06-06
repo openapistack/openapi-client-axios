@@ -287,6 +287,7 @@ describe('OpenAPIClientAxios', () => {
       api.withServer(newServer);
       expect(api.getBaseURL()).toEqual(newServer.url);
     });
+
     test('can set default server by using description', async () => {
       const api = new OpenAPIClientAxios({ definition });
       await api.init();
@@ -295,6 +296,7 @@ describe('OpenAPIClientAxios', () => {
       api.withServer(newServer);
       expect(api.getBaseURL()).toEqual(baseURLAlternative);
     });
+
     test('can set default server by index', async () => {
       const api = new OpenAPIClientAxios({ definition });
       await api.init();
