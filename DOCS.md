@@ -11,10 +11,13 @@
     - [Parameter: opts.definition](#parameter-optsdefinition)
     - [Parameter: opts.strict](#parameter-optsstrict)
     - [Parameter: opts.validate](#parameter-optsvalidate)
+    - [Parameter: opts.withServer](#parameter-optswithserver)
     - [Parameter: opts.axiosConfigDefaults](#parameter-optsaxiosconfigdefaults)
   - [.init()](#init)
   - [.initSync()](#initsync)
   - [.getClient()](#getclient)
+  - [.withServer(server)](#withserverserver)
+    - [Parameter: server](#parameter-server)
   - [.getBaseURL(operation?)](#getbaseurloperation)
     - [Parameter: operation](#parameter-operation)
   - [.getRequestConfigForOperation(operation, args)](#getrequestconfigforoperationoperation-args)
@@ -31,6 +34,7 @@
   - [Data](#data)
   - [Config](#config)
 - [Request Config Object](#request-config-object)
+- [Paths Dictionary](#paths-dictionary)
 - [Typegen](#typegen)
 
 <!-- tocstop -->
