@@ -17,6 +17,7 @@ import {
   ParamType,
   HttpMethod,
   UnknownPathsDictionary,
+  Server,
 } from './types/client';
 
 /**
@@ -50,6 +51,8 @@ export class OpenAPIClientAxios {
 
   public axiosConfigDefaults: AxiosRequestConfig;
 
+  private defaultServer: number | string | Server;
+
   /**
    * Creates an instance of OpenAPIClientAxios.
    *
@@ -65,10 +68,12 @@ export class OpenAPIClientAxios {
     strict?: boolean;
     validate?: boolean;
     axiosConfigDefaults?: AxiosRequestConfig;
+    withServer?: number | string | Server;
   }) {
     const optsWithDefaults = {
       validate: true,
       strict: false,
+      withServer: 0,
       ...opts,
       axiosConfigDefaults: {
         paramsSerializer: (params) => QueryString.stringify(params, { arrayFormat: 'none' }),
@@ -79,6 +84,7 @@ export class OpenAPIClientAxios {
     this.strict = optsWithDefaults.strict;
     this.validate = optsWithDefaults.validate;
     this.axiosConfigDefaults = optsWithDefaults.axiosConfigDefaults;
+    this.defaultServer = optsWithDefaults.withServer;
   }
 
   /**
@@ -104,6 +110,10 @@ export class OpenAPIClientAxios {
     }
     return this.instance as Client;
   };
+
+  public withServer(server: number | string | Server) {
+    this.defaultServer = server;
+  }
 
   /**
    * Initalizes OpenAPIClientAxios and creates a member axios client instance
@@ -265,9 +275,25 @@ export class OpenAPIClientAxios {
         return operation.servers[0].url;
       }
     }
-    if (this.definition.servers && this.definition.servers[0]) {
-      return this.definition.servers[0].url;
+
+    if (typeof this.defaultServer === 'number') {
+      if (this.definition.servers && this.definition.servers[this.defaultServer]) {
+        return this.definition.servers[this.defaultServer].url;
+      }
+      return undefined;
     }
+    if (typeof this.defaultServer === 'string') {
+      for (const server of this.definition.servers) {
+        if (server.description === this.defaultServer) {
+          return server.url;
+        }
+      }
+      return undefined;
+    }
+    if (this.defaultServer.url) {
+      return this.defaultServer.url;
+    }
+
     return undefined;
   };
 
