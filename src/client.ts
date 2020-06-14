@@ -143,7 +143,7 @@ export class OpenAPIClientAxios {
     }
 
     // dereference the document into definition
-    this.definition = await SwaggerParser.dereference(this.inputDocument);
+    this.definition = await SwaggerParser.dereference(this.document);
 
     // create axios instance
     this.instance = this.createAxiosInstance();
