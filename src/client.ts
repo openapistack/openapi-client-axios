@@ -51,6 +51,7 @@ export class OpenAPIClientAxios {
   public instance: any;
 
   public axiosConfigDefaults: AxiosRequestConfig;
+  public swaggerParserOpts: SwaggerParser.Options;
 
   private defaultServer: number | string | Server;
 
@@ -71,6 +72,7 @@ export class OpenAPIClientAxios {
     quick?: boolean;
     validate?: boolean;
     axiosConfigDefaults?: AxiosRequestConfig;
+    swaggerParserOpts?: SwaggerParser.Options;
     withServer?: number | string | Server;
   }) {
     const optsWithDefaults = {
@@ -78,6 +80,7 @@ export class OpenAPIClientAxios {
       strict: false,
       quick: false,
       withServer: 0,
+      swaggerParserOpts: {} as SwaggerParser.Options,
       ...opts,
       axiosConfigDefaults: {
         paramsSerializer: (params) => QueryString.stringify(params, { arrayFormat: 'none' }),
@@ -89,6 +92,7 @@ export class OpenAPIClientAxios {
     this.quick = optsWithDefaults.quick;
     this.validate = optsWithDefaults.validate;
     this.axiosConfigDefaults = optsWithDefaults.axiosConfigDefaults;
+    this.swaggerParserOpts = optsWithDefaults.swaggerParserOpts;
     this.defaultServer = optsWithDefaults.withServer;
   }
 
@@ -131,7 +135,7 @@ export class OpenAPIClientAxios {
   public init = async <Client = OpenAPIClient>(): Promise<Client> => {
     if (this.quick) {
       // to save time, just dereference input document
-      this.definition = await SwaggerParser.dereference(this.inputDocument);
+      this.definition = await SwaggerParser.dereference(this.inputDocument, this.swaggerParserOpts);
       // in quick mode no guarantees document will be the original document
       this.document = typeof this.inputDocument === 'object' ? this.inputDocument : this.definition;
     } else {
@@ -152,7 +156,7 @@ export class OpenAPIClientAxios {
         }
       }
       // dereference the document into definition
-      this.definition = await SwaggerParser.dereference(_.cloneDeep(this.document));
+      this.definition = await SwaggerParser.dereference(_.cloneDeep(this.document), this.swaggerParserOpts);
     }
 
     // create axios instance
@@ -169,7 +173,7 @@ export class OpenAPIClientAxios {
    * @memberof OpenAPIClientAxios
    */
   public async loadDocument() {
-    this.document = await SwaggerParser.parse(this.inputDocument);
+    this.document = await SwaggerParser.parse(this.inputDocument, this.swaggerParserOpts);
     return this.document;
   }
 
