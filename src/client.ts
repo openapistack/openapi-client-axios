@@ -44,6 +44,7 @@ export class OpenAPIClientAxios {
   public definition: Document;
 
   public strict: boolean;
+  public quick: boolean;
   public validate: boolean;
 
   public initalized: boolean;
@@ -59,6 +60,7 @@ export class OpenAPIClientAxios {
    * @param opts - constructor options
    * @param {Document | string} opts.definition - the OpenAPI definition, file path or Document object
    * @param {boolean} opts.strict - strict mode, throw errors or warn on OpenAPI spec validation errors (default: false)
+   * @param {boolean} opts.quick - quick mode, skips validation and doesn't guarantee document is unchanged
    * @param {boolean} opts.validate - whether to validate the input document document (default: true)
    * @param {boolean} opts.axiosConfigDefaults - default axios config for the instance
    * @memberof OpenAPIClientAxios
@@ -66,6 +68,7 @@ export class OpenAPIClientAxios {
   constructor(opts: {
     definition: Document | string;
     strict?: boolean;
+    quick?: boolean;
     validate?: boolean;
     axiosConfigDefaults?: AxiosRequestConfig;
     withServer?: number | string | Server;
@@ -73,6 +76,7 @@ export class OpenAPIClientAxios {
     const optsWithDefaults = {
       validate: true,
       strict: false,
+      quick: false,
       withServer: 0,
       ...opts,
       axiosConfigDefaults: {
@@ -82,6 +86,7 @@ export class OpenAPIClientAxios {
     };
     this.inputDocument = optsWithDefaults.definition;
     this.strict = optsWithDefaults.strict;
+    this.quick = optsWithDefaults.quick;
     this.validate = optsWithDefaults.validate;
     this.axiosConfigDefaults = optsWithDefaults.axiosConfigDefaults;
     this.defaultServer = optsWithDefaults.withServer;
@@ -124,26 +129,31 @@ export class OpenAPIClientAxios {
    * @memberof OpenAPIClientAxios
    */
   public init = async <Client = OpenAPIClient>(): Promise<Client> => {
-    // parse the document
-    this.document = await SwaggerParser.parse(this.inputDocument);
-
-    try {
-      if (this.validate) {
-        // validate the document
-        this.validateDefinition();
+    if (this.quick) {
+      // to save time, just dereference input document
+      this.definition = await SwaggerParser.dereference(this.inputDocument);
+      // in quick mode no guarantees document will be the original document
+      this.document = typeof this.inputDocument === 'object' ? this.inputDocument : this.definition;
+    } else {
+      // load and parse the document
+      await this.loadDocument();
+      try {
+        if (this.validate) {
+          // validate the document
+          this.validateDefinition();
+        }
+      } catch (err) {
+        if (this.strict) {
+          // in strict-mode, fail hard and re-throw the error
+          throw err;
+        } else {
+          // just emit a warning about the validation errors
+          console.warn(err);
+        }
       }
-    } catch (err) {
-      if (this.strict) {
-        // in strict-mode, fail hard and re-throw the error
-        throw err;
-      } else {
-        // just emit a warning about the validation errors
-        console.warn(err);
-      }
+      // dereference the document into definition
+      this.definition = await SwaggerParser.dereference(_.cloneDeep(this.document));
     }
-
-    // dereference the document into definition
-    this.definition = await SwaggerParser.dereference(this.document);
 
     // create axios instance
     this.instance = this.createAxiosInstance();
@@ -152,6 +162,16 @@ export class OpenAPIClientAxios {
     this.initalized = true;
     return this.instance as Client;
   };
+
+  /**
+   * Loads the input document asynchronously and sets this.document
+   *
+   * @memberof OpenAPIClientAxios
+   */
+  public async loadDocument() {
+    this.document = await SwaggerParser.parse(this.inputDocument);
+    return this.document;
+  }
 
   /**
    * Synchronous version of .init()
@@ -169,7 +189,7 @@ export class OpenAPIClientAxios {
     this.document = this.inputDocument;
 
     try {
-      if (this.validate) {
+      if (this.validate && !this.quick) {
         // validate the document
         this.validateDefinition();
       }
