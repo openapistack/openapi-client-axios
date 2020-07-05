@@ -54,6 +54,7 @@ export class OpenAPIClientAxios {
   public swaggerParserOpts: SwaggerParser.Options;
 
   private defaultServer: number | string | Server;
+  private baseURLVariables: { [key: string]: string | number };
 
   /**
    * Creates an instance of OpenAPIClientAxios.
@@ -74,12 +75,14 @@ export class OpenAPIClientAxios {
     axiosConfigDefaults?: AxiosRequestConfig;
     swaggerParserOpts?: SwaggerParser.Options;
     withServer?: number | string | Server;
+    baseURLVariables?: { [key: string]: string | number };
   }) {
     const optsWithDefaults = {
       validate: true,
       strict: false,
       quick: false,
       withServer: 0,
+      baseURLVariables: {},
       swaggerParserOpts: {} as SwaggerParser.Options,
       ...opts,
       axiosConfigDefaults: {
@@ -94,6 +97,7 @@ export class OpenAPIClientAxios {
     this.axiosConfigDefaults = optsWithDefaults.axiosConfigDefaults;
     this.swaggerParserOpts = optsWithDefaults.swaggerParserOpts;
     this.defaultServer = optsWithDefaults.withServer;
+    this.baseURLVariables = optsWithDefaults.baseURLVariables;
   }
 
   /**
@@ -120,8 +124,9 @@ export class OpenAPIClientAxios {
     return this.instance as Client;
   };
 
-  public withServer(server: number | string | Server) {
+  public withServer(server: number | string | Server, variables: { [key: string]: string | number } = {}) {
     this.defaultServer = server;
+    this.baseURLVariables = variables;
   }
 
   /**
