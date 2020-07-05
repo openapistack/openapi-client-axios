@@ -305,6 +305,7 @@ export class OpenAPIClientAxios {
       }
     }
 
+    // get the target server from this.defaultServer
     let targetServer;
     if (typeof this.defaultServer === 'number') {
       if (this.definition.servers && this.definition.servers[this.defaultServer]) {
@@ -321,12 +322,14 @@ export class OpenAPIClientAxios {
       targetServer = this.defaultServer;
     }
 
+    // if no targetServer is found, return undefined
     if (!targetServer) {
       return undefined;
     }
 
     let baseURL = targetServer.url;
     let baseURLVariableSet = targetServer.variables;
+
     // get baseURL var names
     let baseURLBuilder = bath(baseURL);
 
@@ -335,10 +338,11 @@ export class OpenAPIClientAxios {
       return baseURL;
     }
 
+    // object to place variables resolved from this.baseURLVariables
     let baseURLVariablesResolved: { [key: string]: string } = {};
 
     // step through names and assign value from this.baseURLVariables or the default value
-    // note: any variables defined in baseURLVariables but not actually a variable in baseURL are ignored
+    // note: any variables defined in baseURLVariables but not actually variables in baseURL are ignored
     for (let name of baseURLBuilder.names) {
       const varValue = this.baseURLVariables[name];
 
@@ -346,11 +350,14 @@ export class OpenAPIClientAxios {
         // if varValue exists assign to baseURLVariablesResolved object
         if (typeof varValue === 'number') {
           // if number, get value from enum array
+
           let enumVal = baseURLVariableSet[name].enum[varValue];
+
           if (enumVal) {
             baseURLVariablesResolved[name] = enumVal;
           } else {
             // if supplied value out of range: throw error
+
             throw new Error(
               `index ${varValue} out of range for enum of baseURL variable: ${name}; enum max index is ${baseURLVariableSet[
                 name
@@ -359,10 +366,12 @@ export class OpenAPIClientAxios {
           }
         } else if (typeof varValue === 'string') {
           // if string, validate against enum array
+
           if (baseURLVariableSet[name].enum.includes(varValue)) {
             baseURLVariablesResolved[name] = varValue;
           } else {
             // if supplied value doesn't exist on enum: throw error
+
             throw new Error(
               `${varValue} is not a valid entry for baseURL variable ${name}; variable must be of the following: ${baseURLVariableSet[
                 name
@@ -372,9 +381,12 @@ export class OpenAPIClientAxios {
         }
       } else {
         // if varValue doesn't exist: get default
+
         baseURLVariablesResolved[name] = baseURLVariableSet[name].default;
       }
     }
+
+    // return resolved baseURL
     return baseURLBuilder.path(baseURLVariablesResolved);
   };
 
