@@ -11,6 +11,8 @@ const examplePetAPIYAML = path.join(testsDir, 'resources', 'example-pet-api.open
 
 const baseURL = 'http://localhost:8080';
 const baseURLAlternative = 'http://localhost:9090/';
+const baseURLWithVariable = 'http://{foo1}.localhost:9090/{foo2}/{foo3}/';
+const baseURLWithVariableResolved = 'http://bar1.localhost:9090/bar2a/bar3b/';
 const baseURLV2 = 'http://localhost:8080/v2';
 
 const responses: OpenAPIV3.ResponsesObject = {
@@ -46,6 +48,24 @@ const definition: OpenAPIV3.Document = {
     {
       url: baseURLAlternative,
       description: 'Alternative server',
+    },
+    {
+      url: baseURLWithVariable,
+      description: 'server with variable baseURL',
+      variables: {
+        foo1: {
+          default: 'bar1',
+          enum: ['bar1', 'bar1a'],
+        },
+        foo2: {
+          default: 'bar2b',
+          enum: ['bar2a', 'bar2b'],
+        },
+        foo3: {
+          default: 'bar3a',
+          enum: ['bar3a', 'bar3b'],
+        },
+      },
     },
   ],
   paths: {
@@ -241,6 +261,14 @@ describe('OpenAPIClientAxios', () => {
       checkHasOperationMethods(api.client);
     });
 
+    test('can be initialised using alternative server with variable in baseURL', async () => {
+      const api = new OpenAPIClientAxios({ definition, withServer: 2, baseURLVariables: { foo2: 'bar2a', foo3: 1 } });
+      await api.init();
+      expect(api.getBaseURL()).toEqual(baseURLWithVariableResolved);
+      expect(api.client.api).toBe(api);
+      checkHasOperationMethods(api.client);
+    });
+
     test('can be initalised using alternative server using object', async () => {
       const url = 'http://examplde.com/v5';
       const api = new OpenAPIClientAxios({ definition, withServer: { url } });
@@ -304,6 +332,16 @@ describe('OpenAPIClientAxios', () => {
       const newServer = 1;
       api.withServer(newServer);
       expect(api.getBaseURL()).toEqual(baseURLAlternative);
+    });
+
+    test('can set default server with variables', async () => {
+      const api = new OpenAPIClientAxios({ definition });
+      await api.init();
+      expect(api.getBaseURL()).toEqual(baseURL);
+      const newServer = 2;
+      const newServerVars = { foo2: 'bar2a', foo3: 1 };
+      api.withServer(newServer, newServerVars);
+      expect(api.getBaseURL()).toEqual(baseURLWithVariableResolved);
     });
   });
 
