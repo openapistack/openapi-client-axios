@@ -8,6 +8,7 @@ import ReferenceResolver from '@anttiviljami/dtsgenerator/dist/core/referenceRes
 import SchemaConvertor, { ExportedType } from '@anttiviljami/dtsgenerator/dist/core/schemaConvertor';
 import WriteProcessor from '@anttiviljami/dtsgenerator/dist/core/writeProcessor';
 import SwaggerParser from 'swagger-parser';
+import { normalizeTypeName } from '@anttiviljami/dtsgenerator/dist/core/typeNameConvertor';
 
 export async function main() {
   const argv = yargs
@@ -53,25 +54,27 @@ function generateMethodForOperation(methodName: string, operation: Operation, ex
   const { operationId, summary, description } = operation;
 
   // parameters arg
+  const normalizedOperationId = normalizeTypeName(operationId);
   const parameterTypePaths = _.chain([
-    _.find(exportTypes, { schemaRef: `#/paths/${operationId}/pathParameters` }),
-    _.find(exportTypes, { schemaRef: `#/paths/${operationId}/queryParameters` }),
-    _.find(exportTypes, { schemaRef: `#/paths/${operationId}/headerParameters` }),
-    _.find(exportTypes, { schemaRef: `#/paths/${operationId}/cookieParameters` }),
+    _.find(exportTypes, { schemaRef: `#/paths/${normalizedOperationId}/pathParameters` }),
+    _.find(exportTypes, { schemaRef: `#/paths/${normalizedOperationId}/queryParameters` }),
+    _.find(exportTypes, { schemaRef: `#/paths/${normalizedOperationId}/headerParameters` }),
+    _.find(exportTypes, { schemaRef: `#/paths/${normalizedOperationId}/cookieParameters` }),
   ])
     .filter()
     .map('path')
     .value();
+
   const parametersType = !_.isEmpty(parameterTypePaths) ? parameterTypePaths.join(' & ') : 'UnknownParamsObject';
   const parametersArg = `parameters?: Parameters<${parametersType}>`;
 
   // payload arg
-  const requestBodyType = _.find(exportTypes, { schemaRef: `#/paths/${operationId}/requestBody` });
+  const requestBodyType = _.find(exportTypes, { schemaRef: `#/paths/${normalizedOperationId}/requestBody` });
   const dataArg = `data?: ${requestBodyType ? requestBodyType.path : 'any'}`;
 
   // return type
   const responseTypePaths = _.chain(exportTypes)
-    .filter(({ schemaRef }) => schemaRef.startsWith(`#/paths/${operationId}/responses`))
+    .filter(({ schemaRef }) => schemaRef.startsWith(`#/paths/${normalizedOperationId}/responses`))
     .map(({ path }) =>
       path
         .split('.')
