@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import axios, { AxiosInstance, AxiosRequestConfig, Method } from 'axios';
 import bath from 'bath-es5';
-import { validate as validateOpenAPI } from 'openapi-schema-validation';
+import OpenAPISchemaValidator from 'openapi-schema-validator';
 import SwaggerParser from 'swagger-parser';
 import QueryString from 'query-string';
 import dereference from 'json-schema-deref-sync';
@@ -278,8 +278,11 @@ export class OpenAPIClientAxios {
    * @memberof OpenAPIClientAxios
    */
   public validateDefinition = () => {
-    const { valid, errors } = validateOpenAPI(this.document, 3);
-    if (!valid) {
+    const validator = new OpenAPISchemaValidator({
+      version: 3,
+    });
+    const { errors } = validator.validate(this.document);
+    if (errors.length > 0) {
       const prettyErrors = JSON.stringify(errors, null, 2);
       throw new Error(`Document is not valid OpenAPI. ${errors.length} validation errors:\n${prettyErrors}`);
     }
