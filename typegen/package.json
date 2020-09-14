@@ -38,7 +38,7 @@
   "dependencies": {
     "@anttiviljami/dtsgenerator": "^2.5.0",
     "indent-string": "^4.0.0",
-    "openapi-client-axios": "*",
+    "openapi-client-axios": "https://github.com/ccakes/openapi-client-axios",
     "swagger-parser": "^9.0.1",
     "yargs": "^13.2.2"
   },
