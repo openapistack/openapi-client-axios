@@ -536,26 +536,28 @@ export class OpenAPIClientAxios {
    */
   public getOperations = (): Operation[] => {
     const paths = _.get(this.definition, 'paths', {});
-    return _.chain(paths)
-      .entries()
-      .flatMap(([path, pathObject]) => {
-        const methods = _.pick(pathObject, _.values(HttpMethod));
-        return _.map(_.entries(methods), ([method, operation]) => {
-          const op: Operation = {
-            ...(operation as OpenAPIV3.OperationObject),
-            path,
-            method: method as HttpMethod,
-          };
-          if (pathObject.parameters) {
-            op.parameters = [...(op.parameters || []), ...pathObject.parameters];
-          }
-          if (pathObject.servers) {
-            op.servers = [...(op.servers || []), ...pathObject.servers];
-          }
-          return op;
-        });
-      })
-      .value();
+
+    let operations = [];
+    for (const [path, pathObject] of Object.entries(paths)) {
+      const methods = _.pick(pathObject, _.values(HttpMethod));
+      const op = _.map(_.entries(methods), ([method, operation]) => {
+        const op: Operation = {
+          ...(operation as OpenAPIV3.OperationObject),
+          path,
+          method: method as HttpMethod,
+        };
+        if (pathObject.parameters) {
+          op.parameters = [...(op.parameters || []), ...pathObject.parameters];
+        }
+        if (pathObject.servers) {
+          op.servers = [...(op.servers || []), ...pathObject.servers];
+        }
+        return op;
+      });
+      operations.push(op);
+    }
+
+    return operations.flat();
   };
 
   /**
