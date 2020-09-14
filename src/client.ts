@@ -54,6 +54,7 @@ export class OpenAPIClientAxios {
   public swaggerParserOpts: SwaggerParser.Options;
 
   private defaultServer: number | string | Server;
+  private baseURLVariables: { [key: string]: string | number };
 
   /**
    * Creates an instance of OpenAPIClientAxios.
@@ -74,12 +75,14 @@ export class OpenAPIClientAxios {
     axiosConfigDefaults?: AxiosRequestConfig;
     swaggerParserOpts?: SwaggerParser.Options;
     withServer?: number | string | Server;
+    baseURLVariables?: { [key: string]: string | number };
   }) {
     const optsWithDefaults = {
       validate: true,
       strict: false,
       quick: false,
       withServer: 0,
+      baseURLVariables: {},
       swaggerParserOpts: {} as SwaggerParser.Options,
       ...opts,
       axiosConfigDefaults: {
@@ -94,6 +97,7 @@ export class OpenAPIClientAxios {
     this.axiosConfigDefaults = optsWithDefaults.axiosConfigDefaults;
     this.swaggerParserOpts = optsWithDefaults.swaggerParserOpts;
     this.defaultServer = optsWithDefaults.withServer;
+    this.baseURLVariables = optsWithDefaults.baseURLVariables;
   }
 
   /**
@@ -120,8 +124,9 @@ export class OpenAPIClientAxios {
     return this.instance as Client;
   };
 
-  public withServer(server: number | string | Server) {
+  public withServer(server: number | string | Server, variables: { [key: string]: string | number } = {}) {
     this.defaultServer = server;
+    this.baseURLVariables = variables;
   }
 
   /**
@@ -300,25 +305,87 @@ export class OpenAPIClientAxios {
       }
     }
 
+    // get the target server from this.defaultServer
+    let targetServer;
     if (typeof this.defaultServer === 'number') {
       if (this.definition.servers && this.definition.servers[this.defaultServer]) {
-        return this.definition.servers[this.defaultServer].url;
+        targetServer = this.definition.servers[this.defaultServer];
       }
-      return undefined;
-    }
-    if (typeof this.defaultServer === 'string') {
+    } else if (typeof this.defaultServer === 'string') {
       for (const server of this.definition.servers) {
         if (server.description === this.defaultServer) {
-          return server.url;
+          targetServer = server;
+          break;
         }
       }
-      return undefined;
-    }
-    if (this.defaultServer.url) {
-      return this.defaultServer.url;
+    } else if (this.defaultServer.url) {
+      targetServer = this.defaultServer;
     }
 
-    return undefined;
+    // if no targetServer is found, return undefined
+    if (!targetServer) {
+      return undefined;
+    }
+
+    const baseURL = targetServer.url;
+    const baseURLVariableSet = targetServer.variables;
+
+    // get baseURL var names
+    const baseURLBuilder = bath(baseURL);
+
+    // if there are no variables to resolve: return baseURL as is
+    if (!baseURLBuilder.names.length) {
+      return baseURL;
+    }
+
+    // object to place variables resolved from this.baseURLVariables
+    const baseURLVariablesResolved: { [key: string]: string } = {};
+
+    // step through names and assign value from this.baseURLVariables or the default value
+    // note: any variables defined in baseURLVariables but not actually variables in baseURL are ignored
+    for (const name of baseURLBuilder.names) {
+      const varValue = this.baseURLVariables[name];
+
+      if (varValue !== undefined) {
+        // if varValue exists assign to baseURLVariablesResolved object
+        if (typeof varValue === 'number') {
+          // if number, get value from enum array
+
+          const enumVal = baseURLVariableSet[name].enum[varValue];
+
+          if (enumVal) {
+            baseURLVariablesResolved[name] = enumVal;
+          } else {
+            // if supplied value out of range: throw error
+
+            throw new Error(
+              `index ${varValue} out of range for enum of baseURL variable: ${name}; \
+              enum max index is ${baseURLVariableSet[name].enum.length - 1}`,
+            );
+          }
+        } else if (typeof varValue === 'string') {
+          // if string, validate against enum array
+
+          if (baseURLVariableSet[name].enum.includes(varValue)) {
+            baseURLVariablesResolved[name] = varValue;
+          } else {
+            // if supplied value doesn't exist on enum: throw error
+
+            throw new Error(
+              `${varValue} is not a valid entry for baseURL variable ${name}; \
+                variable must be of the following: ${baseURLVariableSet[name].enum.join(', ')}`,
+            );
+          }
+        }
+      } else {
+        // if varValue doesn't exist: get default
+
+        baseURLVariablesResolved[name] = baseURLVariableSet[name].default;
+      }
+    }
+
+    // return resolved baseURL
+    return baseURLBuilder.path(baseURLVariablesResolved);
   };
 
   /**
