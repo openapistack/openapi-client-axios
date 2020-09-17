@@ -87,7 +87,7 @@ function generateMethodForOperation(methodName: string, operation: Operation, ex
   const returnType = `OperationResponse<${responseType}>`;
 
   const operationArgs = [parametersArg, dataArg, 'config?: AxiosRequestConfig'];
-  const operationMethod = `${methodName}(\n${operationArgs
+  const operationMethod = `'${methodName}'(\n${operationArgs
     .map((arg) => indent(arg, 2))
     .join(',\n')}  \n): ${returnType}`;
 
