@@ -2,7 +2,6 @@ import _ from 'lodash';
 import axios, { AxiosInstance, AxiosRequestConfig, Method } from 'axios';
 import bath from 'bath-es5';
 import OpenAPISchemaValidator from 'openapi-schema-validator';
-import SwaggerParser from 'swagger-parser';
 import QueryString from 'query-string';
 import {
   OpenAPIV3,
@@ -44,13 +43,11 @@ export class OpenAPIClientAxios {
 
   public strict: boolean;
   public quick: boolean;
-  public validate: boolean;
 
   public initalized: boolean;
   public instance: any;
 
   public axiosConfigDefaults: AxiosRequestConfig;
-  public swaggerParserOpts: SwaggerParser.Options;
 
   private defaultServer: number | string | Server;
   private baseURLVariables: { [key: string]: string | number };
@@ -62,7 +59,6 @@ export class OpenAPIClientAxios {
    * @param {Document | string} opts.definition - the OpenAPI definition, file path or Document object
    * @param {boolean} opts.strict - strict mode, throw errors or warn on OpenAPI spec validation errors (default: false)
    * @param {boolean} opts.quick - quick mode, skips validation and doesn't guarantee document is unchanged
-   * @param {boolean} opts.validate - whether to validate the input document document (default: true)
    * @param {boolean} opts.axiosConfigDefaults - default axios config for the instance
    * @memberof OpenAPIClientAxios
    */
@@ -70,19 +66,15 @@ export class OpenAPIClientAxios {
     definition: Document | string;
     strict?: boolean;
     quick?: boolean;
-    validate?: boolean;
     axiosConfigDefaults?: AxiosRequestConfig;
-    swaggerParserOpts?: SwaggerParser.Options;
     withServer?: number | string | Server;
     baseURLVariables?: { [key: string]: string | number };
   }) {
     const optsWithDefaults = {
-      validate: true,
       strict: false,
       quick: false,
       withServer: 0,
       baseURLVariables: {},
-      swaggerParserOpts: {} as SwaggerParser.Options,
       ...opts,
       axiosConfigDefaults: {
         paramsSerializer: (params) => QueryString.stringify(params, { arrayFormat: 'none' }),
@@ -92,9 +84,7 @@ export class OpenAPIClientAxios {
     this.inputDocument = optsWithDefaults.definition;
     this.strict = optsWithDefaults.strict;
     this.quick = optsWithDefaults.quick;
-    this.validate = optsWithDefaults.validate;
     this.axiosConfigDefaults = optsWithDefaults.axiosConfigDefaults;
-    this.swaggerParserOpts = optsWithDefaults.swaggerParserOpts;
     this.defaultServer = optsWithDefaults.withServer;
     this.baseURLVariables = optsWithDefaults.baseURLVariables;
   }
@@ -139,28 +129,15 @@ export class OpenAPIClientAxios {
   public init = async <Client = OpenAPIClient>(): Promise<Client> => {
     if (this.quick) {
       // to save time, just dereference input document
-      this.definition = await SwaggerParser.dereference(this.inputDocument, this.swaggerParserOpts);
+      this.definition = this.validateDefinition(this.inputDocument);
       // in quick mode no guarantees document will be the original document
       this.document = typeof this.inputDocument === 'object' ? this.inputDocument : this.definition;
     } else {
       // load and parse the document
       await this.loadDocument();
-      try {
-        if (this.validate) {
-          // validate the document
-          this.validateDefinition();
-        }
-      } catch (err) {
-        if (this.strict) {
-          // in strict-mode, fail hard and re-throw the error
-          throw err;
-        } else {
-          // just emit a warning about the validation errors
-          console.warn(err);
-        }
-      }
+
       // dereference the document into definition
-      this.definition = await SwaggerParser.dereference(_.cloneDeep(this.document), this.swaggerParserOpts);
+      this.definition = this.validateDefinition(this.inputDocument);
     }
 
     // create axios instance
@@ -195,21 +172,6 @@ export class OpenAPIClientAxios {
 
     // set document
     this.document = this.inputDocument;
-
-    try {
-      if (this.validate && !this.quick) {
-        // validate the document
-        this.validateDefinition();
-      }
-    } catch (err) {
-      if (this.strict) {
-        // in strict-mode, fail hard and re-throw the error
-        throw err;
-      } else {
-        // just emit a warning about the validation errors
-        console.warn(err);
-      }
-    }
 
     // create axios instance
     this.instance = this.createAxiosInstance();
@@ -273,16 +235,16 @@ export class OpenAPIClientAxios {
    * @returns {Document} parsed document
    * @memberof OpenAPIClientAxios
    */
-  public validateDefinition = () => {
+  public validateDefinition = (inputDocument: Document): OpenAPIV3.Document => {
     const validator = new OpenAPISchemaValidator({
       version: 3,
     });
-    const { errors } = validator.validate(this.document);
+    const { errors } = validator.validate(inputDocument);
     if (errors.length > 0) {
       const prettyErrors = JSON.stringify(errors, null, 2);
       throw new Error(`Document is not valid OpenAPI. ${errors.length} validation errors:\n${prettyErrors}`);
     }
-    return this.document;
+    return inputDocument;
   };
 
   /**

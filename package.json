@@ -44,7 +44,6 @@
     "openapi-schema-validator": "^7.0.1",
     "openapi-types": "^7.0.1",
     "query-string": "^6.5.0",
-    "swagger-parser": "^9.0.1"
   },
   "devDependencies": {
     "@anttiviljami/dtsgenerator": "^2.5.1",
