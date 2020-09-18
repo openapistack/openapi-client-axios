@@ -4,7 +4,6 @@ import bath from 'bath-es5';
 import OpenAPISchemaValidator from 'openapi-schema-validator';
 import SwaggerParser from 'swagger-parser';
 import QueryString from 'query-string';
-import dereference from 'json-schema-deref-sync';
 import {
   OpenAPIV3,
   Document,
@@ -211,9 +210,6 @@ export class OpenAPIClientAxios {
         console.warn(err);
       }
     }
-
-    // dereference the document into definition
-    this.definition = dereference(this.inputDocument);
 
     // create axios instance
     this.instance = this.createAxiosInstance();
