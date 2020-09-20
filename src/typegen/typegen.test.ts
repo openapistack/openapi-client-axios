@@ -5,7 +5,7 @@ import { generateTypesForDocument } from './typegen';
 const rootDir = path.join(__dirname, '..', '..');
 const testsDir = path.join(rootDir, '__tests__');
 
-const examplePetAPIYAML = path.join(testsDir, 'resources', 'example-pet-api.openapi.yml');
+const examplePetAPIYAML = path.join(testsDir, 'resources', 'example-pet-api.openapi.json');
 
 describe('typegen', () => {
   let imports: string;

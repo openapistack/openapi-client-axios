@@ -1,6 +1,7 @@
 import _ from 'lodash';
 import axios, { AxiosInstance, AxiosRequestConfig, Method } from 'axios';
 import bath from 'bath-es5';
+import fetch from 'node-fetch';
 import OpenAPISchemaValidator from 'openapi-schema-validator';
 import QueryString from 'query-string';
 import {
@@ -37,8 +38,7 @@ export type OpenAPIClient<
  * @class OpenAPIClientAxios
  */
 export class OpenAPIClientAxios {
-  public document: Document;
-  public inputDocument: Document | string;
+  public url: string;
   public definition: Document;
 
   public strict: boolean;
@@ -56,23 +56,20 @@ export class OpenAPIClientAxios {
    * Creates an instance of OpenAPIClientAxios.
    *
    * @param opts - constructor options
-   * @param {Document | string} opts.definition - the OpenAPI definition, file path or Document object
+   * @param {string} opts.url - URL to the OpenAPI definition document (JSON)
    * @param {boolean} opts.strict - strict mode, throw errors or warn on OpenAPI spec validation errors (default: false)
-   * @param {boolean} opts.quick - quick mode, skips validation and doesn't guarantee document is unchanged
    * @param {boolean} opts.axiosConfigDefaults - default axios config for the instance
    * @memberof OpenAPIClientAxios
    */
   constructor(opts: {
-    definition: Document | string;
+    url: string;
     strict?: boolean;
-    quick?: boolean;
     axiosConfigDefaults?: AxiosRequestConfig;
     withServer?: number | string | Server;
     baseURLVariables?: { [key: string]: string | number };
   }) {
     const optsWithDefaults = {
       strict: false,
-      quick: false,
       withServer: 0,
       baseURLVariables: {},
       ...opts,
@@ -81,12 +78,11 @@ export class OpenAPIClientAxios {
         ...(opts.axiosConfigDefaults || {}),
       } as AxiosRequestConfig,
     };
-    this.inputDocument = optsWithDefaults.definition;
     this.strict = optsWithDefaults.strict;
-    this.quick = optsWithDefaults.quick;
     this.axiosConfigDefaults = optsWithDefaults.axiosConfigDefaults;
     this.defaultServer = optsWithDefaults.withServer;
     this.baseURLVariables = optsWithDefaults.baseURLVariables;
+    this.url = opts.url;
   }
 
   /**
@@ -127,18 +123,10 @@ export class OpenAPIClientAxios {
    * @memberof OpenAPIClientAxios
    */
   public init = async <Client = OpenAPIClient>(): Promise<Client> => {
-    if (this.quick) {
-      // to save time, just dereference input document
-      this.definition = this.validateDefinition(this.inputDocument);
-      // in quick mode no guarantees document will be the original document
-      this.document = typeof this.inputDocument === 'object' ? this.inputDocument : this.definition;
-    } else {
-      // load and parse the document
-      await this.loadDocument();
+    const document = await this.loadDocument(this.url);
 
-      // dereference the document into definition
-      this.definition = this.validateDefinition(this.inputDocument);
-    }
+    // dereference the document into definition
+    this.definition = this.validateDefinition(document);
 
     // create axios instance
     this.instance = this.createAxiosInstance();
@@ -153,33 +141,9 @@ export class OpenAPIClientAxios {
    *
    * @memberof OpenAPIClientAxios
    */
-  public async loadDocument() {
-    this.document = await SwaggerParser.parse(this.inputDocument, this.swaggerParserOpts);
-    return this.document;
+  public async loadDocument(url: string): Promise<Document> {
+    return fetch(url).then((res) => res.ok && res.json());
   }
-
-  /**
-   * Synchronous version of .init()
-   *
-   * Note: Only works when the input definition is a valid OpenAPI v3 object and doesn't contain remote $refs.
-   *
-   * @memberof OpenAPIClientAxios
-   */
-  public initSync = <Client = OpenAPIClient>(): Client => {
-    if (typeof this.inputDocument !== 'object') {
-      throw new Error(`.initSync() can't be called with a non-object definition. Please use .init()`);
-    }
-
-    // set document
-    this.document = this.inputDocument;
-
-    // create axios instance
-    this.instance = this.createAxiosInstance();
-
-    // we are now initalized
-    this.initalized = true;
-    return this.instance as Client;
-  };
 
   /**
    * Creates a new axios instance, extends it and returns it
