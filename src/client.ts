@@ -252,65 +252,7 @@ export class OpenAPIClientAxios {
       return undefined;
     }
 
-    const baseURL = targetServer.url;
-    const baseURLVariableSet = targetServer.variables;
-
-    // get baseURL var names
-    const baseURLBuilder = bath(baseURL);
-
-    // if there are no variables to resolve: return baseURL as is
-    if (!baseURLBuilder.names.length) {
-      return baseURL;
-    }
-
-    // object to place variables resolved from this.baseURLVariables
-    const baseURLVariablesResolved: { [key: string]: string } = {};
-
-    // step through names and assign value from this.baseURLVariables or the default value
-    // note: any variables defined in baseURLVariables but not actually variables in baseURL are ignored
-    for (const name of baseURLBuilder.names) {
-      const varValue = this.baseURLVariables[name];
-
-      if (varValue !== undefined) {
-        // if varValue exists assign to baseURLVariablesResolved object
-        if (typeof varValue === 'number') {
-          // if number, get value from enum array
-
-          const enumVal = baseURLVariableSet[name].enum[varValue];
-
-          if (enumVal) {
-            baseURLVariablesResolved[name] = enumVal;
-          } else {
-            // if supplied value out of range: throw error
-
-            throw new Error(
-              `index ${varValue} out of range for enum of baseURL variable: ${name}; \
-              enum max index is ${baseURLVariableSet[name].enum.length - 1}`,
-            );
-          }
-        } else if (typeof varValue === 'string') {
-          // if string, validate against enum array
-
-          if (baseURLVariableSet[name].enum.includes(varValue)) {
-            baseURLVariablesResolved[name] = varValue;
-          } else {
-            // if supplied value doesn't exist on enum: throw error
-
-            throw new Error(
-              `${varValue} is not a valid entry for baseURL variable ${name}; \
-                variable must be of the following: ${baseURLVariableSet[name].enum.join(', ')}`,
-            );
-          }
-        }
-      } else {
-        // if varValue doesn't exist: get default
-
-        baseURLVariablesResolved[name] = baseURLVariableSet[name].default;
-      }
-    }
-
-    // return resolved baseURL
-    return baseURLBuilder.path(baseURLVariablesResolved);
+    return targetServer.url;
   };
 
   /**

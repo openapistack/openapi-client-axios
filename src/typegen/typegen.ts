@@ -21,15 +21,15 @@ export async function main() {
   console.log(operationTypings);
 }
 
-export async function generateTypesForDocument(definition: Document | string) {
-  const api = new OpenAPIClientAxios({ definition });
+export async function generateTypesForDocument(url: string) {
+  const api = new OpenAPIClientAxios({ url });
   await api.init();
 
   const processor = new WriteProcessor({ indentSize: 2, indentChar: ' ' });
   const resolver = new ReferenceResolver();
   const convertor = new SchemaConvertor(processor);
 
-  const rootSchema = await SwaggerParser.bundle(definition);
+  const rootSchema = await SwaggerParser.bundle(api.definition);
   resolver.registerSchema(parseSchema(rootSchema));
 
   const generator = new DtsGenerator(resolver, convertor);

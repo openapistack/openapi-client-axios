@@ -13,9 +13,25 @@
   ],
   "servers": [
     {
-      "url": "http://localhost:8080"
+      "url": "http://localhost:8080",
+      "description": "Main server"
     }, {
-      "url": "http://localhost:9090"
+      "url": "http://localhost:9090",
+      "description": "Alternative server"
+    }, {
+      "url": "http://{foo1}.localhost:9090/{foo2}/{foo3}/",
+      "description": "Server with vars",
+      "variables": {
+        "foo1": {
+          "default": "nope-foo1"
+        },
+        "foo2": {
+          "default": "nope-foo2"
+        },
+        "foo3": {
+          "default": "nope-foo3"
+        }
+      }
     }
   ],
   "paths": {
@@ -272,7 +288,7 @@
     "/pets/relative": {
       "servers": [
         {
-          "url": "baseURLV2"
+          "url": "http://localhost:8080/v2"
         }
       ],
       "get": {

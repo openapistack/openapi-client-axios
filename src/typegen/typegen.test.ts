@@ -1,11 +1,8 @@
-import path from 'path';
 import ts from 'typescript';
 import { generateTypesForDocument } from './typegen';
 
-const rootDir = path.join(__dirname, '..', '..');
-const testsDir = path.join(rootDir, '__tests__');
-
-const examplePetAPIYAML = path.join(testsDir, 'resources', 'example-pet-api.openapi.json');
+const examplePetAPIJSON =
+  'https://raw.githubusercontent.com/ccakes/openapi-client-axios/lighten-client/__tests__/resources/example-pet-api.openapi.json';
 
 describe('typegen', () => {
   let imports: string;
@@ -13,7 +10,7 @@ describe('typegen', () => {
   let operationTypings: string;
 
   beforeAll(async () => {
-    const types = await generateTypesForDocument(examplePetAPIYAML);
+    const types = await generateTypesForDocument(examplePetAPIJSON);
     imports = types[0];
     schemaTypes = types[1];
     operationTypings = types[2];
