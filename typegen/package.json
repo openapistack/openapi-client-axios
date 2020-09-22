@@ -39,10 +39,12 @@
     "@anttiviljami/dtsgenerator": "^2.5.0",
     "indent-string": "^4.0.0",
     "openapi-client-axios": "*",
-    "swagger-parser": "^9.0.1",
+    "swagger-parser": "^10.0.2",
     "yargs": "^13.2.2"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "openapi-types": "^7.0.1"
+  },
   "scripts": {
     "prepack": "./prepack.sh"
   }
