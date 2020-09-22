@@ -11,16 +11,12 @@
     "noImplicitAny": true,
     "strictPropertyInitialization": false,
     "strictNullChecks": false,
-    "baseUrl": ".",
-    "rootDir": "src/",
+    "baseUrl": "",
     "outDir": "",
     "sourceMap": true,
     "declaration": true
   },
   "include": [
     "src/**/*"
-  ],
-  "exclude": [
-    "**/*.test.ts"
   ]
 }
