@@ -1,10 +1,16 @@
-import _ from 'lodash';
 import axios, { AxiosInstance, AxiosRequestConfig, Method } from 'axios';
 import bath from 'bath-es5';
 import { validate as validateOpenAPI } from 'openapi-schema-validation';
 import SwaggerParser from 'swagger-parser';
 import QueryString from 'query-string';
 import dereference from 'json-schema-deref-sync';
+import get from 'lodash/get';
+import find from 'lodash/find';
+import pick from 'lodash/pick';
+import merge from 'lodash/merge';
+import isNil from 'lodash/isNil';
+import isArray from 'lodash/isArray';
+import cloneDeep from 'lodash/cloneDeep';
 import {
   OpenAPIV3,
   Document,
@@ -13,7 +19,6 @@ import {
   OperationMethodArguments,
   UnknownOperationMethods,
   RequestConfig,
-  ParamsArray,
   ParamType,
   HttpMethod,
   UnknownPathsDictionary,
@@ -161,7 +166,7 @@ export class OpenAPIClientAxios {
         }
       }
       // dereference the document into definition
-      this.definition = await SwaggerParser.dereference(_.cloneDeep(this.document), this.swaggerParserOpts);
+      this.definition = await SwaggerParser.dereference(cloneDeep(this.document), this.swaggerParserOpts);
     }
 
     // create axios instance
@@ -257,9 +262,9 @@ export class OpenAPIClientAxios {
         }
         const methods = this.definition.paths[path];
         for (const m in methods) {
-          if (methods[m as HttpMethod] && _.includes(Object.values(HttpMethod), m)) {
+          if (methods[m as HttpMethod] && Object.values(HttpMethod).includes(m as HttpMethod)) {
             const method = m as HttpMethod;
-            const operation = _.find(this.getOperations(), { path, method });
+            const operation = find(this.getOperations(), { path, method });
             instance.paths[path][method] = this.createOperationMethod(operation);
           }
         }
@@ -415,7 +420,7 @@ export class OpenAPIClientAxios {
 
     // allow overriding any parameters in AxiosRequestConfig
     const [, , config] = args;
-    return config ? _.merge(axiosConfig, config) : axiosConfig;
+    return config ? merge(axiosConfig, config) : axiosConfig;
   };
 
   /**
@@ -453,7 +458,7 @@ export class OpenAPIClientAxios {
     };
 
     const getParamType = (paramName: string): ParamType => {
-      const param = _.find((operation as Operation).parameters, { name: paramName }) as OpenAPIV3.ParameterObject;
+      const param = find((operation as Operation).parameters, { name: paramName }) as OpenAPIV3.ParameterObject;
       if (param) {
         return param.in as ParamType;
       }
@@ -462,22 +467,22 @@ export class OpenAPIClientAxios {
     };
 
     const getFirstOperationParam = () => {
-      const firstRequiredParam = _.find((operation as Operation).parameters, {
+      const firstRequiredParam = find((operation as Operation).parameters, {
         required: true,
       }) as OpenAPIV3.ParameterObject;
       if (firstRequiredParam) {
         return firstRequiredParam;
       }
-      const firstParam = _.first((operation as Operation).parameters) as OpenAPIV3.ParameterObject;
+      const firstParam = get((operation as Operation).parameters, '0') as OpenAPIV3.ParameterObject;
       if (firstParam) {
         return firstParam;
       }
     };
 
     const [paramsArg, payload] = args;
-    if (_.isArray(paramsArg)) {
+    if (isArray(paramsArg)) {
       // ParamsArray
-      for (const param of paramsArg as ParamsArray) {
+      for (const param of paramsArg) {
         setRequestParam(param.name, param.value, param.in || getParamType(param.name));
       }
     } else if (typeof paramsArg === 'object') {
@@ -487,7 +492,7 @@ export class OpenAPIClientAxios {
           setRequestParam(name, paramsArg[name], getParamType(name));
         }
       }
-    } else if (!_.isNil(paramsArg)) {
+    } else if (!isNil(paramsArg)) {
       const firstParam = getFirstOperationParam();
       if (!firstParam) {
         throw new Error(`No parameters found for operation ${operation.operationId}`);
@@ -532,14 +537,13 @@ export class OpenAPIClientAxios {
    * @memberof OpenAPIBackend
    */
   public getOperations = (): Operation[] => {
-    const paths = _.get(this.definition, 'paths', {});
-    return _.chain(paths)
-      .entries()
+    const paths = this.definition?.paths || {};
+    return Object.entries(paths)
       .flatMap(([path, pathObject]) => {
-        const methods = _.pick(pathObject, _.values(HttpMethod));
-        return _.map(_.entries(methods), ([method, operation]) => {
+        const methods = pick(pathObject, Object.values(HttpMethod));
+        return Object.entries(methods).map(([method, operation]) => {
           const op: Operation = {
-            ...(operation as OpenAPIV3.OperationObject),
+            ...operation,
             path,
             method: method as HttpMethod,
           };
@@ -551,8 +555,7 @@ export class OpenAPIClientAxios {
           }
           return op;
         });
-      })
-      .value();
+      });
   };
 
   /**
@@ -563,7 +566,7 @@ export class OpenAPIClientAxios {
    * @memberof OpenAPIBackend
    */
   public getOperation = (operationId: string): Operation | undefined => {
-    return _.find(this.getOperations(), { operationId });
+    return find(this.getOperations(), { operationId });
   };
 
   /**
