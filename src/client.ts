@@ -8,6 +8,7 @@ import get from 'lodash/get';
 import find from 'lodash/find';
 import pick from 'lodash/pick';
 import merge from 'lodash/merge';
+import flatMap from 'lodash/flatMap';
 import isNil from 'lodash/isNil';
 import isArray from 'lodash/isArray';
 import cloneDeep from 'lodash/cloneDeep';
@@ -538,8 +539,8 @@ export class OpenAPIClientAxios {
    */
   public getOperations = (): Operation[] => {
     const paths = this.definition?.paths || {};
-    return Object.entries(paths)
-      .flatMap(([path, pathObject]) => {
+    return flatMap(Object.entries(paths),
+      ([path, pathObject]) => {
         const methods = pick(pathObject, Object.values(HttpMethod));
         return Object.entries(methods).map(([method, operation]) => {
           const op: Operation = {
