@@ -1,4 +1,4 @@
-<h1 align="center"><a href="https://github.com/anttiviljami/openapi-client-axios"><img alt="openapi-client-axios" src="https://raw.githubusercontent.com/anttiviljami/openapi-client-axios/master/header.png" style="max-width:50rem"></a></h1>
+<h1 align="center"><img alt="openapi-client-axios" src="./header.png" style="max-width:50rem"></h1>
 
 [![CI](https://github.com/anttiviljami/openapi-client-axios/workflows/CI/badge.svg)](https://github.com/anttiviljami/openapi-client-axios/actions?query=workflow%3ACI)
 [![Dependencies](https://david-dm.org/anttiviljami/openapi-client-axios.svg)](https://david-dm.org/anttiviljami/openapi-client-axios)
