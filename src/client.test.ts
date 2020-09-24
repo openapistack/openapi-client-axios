@@ -1,5 +1,6 @@
 import path from 'path';
 import MockAdapter from 'axios-mock-adapter';
+import cloneDeep from 'lodash/cloneDeep';
 import { definition, baseURL, baseURLV2, baseURLAlternative, baseURLWithVariableResolved } from '../__tests__/fixtures';
 import { OpenAPIClientAxios, OpenAPIClient } from './client';
 
@@ -28,6 +29,13 @@ describe('OpenAPIClientAxios', () => {
       expect(api.initalized).toEqual(true);
       expect(api.client.api).toBe(api);
       checkHasOperationMethods(api.client);
+    });
+
+    test('dereferences the input document', async () => {
+      const api = new OpenAPIClientAxios({ definition, strict: true });
+      await api.init();
+      expect(JSON.stringify(api.inputDocument)).toMatch('$ref');
+      expect(JSON.stringify(api.definition)).not.toMatch('$ref');
     });
 
     test('can be initalised using a valid YAML file', async () => {
@@ -63,7 +71,11 @@ describe('OpenAPIClientAxios', () => {
     });
 
     test('can be initialised using alternative server with variable in baseURL', async () => {
-      const api = new OpenAPIClientAxios({ definition, withServer: 2, baseURLVariables: { foo2: 'bar2a', foo3: 1 } });
+      const api = new OpenAPIClientAxios({
+        definition,
+        withServer: 2,
+        baseURLVariables: { foo2: 'bar2a', foo3: 1 },
+      });
       await api.init();
       expect(api.getBaseURL()).toEqual(baseURLWithVariableResolved);
       expect(api.client.api).toBe(api);
@@ -153,6 +165,13 @@ describe('OpenAPIClientAxios', () => {
       expect(api.initalized).toEqual(true);
       expect(api.client.api).toBe(api);
       checkHasOperationMethods(api.client);
+    });
+
+    test('dereferences the input document', () => {
+      const api = new OpenAPIClientAxios({ definition, strict: true });
+      api.initSync();
+      expect(JSON.stringify(api.inputDocument)).toMatch('$ref');
+      expect(JSON.stringify(api.definition)).not.toMatch('$ref');
     });
 
     test('throws an error when initalised using a file URL', () => {

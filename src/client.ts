@@ -2,6 +2,7 @@ import axios, { AxiosInstance, AxiosRequestConfig, Method } from 'axios';
 import bath from 'bath-es5';
 import { validate as validateOpenAPI } from 'openapi-schema-validation';
 import SwaggerParser from 'swagger-parser';
+import RefParser from '@apidevtools/json-schema-ref-parser';
 import dereference from '@apidevtools/json-schema-ref-parser/lib/dereference';
 import QueryString from 'query-string';
 import get from 'lodash/get';
@@ -219,10 +220,14 @@ export class OpenAPIClientAxios {
     }
 
     // dereference the document into definition
-    dereference(this.inputDocument);
+    this.definition = cloneDeep(this.document);
+    const parser = new RefParser();
+    parser.parse(this.definition);
+    parser.schema = this.definition;
+    dereference(parser); // mutates this.definition (synchronous)
 
     // create axios instance
-    this.instance = this.createAxiosInstance();
+    // this.instance = this.createAxiosInstance();
 
     // we are now initalized
     this.initalized = true;
