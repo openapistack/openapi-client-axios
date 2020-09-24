@@ -227,7 +227,7 @@ export class OpenAPIClientAxios {
     dereference(parser); // mutates this.definition (synchronous)
 
     // create axios instance
-    // this.instance = this.createAxiosInstance();
+    this.instance = this.createAxiosInstance();
 
     // we are now initalized
     this.initalized = true;
