@@ -2,6 +2,7 @@ import axios, { AxiosInstance, AxiosRequestConfig, Method } from 'axios';
 import bath from 'bath-es5';
 import { validate as validateOpenAPI } from 'openapi-schema-validation';
 import SwaggerParser from 'swagger-parser';
+import dereference from '@apidevtools/json-schema-ref-parser/lib/dereference';
 import QueryString from 'query-string';
 import get from 'lodash/get';
 import find from 'lodash/find';
@@ -218,8 +219,7 @@ export class OpenAPIClientAxios {
     }
 
     // dereference the document into definition
-    // NOTE: make sure to explicitly require this module as a dependency if you intend to use the initSync method
-    this.definition = require('json-schema-deref-sync')(this.inputDocument);
+    dereference(this.inputDocument);
 
     // create axios instance
     this.instance = this.createAxiosInstance();
