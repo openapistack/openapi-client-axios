@@ -30,6 +30,12 @@ describe('OpenAPIClientAxios', () => {
       checkHasOperationMethods(api.client);
     });
 
+    test('dereferences the input document', async () => {
+      const api = new OpenAPIClientAxios({ definition, strict: true });
+      await api.init();
+      expect(JSON.stringify(api.definition)).not.toMatch('$ref');
+    });
+
     test('can be initalised using a valid YAML file', async () => {
       const api = new OpenAPIClientAxios({ definition: examplePetAPIYAML, strict: true });
       await api.init();
@@ -153,6 +159,12 @@ describe('OpenAPIClientAxios', () => {
       expect(api.initalized).toEqual(true);
       expect(api.client.api).toBe(api);
       checkHasOperationMethods(api.client);
+    });
+
+    test('dereferences the input document', async () => {
+      const api = new OpenAPIClientAxios({ definition, strict: true });
+      await api.init();
+      expect(JSON.stringify(api.definition)).not.toMatch('$ref');
     });
 
     test('throws an error when initalised using a file URL', () => {
