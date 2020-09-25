@@ -13,6 +13,7 @@
     - [Parameter: opts.validate](#parameter-optsvalidate)
     - [Parameter: opts.withServer](#parameter-optswithserver)
     - [Parameter: opts.axiosConfigDefaults](#parameter-optsaxiosconfigdefaults)
+    - [Parameter: opts.operationNameFactory](#parameter-optsoperationnamefactory)
   - [.init()](#init)
   - [.initSync()](#initsync)
   - [.getClient()](#getclient)
@@ -160,6 +161,12 @@ Type: `number`, `string` or [Server Object](https://github.com/OAI/OpenAPI-Speci
 Optional. Default axios config for the instance. Applied when instance is created.
 
 Type: [`AxiosRequestConfig`](https://github.com/axios/axios#request-config)
+
+#### Parameter: opts.operationNameFactory
+
+Optional. Override the default method name resolution strategy (default: use `operationId` as method name)
+
+Type: `(operationId: string) => string`
 
 ### .init()
 
