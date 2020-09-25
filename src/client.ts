@@ -78,7 +78,6 @@ export class OpenAPIClientAxios {
    */
   constructor(opts: {
     definition: Document | string;
-    operationNameFactory?: (operation: string) => string;
     strict?: boolean;
     quick?: boolean;
     validate?: boolean;
@@ -86,6 +85,7 @@ export class OpenAPIClientAxios {
     swaggerParserOpts?: SwaggerParser.Options;
     withServer?: number | string | Server;
     baseURLVariables?: { [key: string]: string | number };
+    operationNameFactory?: (operation: string) => string;
   }) {
     const optsWithDefaults = {
       validate: true,
