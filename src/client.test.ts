@@ -31,6 +31,15 @@ describe('OpenAPIClientAxios', () => {
       checkHasOperationMethods(api.client);
     });
 
+    test('operation method names are configurable', async () => {
+      const api = new OpenAPIClientAxios({ definition, strict: true, operationNameFactory: (operation) => operation.toUpperCase() });
+      await api.init();
+
+      expect(api.client).toHaveProperty('GETPETS');
+      expect(api.client).toHaveProperty('CREATEPET');
+      expect(api.client).toHaveProperty('GETPETBYID');
+    })
+
     test('dereferences the input document', async () => {
       const api = new OpenAPIClientAxios({ definition, strict: true });
       await api.init();
