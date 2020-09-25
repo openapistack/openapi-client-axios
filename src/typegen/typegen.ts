@@ -17,15 +17,15 @@ interface TypegenOptions {
 export async function main() {
   const argv = yargs
     .option('transformOperationName', {
-      type: 'string'
+      type: 'string',
     })
     .usage('Usage: $0 [file]')
     .example('$0 ./openapi.yml > client.d.ts', '- generate a type definition file')
     .demandCommand(1).argv;
 
   const opts: TypegenOptions = {
-    transformOperationName: (operation: string) => operation
-  }
+    transformOperationName: (operation: string) => operation,
+  };
 
   if (argv.transformOperationName) {
     const [modulePath, func] = argv.transformOperationName.split(/\.(?=[^\.]+$)/);
@@ -34,7 +34,7 @@ export async function main() {
       throw new Error('transformOperationName must be provided in {path-to-module}.{exported-function} format');
     }
 
-    const module = (await import(modulePath))
+    const module = await import(modulePath);
 
     if (!module[func]) {
       throw new Error(`Could not find transform function ${func} in ${modulePath}`);
@@ -78,6 +78,7 @@ export async function generateTypesForDocument(definition: Document | string, op
   return [imports, schemaTypes, operationTypings];
 }
 
+// tslint:disable-next-line:max-line-length
 function generateMethodForOperation(methodName: string, operation: Operation, exportTypes: ExportedType[]) {
   const { operationId, summary, description } = operation;
 
@@ -132,10 +133,13 @@ function generateMethodForOperation(methodName: string, operation: Operation, ex
   return [comment, operationMethod].join('\n');
 }
 
+// tslint:disable-next-line:max-line-length
 export function generateOperationMethodTypings(api: OpenAPIClientAxios, exportTypes: ExportedType[], opts: TypegenOptions) {
   const operations = api.getOperations();
 
-  const operationTypings = operations.map((op) => generateMethodForOperation(opts.transformOperationName(op.operationId), op, exportTypes));
+  const operationTypings = operations.map((op) => {
+    return generateMethodForOperation(opts.transformOperationName(op.operationId), op, exportTypes);
+  });
 
   const pathOperationTypes = _.entries(api.definition.paths).map(([path, pathItem]) => {
     const methodTypings: string[] = [];
