@@ -1,6 +1,5 @@
 import axios, { AxiosInstance, AxiosRequestConfig, Method } from 'axios';
 import bath from 'bath-es5';
-import { validate as validateOpenAPI } from 'openapi-schema-validation';
 import SwaggerParser from 'swagger-parser';
 import RefParser from '@apidevtools/json-schema-ref-parser';
 import dereference from '@apidevtools/json-schema-ref-parser/lib/dereference';
@@ -26,6 +25,11 @@ import {
   UnknownPathsDictionary,
   Server,
 } from './types/client';
+
+const OpenAPISchemaValidator = require('openapi-schema-validator').default;
+const validateOpenAPI = new OpenAPISchemaValidator({
+  version: 3,
+});
 
 /**
  * OpenAPIClient is an AxiosInstance extended with operation methods
@@ -289,8 +293,8 @@ export class OpenAPIClientAxios {
    * @memberof OpenAPIClientAxios
    */
   public validateDefinition = () => {
-    const { valid, errors } = validateOpenAPI(this.document, 3);
-    if (!valid) {
+    const { errors } = validateOpenAPI.validate(this.document);
+    if (errors.length) {
       const prettyErrors = JSON.stringify(errors, null, 2);
       throw new Error(`Document is not valid OpenAPI. ${errors.length} validation errors:\n${prettyErrors}`);
     }
