@@ -1,4 +1,5 @@
 import axios, { AxiosInstance, AxiosRequestConfig, Method } from 'axios';
+import OpenAPISchemaValidator from 'openapi-schema-validator';
 import bath from 'bath-es5';
 import SwaggerParser from 'swagger-parser';
 import RefParser from '@apidevtools/json-schema-ref-parser';
@@ -25,11 +26,6 @@ import {
   UnknownPathsDictionary,
   Server,
 } from './types/client';
-
-const OpenAPISchemaValidator = require('openapi-schema-validator').default;
-const validateOpenAPI = new OpenAPISchemaValidator({
-  version: 3,
-});
 
 /**
  * OpenAPIClient is an AxiosInstance extended with operation methods
@@ -293,6 +289,7 @@ export class OpenAPIClientAxios {
    * @memberof OpenAPIClientAxios
    */
   public validateDefinition = () => {
+    const validateOpenAPI = new OpenAPISchemaValidator({version: 3});
     const { errors } = validateOpenAPI.validate(this.document);
     if (errors.length) {
       const prettyErrors = JSON.stringify(errors, null, 2);
