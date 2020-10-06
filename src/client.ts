@@ -63,6 +63,8 @@ export class OpenAPIClientAxios {
   private defaultServer: number | string | Server;
   private baseURLVariables: { [key: string]: string | number };
 
+  private transformOperationName: (operation: string) => string;
+
   /**
    * Creates an instance of OpenAPIClientAxios.
    *
@@ -83,6 +85,7 @@ export class OpenAPIClientAxios {
     swaggerParserOpts?: SwaggerParser.Options;
     withServer?: number | string | Server;
     baseURLVariables?: { [key: string]: string | number };
+    transformOperationName?: (operation: string) => string;
   }) {
     const optsWithDefaults = {
       validate: true,
@@ -91,6 +94,7 @@ export class OpenAPIClientAxios {
       withServer: 0,
       baseURLVariables: {},
       swaggerParserOpts: {} as SwaggerParser.Options,
+      transformOperationName: (operationId: string) => operationId,
       ...opts,
       axiosConfigDefaults: {
         paramsSerializer: (params) => QueryString.stringify(params, { arrayFormat: 'none' }),
@@ -105,6 +109,7 @@ export class OpenAPIClientAxios {
     this.swaggerParserOpts = optsWithDefaults.swaggerParserOpts;
     this.defaultServer = optsWithDefaults.withServer;
     this.baseURLVariables = optsWithDefaults.baseURLVariables;
+    this.transformOperationName = optsWithDefaults.transformOperationName;
   }
 
   /**
@@ -254,7 +259,7 @@ export class OpenAPIClientAxios {
     for (const operation of operations) {
       const { operationId } = operation;
       if (operationId) {
-        instance[operationId] = this.createOperationMethod(operation);
+        instance[this.transformOperationName(operationId)] = this.createOperationMethod(operation);
       }
     }
 

@@ -13,7 +13,9 @@ describe('typegen', () => {
   let operationTypings: string;
 
   beforeAll(async () => {
-    const types = await generateTypesForDocument(examplePetAPIYAML);
+    const types = await generateTypesForDocument(examplePetAPIYAML, {
+      transformOperationName: (operationId: string) => operationId
+    });
     imports = types[0];
     schemaTypes = types[1];
     operationTypings = types[2];

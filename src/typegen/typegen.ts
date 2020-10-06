@@ -10,18 +10,46 @@ import WriteProcessor from '@anttiviljami/dtsgenerator/dist/core/writeProcessor'
 import SwaggerParser from 'swagger-parser';
 import { normalizeTypeName } from '@anttiviljami/dtsgenerator/dist/core/typeNameConvertor';
 
+interface TypegenOptions {
+  transformOperationName?: (operation: string) => string;
+}
+
 export async function main() {
   const argv = yargs
+    .option('transformOperationName', {
+      type: 'string',
+    })
     .usage('Usage: $0 [file]')
     .example('$0 ./openapi.yml > client.d.ts', '- generate a type definition file')
     .demandCommand(1).argv;
-  const [imports, schemaTypes, operationTypings] = await generateTypesForDocument(argv._[0]);
+
+  const opts: TypegenOptions = {
+    transformOperationName: (operation: string) => operation,
+  };
+
+  if (argv.transformOperationName) {
+    const [modulePath, func] = argv.transformOperationName.split(/\.(?=[^\.]+$)/);
+
+    if (!modulePath || !func) {
+      throw new Error('transformOperationName must be provided in {path-to-module}.{exported-function} format');
+    }
+
+    const module = await import(modulePath);
+
+    if (!module[func]) {
+      throw new Error(`Could not find transform function ${func} in ${modulePath}`);
+    }
+
+    opts.transformOperationName = module[func];
+  }
+
+  const [imports, schemaTypes, operationTypings] = await generateTypesForDocument(argv._[0], opts);
   console.log(imports, '\n');
   console.log(schemaTypes);
   console.log(operationTypings);
 }
 
-export async function generateTypesForDocument(definition: Document | string) {
+export async function generateTypesForDocument(definition: Document | string, opts: TypegenOptions) {
   const api = new OpenAPIClientAxios({ definition });
   await api.init();
 
@@ -35,7 +63,7 @@ export async function generateTypesForDocument(definition: Document | string) {
   const generator = new DtsGenerator(resolver, convertor);
   const schemaTypes = await generator.generate();
   const exportedTypes = convertor.getExports();
-  const operationTypings = generateOperationMethodTypings(api, exportedTypes);
+  const operationTypings = generateOperationMethodTypings(api, exportedTypes, opts);
 
   const imports = [
     'import {',
@@ -50,6 +78,7 @@ export async function generateTypesForDocument(definition: Document | string) {
   return [imports, schemaTypes, operationTypings];
 }
 
+// tslint:disable-next-line:max-line-length
 function generateMethodForOperation(methodName: string, operation: Operation, exportTypes: ExportedType[]) {
   const { operationId, summary, description } = operation;
 
@@ -104,10 +133,13 @@ function generateMethodForOperation(methodName: string, operation: Operation, ex
   return [comment, operationMethod].join('\n');
 }
 
-export function generateOperationMethodTypings(api: OpenAPIClientAxios, exportTypes: ExportedType[]) {
+// tslint:disable-next-line:max-line-length
+export function generateOperationMethodTypings(api: OpenAPIClientAxios, exportTypes: ExportedType[], opts: TypegenOptions) {
   const operations = api.getOperations();
 
-  const operationTypings = operations.map((op) => generateMethodForOperation(op.operationId, op, exportTypes));
+  const operationTypings = operations.map((op) => {
+    return generateMethodForOperation(opts.transformOperationName(op.operationId), op, exportTypes);
+  });
 
   const pathOperationTypes = _.entries(api.definition.paths).map(([path, pathItem]) => {
     const methodTypings: string[] = [];
