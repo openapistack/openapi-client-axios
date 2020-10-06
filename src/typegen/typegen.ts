@@ -16,8 +16,8 @@ interface TypegenOptions {
 
 export async function main() {
   const argv = yargs
-    .option('t', {
-      alias: 'transformOperationName',
+    .option('transformOperationName', {
+      alias: 't',
       type: 'string',
     })
     .usage('Usage: $0 [file]')
