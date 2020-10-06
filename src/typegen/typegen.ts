@@ -16,7 +16,8 @@ interface TypegenOptions {
 
 export async function main() {
   const argv = yargs
-    .option('transformOperationName', {
+    .option('t', {
+      alias: 'transformOperationName',
       type: 'string',
     })
     .usage('Usage: $0 [file]')
@@ -134,7 +135,11 @@ function generateMethodForOperation(methodName: string, operation: Operation, ex
 }
 
 // tslint:disable-next-line:max-line-length
-export function generateOperationMethodTypings(api: OpenAPIClientAxios, exportTypes: ExportedType[], opts: TypegenOptions) {
+export function generateOperationMethodTypings(
+  api: OpenAPIClientAxios,
+  exportTypes: ExportedType[],
+  opts: TypegenOptions,
+) {
   const operations = api.getOperations();
 
   const operationTypings = operations.map((op) => {
