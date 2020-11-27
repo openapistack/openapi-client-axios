@@ -500,7 +500,7 @@ export class OpenAPIClientAxios {
     } else if (typeof paramsArg === 'object') {
       // ParamsObject
       for (const name in paramsArg) {
-        if (paramsArg[name]) {
+        if (paramsArg[name] !== undefined) {
           setRequestParam(name, paramsArg[name], getParamType(name));
         }
       }
