@@ -4,6 +4,7 @@ import bath from 'bath-es5';
 import SwaggerParser from 'swagger-parser';
 import RefParser from '@apidevtools/json-schema-ref-parser';
 import dereference from '@apidevtools/json-schema-ref-parser/lib/dereference';
+import $RefParserOptions from '@apidevtools/json-schema-ref-parser/lib/options';
 import QueryString from 'query-string';
 import get from 'lodash/get';
 import find from 'lodash/find';
@@ -229,7 +230,7 @@ export class OpenAPIClientAxios {
     const parser = new RefParser();
     parser.parse(this.definition);
     parser.schema = this.definition;
-    dereference(parser); // mutates this.definition (synchronous)
+    dereference(parser, new $RefParserOptions({})); // mutates this.definition (synchronous)
 
     // create axios instance
     this.instance = this.createAxiosInstance();
