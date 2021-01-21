@@ -38,7 +38,7 @@
     "!typegen"
   ],
   "dependencies": {
-    "axios": "^0.20.0",
+    "axios": "^0.21.1",
     "bath-es5": "^3.0.3",
     "lodash": "^4.17.15",
     "openapi-schema-validator": "^7.0.1",
