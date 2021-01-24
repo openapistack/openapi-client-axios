@@ -25,13 +25,10 @@
     "browser",
     "typescript"
   ],
-  "homepage": "https://github.com/anttiviljami/openapi-client-axios-typegen",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/anttiviljami/openapi-client-axios-typegen.git"
-  },
+  "homepage": "https://github.com/anttiviljami/openapi-client-axios/tree/master/typegen",
+  "repository": "https://github.com/anttiviljami/openapi-client-axios/tree/master/typegen",
   "bugs": {
-    "url": "https://github.com/anttiviljami/openapi-client-axios-typegen/issues"
+    "url": "https://github.com/anttiviljami/openapi-client-axios/issues"
   },
   "main": "typegen.js",
   "types": "typegen.d.ts",
