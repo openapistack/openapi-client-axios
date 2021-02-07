@@ -32,7 +32,7 @@ See [DOCS.md](https://github.com/anttiviljami/openapi-client-axios/blob/master/D
 ## Quick Start
 
 ```
-npm install --save openapi-client-axios
+npm install --save axios openapi-client-axios
 ```
 
 With promises / CommonJS syntax:
