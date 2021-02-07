@@ -7,7 +7,7 @@ import { parseSchema } from '@anttiviljami/dtsgenerator/dist/core/jsonSchema';
 import ReferenceResolver from '@anttiviljami/dtsgenerator/dist/core/referenceResolver';
 import SchemaConvertor, { ExportedType } from '@anttiviljami/dtsgenerator/dist/core/schemaConvertor';
 import WriteProcessor from '@anttiviljami/dtsgenerator/dist/core/writeProcessor';
-import SwaggerParser from 'swagger-parser';
+import { bundle } from '@apidevtools/json-schema-ref-parser';
 import { normalizeTypeName } from '@anttiviljami/dtsgenerator/dist/core/typeNameConvertor';
 
 interface TypegenOptions {
@@ -58,7 +58,7 @@ export async function generateTypesForDocument(definition: Document | string, op
   const resolver = new ReferenceResolver();
   const convertor = new SchemaConvertor(processor);
 
-  const rootSchema = await SwaggerParser.bundle(definition);
+  const rootSchema = await bundle(definition);
   resolver.registerSchema(parseSchema(rootSchema));
 
   const generator = new DtsGenerator(resolver, convertor);

@@ -1,10 +1,10 @@
 import axios, { AxiosInstance, AxiosRequestConfig, Method } from 'axios';
 import OpenAPISchemaValidator from 'openapi-schema-validator';
 import bath from 'bath-es5';
-import SwaggerParser from 'swagger-parser';
+import { parse as parseJSONSchema, dereference } from '@apidevtools/json-schema-ref-parser';
 import RefParser from '@apidevtools/json-schema-ref-parser';
-import dereference from '@apidevtools/json-schema-ref-parser/lib/dereference';
-import $RefParserOptions from '@apidevtools/json-schema-ref-parser/lib/options';
+import RefParserOptions from '@apidevtools/json-schema-ref-parser/lib/options';
+import dereferenceSync from '@apidevtools/json-schema-ref-parser/lib/dereference';
 import QueryString from 'query-string';
 import get from 'lodash/get';
 import find from 'lodash/find';
@@ -59,7 +59,7 @@ export class OpenAPIClientAxios {
   public instance: any;
 
   public axiosConfigDefaults: AxiosRequestConfig;
-  public swaggerParserOpts: SwaggerParser.Options;
+  public swaggerParserOpts: RefParserOptions;
 
   private defaultServer: number | string | Server;
   private baseURLVariables: { [key: string]: string | number };
@@ -83,7 +83,7 @@ export class OpenAPIClientAxios {
     quick?: boolean;
     validate?: boolean;
     axiosConfigDefaults?: AxiosRequestConfig;
-    swaggerParserOpts?: SwaggerParser.Options;
+    swaggerParserOpts?: RefParserOptions;
     withServer?: number | string | Server;
     baseURLVariables?: { [key: string]: string | number };
     transformOperationName?: (operation: string) => string;
@@ -94,7 +94,7 @@ export class OpenAPIClientAxios {
       quick: false,
       withServer: 0,
       baseURLVariables: {},
-      swaggerParserOpts: {} as SwaggerParser.Options,
+      swaggerParserOpts: {} as RefParserOptions,
       transformOperationName: (operationId: string) => operationId,
       ...opts,
       axiosConfigDefaults: {
@@ -153,7 +153,7 @@ export class OpenAPIClientAxios {
   public init = async <Client = OpenAPIClient>(): Promise<Client> => {
     if (this.quick) {
       // to save time, just dereference input document
-      this.definition = await SwaggerParser.dereference(this.inputDocument, this.swaggerParserOpts);
+      this.definition = await dereference(this.inputDocument, this.swaggerParserOpts) as Document;
       // in quick mode no guarantees document will be the original document
       this.document = typeof this.inputDocument === 'object' ? this.inputDocument : this.definition;
     } else {
@@ -174,7 +174,7 @@ export class OpenAPIClientAxios {
         }
       }
       // dereference the document into definition
-      this.definition = await SwaggerParser.dereference(cloneDeep(this.document), this.swaggerParserOpts);
+      this.definition = await dereference(cloneDeep(this.document), this.swaggerParserOpts) as Document;
     }
 
     // create axios instance
@@ -191,7 +191,7 @@ export class OpenAPIClientAxios {
    * @memberof OpenAPIClientAxios
    */
   public async loadDocument() {
-    this.document = await SwaggerParser.parse(this.inputDocument, this.swaggerParserOpts);
+    this.document = await parseJSONSchema(this.inputDocument, this.swaggerParserOpts) as Document;
     return this.document;
   }
 
@@ -230,7 +230,7 @@ export class OpenAPIClientAxios {
     const parser = new RefParser();
     parser.parse(this.definition);
     parser.schema = this.definition;
-    dereference(parser, new $RefParserOptions({})); // mutates this.definition (synchronous)
+    dereferenceSync(parser, new RefParserOptions({})); // mutates this.definition (synchronous)
 
     // create axios instance
     this.instance = this.createAxiosInstance();
