@@ -142,7 +142,7 @@ export class OpenAPIClientAxios {
   public init = async <Client = OpenAPIClient>(): Promise<Client> => {
     if (this.quick) {
       // to save time, just dereference input document
-      this.definition = await dereference(this.inputDocument, this.swaggerParserOpts) as Document;
+      this.definition = (await dereference(this.inputDocument, this.swaggerParserOpts)) as Document;
       // in quick mode no guarantees document will be the original document
       this.document = typeof this.inputDocument === 'object' ? this.inputDocument : this.definition;
     } else {
@@ -150,7 +150,7 @@ export class OpenAPIClientAxios {
       await this.loadDocument();
 
       // dereference the document into definition
-      this.definition = await dereference(cloneDeep(this.document), this.swaggerParserOpts) as Document;
+      this.definition = (await dereference(cloneDeep(this.document), this.swaggerParserOpts)) as Document;
     }
 
     // create axios instance
@@ -167,7 +167,7 @@ export class OpenAPIClientAxios {
    * @memberof OpenAPIClientAxios
    */
   public async loadDocument() {
-    this.document = await parseJSONSchema(this.inputDocument, this.swaggerParserOpts) as Document;
+    this.document = (await parseJSONSchema(this.inputDocument, this.swaggerParserOpts)) as Document;
     return this.document;
   }
 
@@ -496,24 +496,23 @@ export class OpenAPIClientAxios {
    */
   public getOperations = (): Operation[] => {
     const paths = this.definition?.paths || {};
-    return flatMap(Object.entries(paths),
-      ([path, pathObject]) => {
-        const methods = pick(pathObject, Object.values(HttpMethod));
-        return Object.entries(methods).map(([method, operation]) => {
-          const op: Operation = {
-            ...operation,
-            path,
-            method: method as HttpMethod,
-          };
-          if (pathObject.parameters) {
-            op.parameters = [...(op.parameters || []), ...pathObject.parameters];
-          }
-          if (pathObject.servers) {
-            op.servers = [...(op.servers || []), ...pathObject.servers];
-          }
-          return op;
-        });
+    return flatMap(Object.entries(paths), ([path, pathObject]) => {
+      const methods = pick(pathObject, Object.values(HttpMethod));
+      return Object.entries(methods).map(([method, operation]) => {
+        const op: Operation = {
+          ...operation,
+          path,
+          method: method as HttpMethod,
+        };
+        if (pathObject.parameters) {
+          op.parameters = [...(op.parameters || []), ...pathObject.parameters];
+        }
+        if (pathObject.servers) {
+          op.servers = [...(op.servers || []), ...pathObject.servers];
+        }
+        return op;
       });
+    });
   };
 
   /**
