@@ -9,8 +9,6 @@
   - [new OpenAPIClientAxios(opts)](#new-openapiclientaxiosopts)
     - [Parameter: opts](#parameter-opts)
     - [Parameter: opts.definition](#parameter-optsdefinition)
-    - [Parameter: opts.strict](#parameter-optsstrict)
-    - [Parameter: opts.validate](#parameter-optsvalidate)
     - [Parameter: opts.withServer](#parameter-optswithserver)
     - [Parameter: opts.axiosConfigDefaults](#parameter-optsaxiosconfigdefaults)
     - [Parameter: opts.transformOperationName](#parameter-optstransformoperationname)
@@ -20,7 +18,7 @@
   - [.withServer(server)](#withserverserver)
     - [Parameter: server](#parameter-server)
   - [.getBaseURL(operation?)](#getbaseurloperation)
-    - [Parameter: operation](#parameter-operation)
+    - [Parameter: operation](#paramter-operation)
   - [.getRequestConfigForOperation(operation, args)](#getrequestconfigforoperationoperation-args)
     - [Parameter: operation](#parameter-operation)
     - [Parameter: args](#parameter-args)
@@ -116,8 +114,6 @@ Example:
 ```javascript
 const api = new OpenAPIClientAxios({
   definition: './openapi.yml',
-  strict: true,
-  validate: true,
   withServer: 0,
   axiosConfigDefaults: {
     withCredentials: true,
@@ -137,18 +133,6 @@ Constructor options
 The OpenAPI definition as a file path or [Document object](#document-object).
 
 Type: `Document | string`
-
-#### Parameter: opts.strict
-
-Optional. Strict mode, throw errors or warn on OpenAPI spec validation errors (default: false)
-
-Type: `boolean`
-
-#### Parameter: opts.validate
-
-Optional. Whether to validate the input document (default: true)
-
-Type: `boolean`
 
 #### Parameter: opts.withServer
 
@@ -177,10 +161,9 @@ Initalizes OpenAPIClientAxios
 Returns a promise of the created member axios instance.
 
 1. Parses the input definition into a JS object. If the input definition is a URL, it will be resolved
-2. (optional) Validates the definition object
-3. Dereferences the definition for use. Will resolve any remote $refs
-4. Creates the member axios instance
-5. Sets `api.initialised = true` and returns the created axios instance
+2. Dereferences the definition for use. Will resolve any remote $refs
+3. Creates the member axios instance
+4. Sets `api.initialised = true` and returns the created axios instance
 
 Example:
 ```javascript

@@ -1,5 +1,4 @@
 import axios, { AxiosInstance, AxiosRequestConfig, Method } from 'axios';
-import OpenAPISchemaValidator from 'openapi-schema-validator';
 import bath from 'bath-es5';
 import { parse as parseJSONSchema, dereference } from '@apidevtools/json-schema-ref-parser';
 import RefParser from '@apidevtools/json-schema-ref-parser';
@@ -51,9 +50,7 @@ export class OpenAPIClientAxios {
   public inputDocument: Document | string;
   public definition: Document;
 
-  public strict: boolean;
   public quick: boolean;
-  public validate: boolean;
 
   public initalized: boolean;
   public instance: any;
@@ -71,17 +68,13 @@ export class OpenAPIClientAxios {
    *
    * @param opts - constructor options
    * @param {Document | string} opts.definition - the OpenAPI definition, file path or Document object
-   * @param {boolean} opts.strict - strict mode, throw errors or warn on OpenAPI spec validation errors (default: false)
    * @param {boolean} opts.quick - quick mode, skips validation and doesn't guarantee document is unchanged
-   * @param {boolean} opts.validate - whether to validate the input document document (default: true)
    * @param {boolean} opts.axiosConfigDefaults - default axios config for the instance
    * @memberof OpenAPIClientAxios
    */
   constructor(opts: {
     definition: Document | string;
-    strict?: boolean;
     quick?: boolean;
-    validate?: boolean;
     axiosConfigDefaults?: AxiosRequestConfig;
     swaggerParserOpts?: RefParserOptions;
     withServer?: number | string | Server;
@@ -89,8 +82,6 @@ export class OpenAPIClientAxios {
     transformOperationName?: (operation: string) => string;
   }) {
     const optsWithDefaults = {
-      validate: true,
-      strict: false,
       quick: false,
       withServer: 0,
       baseURLVariables: {},
@@ -103,9 +94,7 @@ export class OpenAPIClientAxios {
       } as AxiosRequestConfig,
     };
     this.inputDocument = optsWithDefaults.definition;
-    this.strict = optsWithDefaults.strict;
     this.quick = optsWithDefaults.quick;
-    this.validate = optsWithDefaults.validate;
     this.axiosConfigDefaults = optsWithDefaults.axiosConfigDefaults;
     this.swaggerParserOpts = optsWithDefaults.swaggerParserOpts;
     this.defaultServer = optsWithDefaults.withServer;
@@ -159,20 +148,7 @@ export class OpenAPIClientAxios {
     } else {
       // load and parse the document
       await this.loadDocument();
-      try {
-        if (this.validate) {
-          // validate the document
-          this.validateDefinition();
-        }
-      } catch (err) {
-        if (this.strict) {
-          // in strict-mode, fail hard and re-throw the error
-          throw err;
-        } else {
-          // just emit a warning about the validation errors
-          console.warn(err);
-        }
-      }
+
       // dereference the document into definition
       this.definition = await dereference(cloneDeep(this.document), this.swaggerParserOpts) as Document;
     }
@@ -209,21 +185,6 @@ export class OpenAPIClientAxios {
 
     // set document
     this.document = this.inputDocument;
-
-    try {
-      if (this.validate && !this.quick) {
-        // validate the document
-        this.validateDefinition();
-      }
-    } catch (err) {
-      if (this.strict) {
-        // in strict-mode, fail hard and re-throw the error
-        throw err;
-      } else {
-        // just emit a warning about the validation errors
-        console.warn(err);
-      }
-    }
 
     // dereference the document into definition
     this.definition = cloneDeep(this.document);
@@ -286,22 +247,6 @@ export class OpenAPIClientAxios {
     // add reference to parent class instance
     instance.api = this;
     return (instance as any) as Client;
-  };
-
-  /**
-   * Validates this.document, which is the parsed OpenAPI document. Throws an error if validation fails.
-   *
-   * @returns {Document} parsed document
-   * @memberof OpenAPIClientAxios
-   */
-  public validateDefinition = () => {
-    const validateOpenAPI = new OpenAPISchemaValidator({version: 3});
-    const { errors } = validateOpenAPI.validate(this.document);
-    if (errors.length) {
-      const prettyErrors = JSON.stringify(errors, null, 2);
-      throw new Error(`Document is not valid OpenAPI. ${errors.length} validation errors:\n${prettyErrors}`);
-    }
-    return this.document;
   };
 
   /**

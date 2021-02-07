@@ -42,7 +42,6 @@
     "axios": "^0.21.1",
     "bath-es5": "^3.0.3",
     "lodash": "^4.17.15",
-    "openapi-schema-validator": "^7.0.1",
     "openapi-types": "^7.0.1",
     "query-string": "^6.5.0"
   },
