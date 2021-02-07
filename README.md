@@ -35,6 +35,10 @@ See [DOCS.md](https://github.com/anttiviljami/openapi-client-axios/blob/master/D
 npm install --save axios openapi-client-axios
 ```
 
+```
+yarn add axios openapi-client-axios
+```
+
 With promises / CommonJS syntax:
 
 ```javascript
