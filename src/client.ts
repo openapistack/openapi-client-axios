@@ -2,8 +2,8 @@ import axios, { AxiosInstance, AxiosRequestConfig, Method } from 'axios';
 import bath from 'bath-es5';
 import { parse as parseJSONSchema, dereference } from '@apidevtools/json-schema-ref-parser';
 import RefParser from '@apidevtools/json-schema-ref-parser';
-import RefParserOptions from '@apidevtools/json-schema-ref-parser/lib/options';
 import dereferenceSync from '@apidevtools/json-schema-ref-parser/lib/dereference';
+import RefParserOptions from '@apidevtools/json-schema-ref-parser/lib/options';
 import QueryString from 'query-string';
 import get from 'lodash/get';
 import find from 'lodash/find';
@@ -56,7 +56,7 @@ export class OpenAPIClientAxios {
   public instance: any;
 
   public axiosConfigDefaults: AxiosRequestConfig;
-  public swaggerParserOpts: RefParserOptions;
+  public swaggerParserOpts: RefParser.Options;
 
   private defaultServer: number | string | Server;
   private baseURLVariables: { [key: string]: string | number };
@@ -76,7 +76,7 @@ export class OpenAPIClientAxios {
     definition: Document | string;
     quick?: boolean;
     axiosConfigDefaults?: AxiosRequestConfig;
-    swaggerParserOpts?: RefParserOptions;
+    swaggerParserOpts?: RefParser.Options;
     withServer?: number | string | Server;
     baseURLVariables?: { [key: string]: string | number };
     transformOperationName?: (operation: string) => string;
@@ -85,7 +85,7 @@ export class OpenAPIClientAxios {
       quick: false,
       withServer: 0,
       baseURLVariables: {},
-      swaggerParserOpts: {} as RefParserOptions,
+      swaggerParserOpts: {} as RefParser.Options,
       transformOperationName: (operationId: string) => operationId,
       ...opts,
       axiosConfigDefaults: {
@@ -191,7 +191,7 @@ export class OpenAPIClientAxios {
     const parser = new RefParser();
     parser.parse(this.definition);
     parser.schema = this.definition;
-    dereferenceSync(parser, new RefParserOptions({})); // mutates this.definition (synchronous)
+    dereferenceSync(parser, new RefParserOptions(this.swaggerParserOpts)); // mutates this.definition (synchronous)
 
     // create axios instance
     this.instance = this.createAxiosInstance();
