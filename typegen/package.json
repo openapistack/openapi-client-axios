@@ -1,8 +1,8 @@
 {
   "name": "openapi-client-axios-typegen",
   "description": "Typescript type generator for openapi-client-axios",
-  "version": "3.12.0",
-  "author": "Viljami Kuosmanen <viljami@avoinsorsa.fi>",
+  "version": "3.12.1",
+  "author": "Viljami Kuosmanen <viljami@viljami.io>",
   "license": "MIT",
   "bin": {
     "typegen": "./typegen"
