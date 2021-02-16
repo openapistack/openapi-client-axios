@@ -95,7 +95,7 @@ function generateMethodForOperation(methodName: string, operation: Operation, ex
     .map('path')
     .value();
 
-  const parametersType = !_.isEmpty(parameterTypePaths) ? parameterTypePaths.join(' & ') : 'UnknownParamsObject';
+  const parametersType = !_.isEmpty(parameterTypePaths) ? parameterTypePaths.join(' & ') : 'UnknownParamsObject | null';
   const parametersArg = `parameters?: Parameters<${parametersType}>`;
 
   // payload arg
