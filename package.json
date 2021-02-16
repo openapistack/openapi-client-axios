@@ -44,11 +44,11 @@
     "bath-es5": "^3.0.3",
     "lodash": "^4.17.20",
     "openapi-types": "^7.0.1",
-    "query-string": "^6.5.0"
+    "query-string": "^6.5.0",
+    "@apidevtools/json-schema-ref-parser": "^9.0.7"
   },
   "devDependencies": {
     "@anttiviljami/dtsgenerator": "^2.5.1",
-    "@apidevtools/json-schema-ref-parser": "^9.0.7",
     "@types/jest": "^26.0.20",
     "@types/json-schema": "^7.0.6",
     "@types/lodash": "^4.14.168",
