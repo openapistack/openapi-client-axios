@@ -95,8 +95,8 @@ function generateMethodForOperation(methodName: string, operation: Operation, ex
     .map('path')
     .value();
 
-  const parametersType = !_.isEmpty(parameterTypePaths) ? parameterTypePaths.join(' & ') : 'UnknownParamsObject | null';
-  const parametersArg = `parameters?: Parameters<${parametersType}>`;
+  const parametersType = !_.isEmpty(parameterTypePaths) ? parameterTypePaths.join(' & ') : 'UnknownParamsObject';
+  const parametersArg = `parameters?: Parameters<${parametersType}> | null`;
 
   // payload arg
   const requestBodyType = _.find(exportTypes, { schemaRef: `#/paths/${normalizedOperationId}/requestBody` });
