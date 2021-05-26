@@ -500,7 +500,7 @@ export class OpenAPIClientAxios {
       const methods = pick(pathObject, Object.values(HttpMethod));
       return Object.entries(methods).map(([method, operation]) => {
         const op: Operation = {
-          ...operation,
+          ...(typeof operation === 'object' ? operation : {}),
           path,
           method: method as HttpMethod,
         };
