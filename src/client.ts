@@ -63,6 +63,8 @@ export class OpenAPIClientAxios {
 
   private transformOperationName: (operation: string) => string;
 
+  private defaultParameters: any;
+
   /**
    * Creates an instance of OpenAPIClientAxios.
    *
@@ -80,6 +82,7 @@ export class OpenAPIClientAxios {
     withServer?: number | string | Server;
     baseURLVariables?: { [key: string]: string | number };
     transformOperationName?: (operation: string) => string;
+    defaultParameters?: any;
   }) {
     const optsWithDefaults = {
       quick: false,
@@ -87,12 +90,14 @@ export class OpenAPIClientAxios {
       baseURLVariables: {},
       swaggerParserOpts: {} as RefParser.Options,
       transformOperationName: (operationId: string) => operationId,
+      defaultParameters: {},
       ...opts,
       axiosConfigDefaults: {
         paramsSerializer: (params) => QueryString.stringify(params, { arrayFormat: 'none' }),
         ...(opts.axiosConfigDefaults || {}),
       } as AxiosRequestConfig,
     };
+
     this.inputDocument = optsWithDefaults.definition;
     this.quick = optsWithDefaults.quick;
     this.axiosConfigDefaults = optsWithDefaults.axiosConfigDefaults;
@@ -100,6 +105,7 @@ export class OpenAPIClientAxios {
     this.defaultServer = optsWithDefaults.withServer;
     this.baseURLVariables = optsWithDefaults.baseURLVariables;
     this.transformOperationName = optsWithDefaults.transformOperationName;
+    this.defaultParameters = optsWithDefaults.defaultParameters;
   }
 
   /**
@@ -436,6 +442,21 @@ export class OpenAPIClientAxios {
         return firstParam;
       }
     };
+
+    // add in default parameters
+    if (isArray(this.defaultParameters)) {
+      // ParamsArray
+      for (const param of this.defaultParameters) {
+        setRequestParam(param.name, param.value, param.in || getParamType(param.name));
+      }
+    } else if (typeof this.defaultParameters === 'object') {
+      // ParamsObject
+      for (const name in this.defaultParameters) {
+        if (this.defaultParameters[name] !== undefined) {
+          setRequestParam(name, this.defaultParameters[name], getParamType(name));
+        }
+      }
+    }
 
     const [paramsArg, payload] = args;
     if (isArray(paramsArg)) {
