@@ -26,7 +26,7 @@ describe('OpenAPIClientAxios', () => {
     test('can be initalised with a valid OpenAPI document as JS Object', async () => {
       const api = new OpenAPIClientAxios({ definition });
       await api.init();
-      expect(api.initalized).toEqual(true);
+      expect(api.initialized).toEqual(true);
       expect(api.client.api).toBe(api);
       checkHasOperationMethods(api.client);
     });
@@ -50,23 +50,23 @@ describe('OpenAPIClientAxios', () => {
       expect(JSON.stringify(api.definition)).not.toMatch('$ref');
     });
 
-    test('can be initalised using a valid YAML file', async () => {
+    test('can be initialized using a valid YAML file', async () => {
       const api = new OpenAPIClientAxios({ definition: examplePetAPIYAML });
       await api.init();
-      expect(api.initalized).toEqual(true);
+      expect(api.initialized).toEqual(true);
       expect(api.client.api).toBe(api);
       checkHasOperationMethods(api.client);
     });
 
-    test('can be initalised using a valid JSON file', async () => {
+    test('can be initialized using a valid JSON file', async () => {
       const api = new OpenAPIClientAxios({ definition: examplePetAPIJSON });
       await api.init();
-      expect(api.initalized).toEqual(true);
+      expect(api.initialized).toEqual(true);
       expect(api.client.api).toBe(api);
       checkHasOperationMethods(api.client);
     });
 
-    test('can be initalised using alternative server using index', async () => {
+    test('can be initialized using alternative server using index', async () => {
       const api = new OpenAPIClientAxios({ definition, withServer: 1 });
       await api.init();
       expect(api.getBaseURL()).toEqual(baseURLAlternative);
@@ -74,7 +74,7 @@ describe('OpenAPIClientAxios', () => {
       checkHasOperationMethods(api.client);
     });
 
-    test('can be initalised using alternative server using description', async () => {
+    test('can be initialized using alternative server using description', async () => {
       const api = new OpenAPIClientAxios({ definition, withServer: 'Alternative server' });
       await api.init();
       expect(api.getBaseURL()).toEqual(baseURLAlternative);
@@ -82,7 +82,7 @@ describe('OpenAPIClientAxios', () => {
       checkHasOperationMethods(api.client);
     });
 
-    test('can be initialised using alternative server with variable in baseURL', async () => {
+    test('can be initialized using alternative server with variable in baseURL', async () => {
       const api = new OpenAPIClientAxios({
         definition,
         withServer: 2,
@@ -94,7 +94,7 @@ describe('OpenAPIClientAxios', () => {
       checkHasOperationMethods(api.client);
     });
 
-    test('can be initalised using alternative server using object', async () => {
+    test('can be initialized using alternative server using object', async () => {
       const url = 'http://examplde.com/v5';
       const api = new OpenAPIClientAxios({ definition, withServer: { url } });
       await api.init();
@@ -103,7 +103,7 @@ describe('OpenAPIClientAxios', () => {
       checkHasOperationMethods(api.client);
     });
 
-    test('can be initalised using default baseUrl resolver', async () => {
+    test('can be initialized using default baseUrl resolver', async () => {
       const api = new OpenAPIClientAxios({ definition });
       await api.init();
       expect(api.getBaseURL()).toEqual(baseURL);
@@ -155,10 +155,10 @@ describe('OpenAPIClientAxios', () => {
   });
 
   describe('initSync', () => {
-    test('can be initalised synchronously with a valid OpenAPI document as JS Object', () => {
+    test('can be initialized synchronously with a valid OpenAPI document as JS Object', () => {
       const api = new OpenAPIClientAxios({ definition });
       api.initSync();
-      expect(api.initalized).toEqual(true);
+      expect(api.initialized).toEqual(true);
       expect(api.client.api).toBe(api);
       checkHasOperationMethods(api.client);
     });
@@ -170,7 +170,7 @@ describe('OpenAPIClientAxios', () => {
       expect(JSON.stringify(api.definition)).not.toMatch('$ref');
     });
 
-    test('throws an error when initalised using a file URL', () => {
+    test('throws an error when initialized using a file URL', () => {
       const api = new OpenAPIClientAxios({ definition: examplePetAPIYAML });
       expect(api.initSync).toThrowError();
     });
