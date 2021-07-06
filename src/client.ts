@@ -52,7 +52,7 @@ export class OpenAPIClientAxios {
 
   public quick: boolean;
 
-  public initalized: boolean;
+  public initialized: boolean;
   public instance: any;
 
   public axiosConfigDefaults: AxiosRequestConfig;
@@ -127,7 +127,7 @@ export class OpenAPIClientAxios {
    * @memberof OpenAPIClientAxios
    */
   public getClient = async <Client = OpenAPIClient>(): Promise<Client> => {
-    if (!this.initalized) {
+    if (!this.initialized) {
       return this.init<Client>();
     }
     return this.instance as Client;
@@ -139,7 +139,7 @@ export class OpenAPIClientAxios {
   }
 
   /**
-   * Initalizes OpenAPIClientAxios and creates a member axios client instance
+   * Initializes OpenAPIClientAxios and creates a member axios client instance
    *
    * The init() method should be called right after creating a new instance of OpenAPIClientAxios
    *
@@ -163,8 +163,8 @@ export class OpenAPIClientAxios {
     // create axios instance
     this.instance = this.createAxiosInstance();
 
-    // we are now initalized
-    this.initalized = true;
+    // we are now initialized
+    this.initialized = true;
     return this.instance as Client;
   };
 
@@ -203,8 +203,8 @@ export class OpenAPIClientAxios {
     // create axios instance
     this.instance = this.createAxiosInstance();
 
-    // we are now initalized
-    this.initalized = true;
+    // we are now initialized
+    this.initialized = true;
     return this.instance as Client;
   };
 
