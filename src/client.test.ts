@@ -668,7 +668,7 @@ describe('OpenAPIClientAxios', () => {
   test('transformOperationMethod', async () => {
     const api = new OpenAPIClientAxios({
       definition,
-      'transformOperationMethods': (operationMethod ) => {
+      'transformOperationMethod': (operationMethod ) => {
         return (params: any, body, config) => {
           params['petId'] = 1;
           params['ownerId'] = 2;
@@ -691,7 +691,7 @@ describe('OpenAPIClientAxios', () => {
   test('transformOperationMethod based on operation', async () => {
     const api = new OpenAPIClientAxios({
       definition,
-      transformOperationMethods: (operationMethod, operation) => {
+      transformOperationMethod: (operationMethod, operation) => {
         return (params: any, body, config) => {
           if (operation.operationId === 'getPetOwner') {
             params['petId'] = 1;

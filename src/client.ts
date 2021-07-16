@@ -62,7 +62,7 @@ export class OpenAPIClientAxios {
   private baseURLVariables: { [key: string]: string | number };
 
   private transformOperationName: (operation: string) => string;
-  private transformOperationMethods: (operationMethod: UnknownOperationMethod, operationToTransform: Operation)
+  private transformOperationMethod: (operationMethod: UnknownOperationMethod, operationToTransform: Operation)
     => UnknownOperationMethod;
 
   /**
@@ -82,7 +82,7 @@ export class OpenAPIClientAxios {
     withServer?: number | string | Server;
     baseURLVariables?: { [key: string]: string | number };
     transformOperationName?: (operation: string) => string;
-    transformOperationMethods?: (operationMethod: UnknownOperationMethod, operationToTransform: Operation)
+    transformOperationMethod?: (operationMethod: UnknownOperationMethod, operationToTransform: Operation)
       => UnknownOperationMethod;
   }) {
     const optsWithDefaults = {
@@ -91,7 +91,7 @@ export class OpenAPIClientAxios {
       baseURLVariables: {},
       swaggerParserOpts: {} as RefParser.Options,
       transformOperationName: (operationId: string) => operationId,
-      transformOperationMethods:
+      transformOperationMethod:
         (operationMethod: UnknownOperationMethod) => operationMethod,
       ...opts,
       axiosConfigDefaults: {
@@ -106,7 +106,7 @@ export class OpenAPIClientAxios {
     this.defaultServer = optsWithDefaults.withServer;
     this.baseURLVariables = optsWithDefaults.baseURLVariables;
     this.transformOperationName = optsWithDefaults.transformOperationName;
-    this.transformOperationMethods = optsWithDefaults.transformOperationMethods;
+    this.transformOperationMethod = optsWithDefaults.transformOperationMethod;
   }
 
   /**
@@ -547,6 +547,6 @@ export class OpenAPIClientAxios {
       return this.client.request(axiosConfig);
     };
 
-    return this.transformOperationMethods(originalOperationMethod, operation);
+    return this.transformOperationMethod(originalOperationMethod, operation);
   };
 }
