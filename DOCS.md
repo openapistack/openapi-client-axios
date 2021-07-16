@@ -154,6 +154,29 @@ Type: `(operationId: string) => string`
 
 For typegen: You can pass the `transformOperationName` using the `-t` ot `--transformOperationName` command line flag.
 
+#### Parameter: opts.transformOperationMethod
+
+Optional. Transforms the returned operation method (default: do not transform)
+
+Type: `(operationMethod: UnknownOperationMethod, operationToTransform: Operation) => UnknownOperationMethod`
+
+The `operation` is also provided to the function, such that you can also conditionally transform the method.
+
+Example:
+
+```javascript
+const api = new OpenAPIClientAxios({ 
+  definition: 'https://example.com/api/openapi.json',
+  transformOperationMethods: (operationMethod, operation) => {
+    return (params, body, config) => {
+      // set default workspaceId for all operations
+      params.workspaceId = '63e90965-07a7-43b3-8f5d-d2e8fa90e8d0';
+      return operationMethod(params, body, config);
+    }
+  }
+});
+```
+
 ### .init()
 
 Initalizes OpenAPIClientAxios

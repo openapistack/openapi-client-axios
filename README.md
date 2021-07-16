@@ -171,50 +171,6 @@ client.paths['/pets/{petId}/owner/{ownerId}'].get({ petId: 1, ownerId: 2 }) ; //
 This allows calling operation methods without using their operationIds, which
 may be sometimes preferred.
 
-## Transforming operation name
-
-The client also allows transforming the operation names obtained from the Open API definition. This is done by providing 
-a transformation function. 
-
-```javascript
-import OpenAPIClientAxios from 'openapi-client-axios';
-
-const api = new OpenAPIClientAxios({ 
-  definition: 'https://example.com/api/openapi.json',
-  transformOperationName: (operationName) => `${operationName}V1`});
-api.init();
-
-async function createPet() {
-  const client = await api.getClient();
-  const res = await client.createPetV1(null, { name: 'Garfield' });
-  console.log('Pet created', res.data);
-}
-```
-
-## Transforming operation method
-
-It is also possible to transform the operation method and the arguments that are provided. This allows you for example
-to provide default parameters, or even to override the implementation of the method. This is again executed with a
-transformation function.
-
-The `operation` is also provided to the function, such that you can also conditionally transform the method. 
-
-```javascript
-import OpenAPIClientAxios from 'openapi-client-axios';
-
-const api = new OpenAPIClientAxios({ 
-  definition: 'https://example.com/api/openapi.json',
-  transformOperationMethods: (operationMethod, operation) => {
-    return (params, body, config) => {
-      // set default workspaceId for all operations
-      params.workspaceId = '63e90965-07a7-43b3-8f5d-d2e8fa90e8d0';
-      return operationMethod(params, body, config);
-    }
-  }
-});
-api.init();
-```
-
 ## Generating type files (.d.ts)
 
 ![TypeScript IntelliSense](typegen/intellisense.gif)
