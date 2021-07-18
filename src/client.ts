@@ -62,6 +62,8 @@ export class OpenAPIClientAxios {
   private baseURLVariables: { [key: string]: string | number };
 
   private transformOperationName: (operation: string) => string;
+  private transformOperationMethod: (operationMethod: UnknownOperationMethod, operationToTransform: Operation)
+    => UnknownOperationMethod;
 
   /**
    * Creates an instance of OpenAPIClientAxios.
@@ -80,6 +82,8 @@ export class OpenAPIClientAxios {
     withServer?: number | string | Server;
     baseURLVariables?: { [key: string]: string | number };
     transformOperationName?: (operation: string) => string;
+    transformOperationMethod?: (operationMethod: UnknownOperationMethod, operationToTransform: Operation)
+      => UnknownOperationMethod;
   }) {
     const optsWithDefaults = {
       quick: false,
@@ -87,6 +91,8 @@ export class OpenAPIClientAxios {
       baseURLVariables: {},
       swaggerParserOpts: {} as RefParser.Options,
       transformOperationName: (operationId: string) => operationId,
+      transformOperationMethod:
+        (operationMethod: UnknownOperationMethod) => operationMethod,
       ...opts,
       axiosConfigDefaults: {
         paramsSerializer: (params) => QueryString.stringify(params, { arrayFormat: 'none' }),
@@ -100,6 +106,7 @@ export class OpenAPIClientAxios {
     this.defaultServer = optsWithDefaults.withServer;
     this.baseURLVariables = optsWithDefaults.baseURLVariables;
     this.transformOperationName = optsWithDefaults.transformOperationName;
+    this.transformOperationMethod = optsWithDefaults.transformOperationMethod;
   }
 
   /**
@@ -534,10 +541,12 @@ export class OpenAPIClientAxios {
    * @memberof OpenAPIClientAxios
    */
   private createOperationMethod = (operation: Operation): UnknownOperationMethod => {
-    return async (...args: OperationMethodArguments) => {
+    const originalOperationMethod = async (...args: OperationMethodArguments) => {
       const axiosConfig = this.getAxiosConfigForOperation(operation, args);
       // do the axios request
       return this.client.request(axiosConfig);
     };
+
+    return this.transformOperationMethod(originalOperationMethod, operation);
   };
 }
