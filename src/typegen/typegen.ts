@@ -3,7 +3,7 @@ import yargs from 'yargs';
 import indent from 'indent-string';
 import OpenAPIClientAxios, { Document, HttpMethod, Operation } from '../';
 import DtsGenerator, { ExportedType } from '@anttiviljami/dtsgenerator/dist/core/dtsGenerator';
-import { bundle } from '@apidevtools/json-schema-ref-parser';
+import RefParser from '@apidevtools/json-schema-ref-parser';
 import { parseSchema } from '@anttiviljami/dtsgenerator/dist/core/type';
 
 interface TypegenOptions {
@@ -47,15 +47,15 @@ export async function main() {
 }
 
 export async function generateTypesForDocument(definition: Document | string, opts: TypegenOptions) {
-  const api = new OpenAPIClientAxios({ definition });
-  await api.init();
-
-  const rootSchema = await bundle(definition);
+  
+  const rootSchema = await RefParser.bundle(definition);
   const schema = parseSchema(rootSchema as any);
-
+  
   const generator = new DtsGenerator([schema]);
   const schemaTypes = await generator.generate();
   const exportedTypes = generator.getExports();
+  const api = new OpenAPIClientAxios({ definition });
+  await api.init();
   const operationTypings = generateOperationMethodTypings(api, exportedTypes, opts);
 
   const imports = [
