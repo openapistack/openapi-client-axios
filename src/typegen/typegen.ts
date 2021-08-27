@@ -51,7 +51,7 @@ export async function generateTypesForDocument(definition: Document | string, op
   await api.init();
 
   const rootSchema = await bundle(definition);
-  const schema = parseSchema(rootSchema as any)
+  const schema = parseSchema(rootSchema as any);
 
   const generator = new DtsGenerator([schema]);
   const schemaTypes = await generator.generate();
