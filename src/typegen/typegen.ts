@@ -2,15 +2,9 @@ import _ from 'lodash';
 import yargs from 'yargs';
 import indent from 'indent-string';
 import OpenAPIClientAxios, { Document, HttpMethod, Operation } from '../';
-import DtsGenerator from '@anttiviljami/dtsgenerator/dist/core/dtsGenerator';
+import DtsGenerator, { ExportedType } from '@anttiviljami/dtsgenerator/dist/core/dtsGenerator';
 import { bundle } from '@apidevtools/json-schema-ref-parser';
 import { parseSchema } from '@anttiviljami/dtsgenerator/dist/core/type';
-
-export interface ExportedType {
-  name: string;
-  path: string;
-  schemaRef: string;
-}
 
 interface TypegenOptions {
   transformOperationName?: (operation: string) => string;
