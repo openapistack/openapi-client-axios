@@ -74,6 +74,7 @@
     "build": "tsc",
     "watch-build": "tsc -w",
     "lint": "tslint --format prose --project .",
+    "lint:fix": "tslint --fix --format prose --project .",
     "prettier": "prettier --write src/** __tests__/**",
     "toc": "./scripts/generate-toc.js",
     "prepare": "npm run build",

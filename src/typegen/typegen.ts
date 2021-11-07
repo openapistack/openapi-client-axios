@@ -47,10 +47,10 @@ export async function main() {
 }
 
 export async function generateTypesForDocument(definition: Document | string, opts: TypegenOptions) {
-  
+
   const rootSchema = await RefParser.bundle(definition);
   const schema = parseSchema(rootSchema as any);
-  
+
   const generator = new DtsGenerator([schema]);
   const schemaTypes = await generator.generate();
   const exportedTypes = generator.getExports();
