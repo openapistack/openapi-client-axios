@@ -1,6 +1,5 @@
 import axios, { AxiosInstance, AxiosRequestConfig, Method } from 'axios';
 import bath from 'bath-es5';
-import { parse as parseJSONSchema, dereference } from '@apidevtools/json-schema-ref-parser';
 import RefParser from '@apidevtools/json-schema-ref-parser';
 import dereferenceSync from '@apidevtools/json-schema-ref-parser/lib/dereference';
 import RefParserOptions from '@apidevtools/json-schema-ref-parser/lib/options';
@@ -149,7 +148,7 @@ export class OpenAPIClientAxios {
   public init = async <Client = OpenAPIClient>(): Promise<Client> => {
     if (this.quick) {
       // to save time, just dereference input document
-      this.definition = (await dereference(this.inputDocument, this.swaggerParserOpts)) as Document;
+      this.definition = (await RefParser.dereference(this.inputDocument, this.swaggerParserOpts)) as Document;
       // in quick mode no guarantees document will be the original document
       this.document = typeof this.inputDocument === 'object' ? this.inputDocument : this.definition;
     } else {
@@ -157,7 +156,7 @@ export class OpenAPIClientAxios {
       await this.loadDocument();
 
       // dereference the document into definition
-      this.definition = (await dereference(cloneDeep(this.document), this.swaggerParserOpts)) as Document;
+      this.definition = (await RefParser.dereference(cloneDeep(this.document), this.swaggerParserOpts)) as Document;
     }
 
     // create axios instance
@@ -174,7 +173,7 @@ export class OpenAPIClientAxios {
    * @memberof OpenAPIClientAxios
    */
   public async loadDocument() {
-    this.document = (await parseJSONSchema(this.inputDocument, this.swaggerParserOpts)) as Document;
+    this.document = (await RefParser.parse(this.inputDocument, this.swaggerParserOpts)) as Document;
     return this.document;
   }
 

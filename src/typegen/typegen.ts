@@ -2,13 +2,9 @@ import _ from 'lodash';
 import yargs from 'yargs';
 import indent from 'indent-string';
 import OpenAPIClientAxios, { Document, HttpMethod, Operation } from '../';
-import DtsGenerator from '@anttiviljami/dtsgenerator/dist/core/dtsGenerator';
-import { parseSchema } from '@anttiviljami/dtsgenerator/dist/core/jsonSchema';
-import ReferenceResolver from '@anttiviljami/dtsgenerator/dist/core/referenceResolver';
-import SchemaConvertor, { ExportedType } from '@anttiviljami/dtsgenerator/dist/core/schemaConvertor';
-import WriteProcessor from '@anttiviljami/dtsgenerator/dist/core/writeProcessor';
-import { bundle } from '@apidevtools/json-schema-ref-parser';
-import { normalizeTypeName } from '@anttiviljami/dtsgenerator/dist/core/typeNameConvertor';
+import DtsGenerator, { ExportedType } from '@anttiviljami/dtsgenerator/dist/core/dtsGenerator';
+import RefParser from '@apidevtools/json-schema-ref-parser';
+import { parseSchema } from '@anttiviljami/dtsgenerator/dist/core/type';
 
 interface TypegenOptions {
   transformOperationName?: (operation: string) => string;
@@ -51,19 +47,15 @@ export async function main() {
 }
 
 export async function generateTypesForDocument(definition: Document | string, opts: TypegenOptions) {
+  
+  const rootSchema = await RefParser.bundle(definition);
+  const schema = parseSchema(rootSchema as any);
+  
+  const generator = new DtsGenerator([schema]);
+  const schemaTypes = await generator.generate();
+  const exportedTypes = generator.getExports();
   const api = new OpenAPIClientAxios({ definition });
   await api.init();
-
-  const processor = new WriteProcessor({ indentSize: 2, indentChar: ' ' });
-  const resolver = new ReferenceResolver();
-  const convertor = new SchemaConvertor(processor);
-
-  const rootSchema = await bundle(definition);
-  resolver.registerSchema(parseSchema(rootSchema));
-
-  const generator = new DtsGenerator(resolver, convertor);
-  const schemaTypes = await generator.generate();
-  const exportedTypes = convertor.getExports();
   const operationTypings = generateOperationMethodTypings(api, exportedTypes, opts);
 
   const imports = [
@@ -84,7 +76,7 @@ function generateMethodForOperation(methodName: string, operation: Operation, ex
   const { operationId, summary, description } = operation;
 
   // parameters arg
-  const normalizedOperationId = normalizeTypeName(operationId);
+  const normalizedOperationId = operationId;
   const parameterTypePaths = _.chain([
     _.find(exportTypes, { schemaRef: `#/paths/${normalizedOperationId}/pathParameters` }),
     _.find(exportTypes, { schemaRef: `#/paths/${normalizedOperationId}/queryParameters` }),
