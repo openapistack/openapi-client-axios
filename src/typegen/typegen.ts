@@ -59,7 +59,7 @@ export async function generateTypesForDocument(definition: Document | string, op
   const operationTypings = generateOperationMethodTypings(api, exportedTypes, opts);
 
   const imports = [
-    'import {',
+    'import type {',
     '  OpenAPIClient,',
     '  Parameters,',
     '  UnknownParamsObject,',
