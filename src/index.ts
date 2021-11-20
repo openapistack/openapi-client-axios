@@ -3,4 +3,4 @@ export default OpenAPIClientAxios;
 export * from 'axios';
 export * from './client';
 export * from './types/client';
-export { generateTypesForDocument } from './typegen/typegen'
+export { generateTypesForDocument } from './typegen/typegen';
