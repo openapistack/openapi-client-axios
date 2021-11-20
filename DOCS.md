@@ -492,3 +492,10 @@ const client = await api.getClient<PetStoreClient>();
 $ typegen ./petstore.yaml
 $ typegen https://raw.githubusercontent.com/OAI/OpenAPI-Specification/master/examples/v3.0/petstore.yaml
 ```
+
+You can also use the typegen functionality in a programmatic way! 
+```typescript
+import { generateTypesForDocument } from 'openapi-client-axios'
+
+const typesFileContent = (await generateTypesForDocument(document)).join('\n')
+```
