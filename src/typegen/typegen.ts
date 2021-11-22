@@ -96,7 +96,7 @@ function generateMethodForOperation(methodName: string, operation: Operation, ex
 
   // return type
   const responseTypePaths = _.chain(exportTypes)
-    .filter(({ schemaRef }) => schemaRef.startsWith(`#/paths/${normalizedOperationId}/responses`))
+    .filter(({ schemaRef }) => schemaRef.startsWith(`#/paths/${normalizedOperationId}/responses/2`))
     .map(({ path }) =>
       path
         .split('.')
