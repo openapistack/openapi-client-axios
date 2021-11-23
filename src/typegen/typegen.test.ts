@@ -27,19 +27,34 @@ describe('typegen', () => {
     expect(operationTypings).not.toBeFalsy();
   });
 
-  test('exports OperationMethods', async () => {
-    expect(operationTypings).toMatch('export interface OperationMethods');
-    expect(operationTypings).toMatch('getPets');
-    expect(operationTypings).toMatch('createPet');
-    expect(operationTypings).toMatch('getPetById');
-    expect(operationTypings).toMatch('replacePetById');
-    expect(operationTypings).toMatch('updatePetById');
-    expect(operationTypings).toMatch('deletePetById');
-    expect(operationTypings).toMatch('getOwnerByPetId');
-    expect(operationTypings).toMatch('getPetOwner');
-    expect(operationTypings).toMatch('getPetsMeta');
-    expect(operationTypings).toMatch('getPetsRelative');
-  });
+  describe ('OperationsMethods', () => {
+    test('exports methods named after the operationId', async () => {
+      expect(operationTypings).toMatch('export interface OperationMethods');
+      expect(operationTypings).toMatch('getPets');
+      expect(operationTypings).toMatch('createPet');
+      expect(operationTypings).toMatch('getPetById');
+      expect(operationTypings).toMatch('replacePetById');
+      expect(operationTypings).toMatch('updatePetById');
+      expect(operationTypings).toMatch('deletePetById');
+      expect(operationTypings).toMatch('getOwnerByPetId');
+      expect(operationTypings).toMatch('getPetOwner');
+      expect(operationTypings).toMatch('getPetsMeta');
+      expect(operationTypings).toMatch('getPetsRelative');
+    });
+
+    test('types responses', () => {
+      expect(operationTypings).toMatch(`OperationResponse<Paths.GetPets.Responses.$200>`);
+      expect(operationTypings).toMatch('OperationResponse<Paths.CreatePet.Responses.$201>');
+      expect(operationTypings).toMatch('OperationResponse<Paths.GetPetById.Responses.$200>');
+      expect(operationTypings).toMatch('OperationResponse<Paths.ReplacePetById.Responses.$200>');
+      expect(operationTypings).toMatch('OperationResponse<Paths.UpdatePetById.Responses.$200>');
+      expect(operationTypings).toMatch('OperationResponse<Paths.DeletePetById.Responses.$200>');
+      expect(operationTypings).toMatch('OperationResponse<Paths.GetPetOwner.Responses.$200>');
+      expect(operationTypings).toMatch('OperationResponse<Paths.GetPetsMeta.Responses.$200>');
+      expect(operationTypings).toMatch('OperationResponse<Paths.GetPetsRelative.Responses.$200>');
+    })
+  })
+
 
   test('exports PathsDictionary', async () => {
     expect(operationTypings).toMatch('export interface PathsDictionary');
@@ -54,4 +69,5 @@ describe('typegen', () => {
   test('exports a Client', async () => {
     expect(operationTypings).toMatch('export type Client =');
   });
+  
 });
