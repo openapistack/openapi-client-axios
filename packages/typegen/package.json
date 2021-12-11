@@ -13,7 +13,11 @@
     "*.d.ts",
     "**/*.js",
     "**/*.d.ts",
-    "!*.png"
+    "!*.jest.config.js",
+    "!*.png",
+    "!src",
+    "!*.config.js",
+    "!__tests__"
   ],
   "keywords": [
     "openapi",

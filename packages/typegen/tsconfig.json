@@ -4,7 +4,7 @@
     "target": "es5",
     "module": "commonjs",
     "moduleResolution": "node",
-    "lib": ["esnext", "dom"],
+    "lib": ["esnext"],
     "esModuleInterop": true,
     "noImplicitAny": true,
     "strictPropertyInitialization": false,
