@@ -48,6 +48,3 @@ $ typegen https://raw.githubusercontent.com/OAI/OpenAPI-Specification/master/exa
 ## Contributing
 
 OpenAPI Client Axios Typegen is Free and Open Source Software. Issues and pull requests are more than welcome!
-
-[<img alt="The Chilicorn" src="http://spiceprogram.org/assets/img/chilicorn_sticker.svg" width="250" height="250">](https://spiceprogram.org/oss-sponsorship)
-
