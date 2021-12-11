@@ -25,7 +25,7 @@ import {
  */
 export type OpenAPIClient<
   OperationMethods = UnknownOperationMethods,
-  PathsDictionary = UnknownPathsDictionary
+  PathsDictionary = UnknownPathsDictionary,
 > = AxiosInstance &
   OperationMethods & {
     api: OpenAPIClientAxios;
@@ -249,7 +249,7 @@ export class OpenAPIClientAxios {
 
     // add reference to parent class instance
     instance.api = this;
-    return (instance as any) as Client;
+    return instance as any as Client;
   };
 
   /**

@@ -34,6 +34,7 @@
   "types": "typegen.d.ts",
   "dependencies": {
     "@anttiviljami/dtsgenerator": "^3.12.2",
+    "@apidevtools/json-schema-ref-parser": "^9.0.9",
     "axios": "^0.21.4",
     "indent-string": "^4.0.0",
     "lodash": "^4.17.21",
@@ -42,9 +43,22 @@
     "yargs": "^17.3.0"
   },
   "devDependencies": {
-    "openapi-types": "^7.0.1"
+    "@types/jest": "^27.0.3",
+    "@types/lodash": "^4.14.178",
+    "@types/yargs": "^17.0.7",
+    "jest": "^27.4.4",
+    "openapi-types": "^10.0.0",
+    "ts-jest": "^27.1.1",
+    "typescript": "^4.5.3",
+    "tslint": "^5.20.1",
+    "tslint-microsoft-contrib": "^5.2.1"
   },
   "scripts": {
-    "prepack": "./prepack.sh"
+    "build": "tsc",
+    "watch-build": "tsc -w",
+    "prepare": "npm run build",
+    "test": "NODE_ENV=test jest",
+    "lint": "tslint --format prose --project .",
+    "lint:fix": "tslint --fix --format prose --project ."
   }
 }

@@ -1,9 +1,9 @@
 import path from 'path';
 import MockAdapter from 'axios-mock-adapter';
-import { definition, baseURL, baseURLV2, baseURLAlternative, baseURLWithVariableResolved } from '../__tests__/fixtures';
+import { definition, baseURL, baseURLV2, baseURLAlternative, baseURLWithVariableResolved } from './__tests__/fixtures';
 import { OpenAPIClientAxios, OpenAPIClient } from './client';
 
-const testsDir = path.join(__dirname, '..', '__tests__');
+const testsDir = path.join(__dirname, '.', '__tests__');
 const examplePetAPIJSON = path.join(testsDir, 'resources', 'example-pet-api.openapi.json');
 const examplePetAPIYAML = path.join(testsDir, 'resources', 'example-pet-api.openapi.yml');
 

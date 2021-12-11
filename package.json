@@ -1,6 +1,7 @@
 {
-  "name": "openapi-client-axios",
-  "description": "JavaScript client library for consuming OpenAPI-enabled APIs with axios. Types included.",
+  "name": "openapi-client-axios-monorepo",
+  "description": "Monorepo for openapi-client-axios + typegen",
+  "private": true,
   "version": "4.3.4",
   "author": "Viljami Kuosmanen <viljami@viljami.io>",
   "license": "MIT",
@@ -43,43 +44,19 @@
     "axios": "^0.21.1",
     "js-yaml": "^3.13.1"
   },
-  "dependencies": {
-    "@apidevtools/json-schema-ref-parser": "^9.0.7",
-    "bath-es5": "^3.0.3",
-    "copy-anything": "^2.0.3",
-    "query-string": "^7.0.0"
-  },
   "devDependencies": {
-    "@anttiviljami/dtsgenerator": "^3.12.1",
-    "@types/jest": "^26.0.20",
-    "@types/json-schema": "^7.0.6",
-    "@types/lodash": "^4.14.178",
-    "@types/node": "^10.12.29",
-    "@types/yargs": "^13.0.0",
-    "axios": "^0.21.4",
-    "axios-mock-adapter": "^1.16.0",
-    "indent-string": "^4.0.0",
-    "jest": "^26.6.3",
-    "json-schema": "^0.4.0",
-    "json-schema-deref-sync": "^0.13.0",
+    "lerna": "^4.0.0",
     "markdown-toc": "^1.2.0",
-    "openapi-types": "^10.0.0",
-    "prettier": "^1.19.1",
-    "source-map-support": "^0.5.10",
-    "ts-jest": "^26.5.0",
-    "tslint": "^5.20.1",
-    "tslint-microsoft-contrib": "^5.2.1",
-    "typescript": "^4.5.3",
-    "yargs": "^13.2.2"
+    "prettier": "^2.5.1"
   },
   "scripts": {
-    "build": "tsc",
-    "watch-build": "tsc -w",
-    "lint": "tslint --format prose --project .",
-    "lint:fix": "tslint --fix --format prose --project .",
-    "prettier": "prettier --write src/** __tests__/**",
-    "toc": "./scripts/generate-toc.js",
-    "prepare": "npm run build",
-    "test": "NODE_ENV=test jest"
+    "postinstall": "lerna bootstrap",
+    "build": "lerna run build",
+    "watch-build": "lerna run watch-build",
+    "lint": "lerna run lint",
+    "lint:fix": "lerna run lint:fix",
+    "prettier": "prettier --write 'packages/**/*.ts'",
+    "test": "lerna run test --stream",
+    "toc": "./scripts/generate-toc.js"
   }
 }

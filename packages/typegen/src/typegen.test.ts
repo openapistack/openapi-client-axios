@@ -1,11 +1,7 @@
 import path from 'path';
-import ts from 'typescript';
 import { generateTypesForDocument } from './typegen';
 
-const rootDir = path.join(__dirname, '..', '..');
-const testsDir = path.join(rootDir, '__tests__');
-
-const examplePetAPIYAML = path.join(testsDir, 'resources', 'example-pet-api.openapi.yml');
+const examplePetAPIYAML = path.join(__dirname, '__tests__', 'resources', 'example-pet-api.openapi.yml');
 
 describe('typegen', () => {
   let imports: string;
@@ -14,7 +10,7 @@ describe('typegen', () => {
 
   beforeAll(async () => {
     const types = await generateTypesForDocument(examplePetAPIYAML, {
-      transformOperationName: (operationId: string) => operationId
+      transformOperationName: (operationId: string) => operationId,
     });
     imports = types[0];
     schemaTypes = types[1];
@@ -27,7 +23,7 @@ describe('typegen', () => {
     expect(operationTypings).not.toBeFalsy();
   });
 
-  describe ('OperationsMethods', () => {
+  describe('OperationsMethods', () => {
     test('exports methods named after the operationId', async () => {
       expect(operationTypings).toMatch('export interface OperationMethods');
       expect(operationTypings).toMatch('getPets');
@@ -52,9 +48,8 @@ describe('typegen', () => {
       expect(operationTypings).toMatch('OperationResponse<Paths.GetPetOwner.Responses.$200>');
       expect(operationTypings).toMatch('OperationResponse<Paths.GetPetsMeta.Responses.$200>');
       expect(operationTypings).toMatch('OperationResponse<Paths.GetPetsRelative.Responses.$200>');
-    })
-  })
-
+    });
+  });
 
   test('exports PathsDictionary', async () => {
     expect(operationTypings).toMatch('export interface PathsDictionary');
@@ -69,5 +64,4 @@ describe('typegen', () => {
   test('exports a Client', async () => {
     expect(operationTypings).toMatch('export type Client =');
   });
-  
 });

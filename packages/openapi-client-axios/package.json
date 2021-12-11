@@ -1,0 +1,78 @@
+{
+  "name": "openapi-client-axios",
+  "description": "JavaScript client library for consuming OpenAPI-enabled APIs with axios. Types included.",
+  "version": "4.4.0",
+  "author": "Viljami Kuosmanen <viljami@viljami.io>",
+  "license": "MIT",
+  "keywords": [
+    "openapi",
+    "swagger",
+    "client",
+    "axios",
+    "frontend",
+    "browser",
+    "mock",
+    "typescript"
+  ],
+  "homepage": "https://github.com/anttiviljami/openapi-client-axios",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/anttiviljami/openapi-client-axios.git"
+  },
+  "bugs": {
+    "url": "https://github.com/anttiviljami/openapi-client-axios/issues"
+  },
+  "main": "index.js",
+  "types": "index.d.ts",
+  "files": [
+    "*.js",
+    "*.d.ts",
+    "*.map",
+    "**/*.js",
+    "**/*.d.ts",
+    "**/*.map",
+    "!*.test.*",
+    "!**/*.test.*",
+    "!scripts",
+    "!node_modules",
+    "!src",
+    "!*.config.js"
+  ],
+  "peerDependencies": {
+    "axios": "^0.21.1",
+    "js-yaml": "^3.13.1"
+  },
+  "dependencies": {
+    "@apidevtools/json-schema-ref-parser": "^9.0.7",
+    "bath-es5": "^3.0.3",
+    "copy-anything": "^2.0.3",
+    "query-string": "^7.0.0"
+  },
+  "devDependencies": {
+    "@anttiviljami/dtsgenerator": "^3.12.1",
+    "@types/jest": "^26.0.20",
+    "@types/json-schema": "^7.0.6",
+    "axios": "^0.21.4",
+    "axios-mock-adapter": "^1.16.0",
+    "indent-string": "^4.0.0",
+    "jest": "^26.6.3",
+    "json-schema": "^0.4.0",
+    "json-schema-deref-sync": "^0.13.0",
+    "openapi-types": "^10.0.0",
+    "source-map-support": "^0.5.10",
+    "ts-jest": "^26.5.0",
+    "typescript": "^4.5.3",
+    "tslint": "^5.20.1",
+    "tslint-microsoft-contrib": "^5.2.1"
+  },
+  "scripts": {
+    "build": "tsc",
+    "watch-build": "tsc -w",
+    "prettier": "prettier --write src/** __tests__/**",
+    "prepare": "npm run readme && npm run build",
+    "readme": "cp ../../README.md .",
+    "test": "NODE_ENV=test jest",
+    "lint": "tslint --format prose --project .",
+    "lint:fix": "tslint --fix --format prose --project ."
+  }
+}
