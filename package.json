@@ -40,10 +40,6 @@
     "!*.config.js",
     "!typegen"
   ],
-  "peerDependencies": {
-    "axios": "^0.21.1",
-    "js-yaml": "^3.13.1"
-  },
   "devDependencies": {
     "lerna": "^4.0.0",
     "markdown-toc": "^1.2.0",
