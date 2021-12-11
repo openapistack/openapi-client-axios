@@ -1,7 +1,6 @@
 <h1 align="center"><img alt="openapi-client-axios" src="./header.png" style="max-width:50rem"></h1>
 
 [![CI](https://github.com/anttiviljami/openapi-client-axios/workflows/CI/badge.svg)](https://github.com/anttiviljami/openapi-client-axios/actions?query=workflow%3ACI)
-[![Dependencies](https://david-dm.org/anttiviljami/openapi-client-axios.svg)](https://david-dm.org/anttiviljami/openapi-client-axios)
 [![npm version](https://img.shields.io/npm/v/openapi-client-axios.svg)](https://www.npmjs.com/package/openapi-client-axios)
 [![npm downloads](https://img.shields.io/npm/dw/openapi-client-axios)](https://www.npmjs.com/package/openapi-client-axios)
 [![bundle size](https://img.shields.io/bundlephobia/minzip/openapi-client-axios?label=gzip%20bundle)](https://www.npmjs.com/package/openapi-client-axios)

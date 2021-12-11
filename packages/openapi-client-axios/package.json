@@ -1,7 +1,7 @@
 {
   "name": "openapi-client-axios",
   "description": "JavaScript client library for consuming OpenAPI-enabled APIs with axios. Types included.",
-  "version": "4.4.1",
+  "version": "4.4.2",
   "author": "Viljami Kuosmanen <viljami@viljami.io>",
   "license": "MIT",
   "keywords": [
@@ -31,12 +31,11 @@
     "**/*.js",
     "**/*.d.ts",
     "**/*.map",
-    "!__tests__",
     "!*.test.*",
     "!**/*.test.*",
-    "!scripts",
-    "!node_modules",
-    "!src",
+    "!__tests__/",
+    "!__tests__/*",
+    "!src/",
     "!*.config.js"
   ],
   "peerDependencies": {
@@ -75,5 +74,6 @@
     "test": "NODE_ENV=test jest",
     "lint": "tslint --format prose --project .",
     "lint:fix": "tslint --fix --format prose --project ."
-  }
+  },
+  "gitHead": "9075245dce9f318c202019abbd16e32866fa0999"
 }

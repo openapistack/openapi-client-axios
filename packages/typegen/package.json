@@ -1,7 +1,7 @@
 {
   "name": "openapi-client-axios-typegen",
   "description": "Typescript type generator for openapi-client-axios",
-  "version": "4.4.1",
+  "version": "4.4.2",
   "author": "Viljami Kuosmanen <viljami@viljami.io>",
   "license": "MIT",
   "bin": {
@@ -15,9 +15,10 @@
     "**/*.d.ts",
     "!*.jest.config.js",
     "!*.png",
-    "!src",
-    "!*.config.js",
-    "!__tests__"
+    "!src/",
+    "!__tests__/",
+    "!__tests__/*",
+    "!*.config.js"
   ],
   "keywords": [
     "openapi",
@@ -42,7 +43,7 @@
     "axios": "^0.21.4",
     "indent-string": "^4.0.0",
     "lodash": "^4.17.21",
-    "openapi-client-axios": "^4.4.0",
+    "openapi-client-axios": "^0.0.0-9075245",
     "swagger-parser": "^10.0.2",
     "yargs": "^17.3.0"
   },
@@ -64,5 +65,6 @@
     "test": "NODE_ENV=test jest",
     "lint": "tslint --format prose --project .",
     "lint:fix": "tslint --fix --format prose --project ."
-  }
+  },
+  "gitHead": "9075245dce9f318c202019abbd16e32866fa0999"
 }
