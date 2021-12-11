@@ -420,7 +420,7 @@ export class OpenAPIClientAxios {
     };
 
     const getParamType = (paramName: string): ParamType => {
-      const param = parameters.find((param: OpenAPIV3.ParameterObject) => param.name === paramName);
+      const param = parameters.find(({ name }) => name === paramName);
       if (param) {
         return param.in as ParamType;
       }
@@ -502,7 +502,7 @@ export class OpenAPIClientAxios {
       return Object.values(HttpMethod)
         .map((method) => ({ path, method, operation: pathObject[method] }))
         .filter(({ operation }) => operation)
-        .map(({ operation, path, method }) => {
+        .map(({ operation, method }) => {
           const op: Partial<Operation> = {
             ...(typeof operation === 'object' ? operation : {}),
             path,
