@@ -1,4 +1,4 @@
-<h1 align="center"><img alt="openapi-client-axios" src="./header.png" style="max-width:50rem"></h1>
+<h1 align="center"><img alt="openapi-client-axios" src="https://github.com/anttiviljami/openapi-client-axios/blob/master/header.png?raw=true" style="max-width:50rem"></h1>
 
 [![CI](https://github.com/anttiviljami/openapi-client-axios/workflows/CI/badge.svg)](https://github.com/anttiviljami/openapi-client-axios/actions?query=workflow%3ACI)
 [![npm version](https://img.shields.io/npm/v/openapi-client-axios.svg)](https://www.npmjs.com/package/openapi-client-axios)
@@ -171,7 +171,7 @@ may be sometimes preferred.
 
 ## Generating type files (.d.ts)
 
-![TypeScript IntelliSense](https://github.com/anttiviljami/openapi-client-axios/blob/master/packages/typegen/intellisense.gif)
+![TypeScript IntelliSense](https://github.com/anttiviljami/openapi-client-axios/blob/master/packages/typegen/intellisense.gif?raw=true)
 
 `openapi-client-axios` comes with a tool called `typegen` to generate typescript type files (.d.ts) for
 OpenAPIClient instances using an OpenAPI definition file.
