@@ -7,7 +7,6 @@ import QueryString from 'query-string';
 import { copy } from 'copy-anything';
 
 import {
-  OpenAPIV3,
   Document,
   Operation,
   UnknownOperationMethod,
@@ -18,6 +17,7 @@ import {
   HttpMethod,
   UnknownPathsDictionary,
   Server,
+  ParameterObject,
 } from './types/client';
 
 /**
@@ -400,7 +400,7 @@ export class OpenAPIClientAxios {
     const query = {} as RequestConfig['query'];
     const headers = {} as RequestConfig['headers'];
     const cookies = {} as RequestConfig['cookies'];
-    const parameters = operation.parameters as OpenAPIV3.ParameterObject[];
+    const parameters = operation.parameters as ParameterObject[];
 
     const setRequestParam = (name: string, value: any, type: ParamType | string) => {
       switch (type) {

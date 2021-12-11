@@ -1,7 +1,7 @@
 {
   "name": "openapi-client-axios-typegen",
   "description": "Typescript type generator for openapi-client-axios",
-  "version": "4.4.6",
+  "version": "4.4.7",
   "author": "Viljami Kuosmanen <viljami@viljami.io>",
   "license": "MIT",
   "bin": {
@@ -47,14 +47,14 @@
     "lodash": "^4.17.21",
     "openapi-client-axios": "^4.4.4",
     "swagger-parser": "^10.0.2",
-    "yargs": "^17.3.0"
+    "yargs": "^17.3.0",
+    "openapi-types": "^10.0.0"
   },
   "devDependencies": {
     "@types/jest": "^27.0.3",
     "@types/lodash": "^4.14.178",
     "@types/yargs": "^17.0.7",
     "jest": "^27.4.4",
-    "openapi-types": "^10.0.0",
     "ts-jest": "^27.1.1",
     "tslint": "^5.20.1",
     "tslint-microsoft-contrib": "^5.2.1",
