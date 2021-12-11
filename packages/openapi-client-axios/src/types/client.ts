@@ -1,5 +1,6 @@
 import type { AxiosResponse, AxiosRequestConfig } from 'axios';
 import type { OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
+export type { OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
 
 /**
  * Type alias for OpenAPI document. We only support v3
