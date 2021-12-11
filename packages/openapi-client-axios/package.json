@@ -69,7 +69,6 @@
     "watch-build": "tsc -w",
     "prettier": "prettier --write src/** __tests__/**",
     "prepare": "npm run readme && npm run build",
-    "readme": "cp ../../README.md .",
     "test": "NODE_ENV=test jest",
     "lint": "tslint --format prose --project .",
     "lint:fix": "tslint --fix --format prose --project ."
