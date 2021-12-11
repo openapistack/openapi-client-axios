@@ -1,6 +1,5 @@
 import path from 'path';
 import MockAdapter from 'axios-mock-adapter';
-import cloneDeep from 'lodash/cloneDeep';
 import { definition, baseURL, baseURLV2, baseURLAlternative, baseURLWithVariableResolved } from '../__tests__/fixtures';
 import { OpenAPIClientAxios, OpenAPIClient } from './client';
 
@@ -668,7 +667,7 @@ describe('OpenAPIClientAxios', () => {
   test('transformOperationMethod', async () => {
     const api = new OpenAPIClientAxios({
       definition,
-      'transformOperationMethod': (operationMethod ) => {
+      transformOperationMethod: (operationMethod) => {
         return (params: any, body, config) => {
           params['petId'] = 1;
           params['ownerId'] = 2;

@@ -5,8 +5,6 @@
     "module": "commonjs",
     "moduleResolution": "node",
     "lib": ["esnext", "dom"],
-    "experimentalDecorators": true,
-    "emitDecoratorMetadata": true,
     "esModuleInterop": true,
     "noImplicitAny": true,
     "strictPropertyInitialization": false,

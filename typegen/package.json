@@ -36,9 +36,10 @@
     "@anttiviljami/dtsgenerator": "^3.12.2",
     "axios": "^0.21.4",
     "indent-string": "^4.0.0",
-    "openapi-client-axios": "*",
+    "lodash": "^4.17.21",
+    "openapi-client-axios": "^4.3.4",
     "swagger-parser": "^10.0.2",
-    "yargs": "^13.2.2"
+    "yargs": "^17.3.0"
   },
   "devDependencies": {
     "openapi-types": "^7.0.1"
