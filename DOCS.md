@@ -156,7 +156,7 @@ Example:
 ```javascript
 const api = new OpenAPIClientAxios({ 
   definition: 'https://example.com/api/openapi.json',
-  transformOperationMethods: (operationMethod, operation) => {
+  transformOperationMethod: (operationMethod, operation) => {
     return (params, body, config) => {
       // set default workspaceId for all operations
       params.workspaceId = '63e90965-07a7-43b3-8f5d-d2e8fa90e8d0';
