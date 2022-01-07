@@ -89,7 +89,7 @@ function generateMethodForOperation(methodName: string, operation: Operation, ex
   // parameters arg
   const normalizedOperationId = convertKeyToTypeName(operationId);
   const parameterTypePaths = _.chain([
-    _.find(exportTypes, e => e.schemaRef.startsWith(`#/paths/${normalizedOperationId}/parameters/`)),
+    _.find(exportTypes, { schemaRef: `#/paths/${normalizedOperationId}/pathParameters` }),
     _.find(exportTypes, { schemaRef: `#/paths/${normalizedOperationId}/queryParameters` }),
     _.find(exportTypes, { schemaRef: `#/paths/${normalizedOperationId}/headerParameters` }),
     _.find(exportTypes, { schemaRef: `#/paths/${normalizedOperationId}/cookieParameters` }),
