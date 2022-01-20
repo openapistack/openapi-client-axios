@@ -400,7 +400,7 @@ export class OpenAPIClientAxios {
     const query = {} as RequestConfig['query'];
     const headers = {} as RequestConfig['headers'];
     const cookies = {} as RequestConfig['cookies'];
-    const parameters = operation.parameters as ParameterObject[];
+    const parameters = operation.parameters || [] as ParameterObject[];
 
     const setRequestParam = (name: string, value: any, type: ParamType | string) => {
       switch (type) {
