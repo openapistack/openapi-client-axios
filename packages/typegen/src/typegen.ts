@@ -10,6 +10,18 @@ interface TypegenOptions {
   transformOperationName?: (operation: string) => string;
 }
 
+// rule from 'dts-generator' jsonSchema.ts
+function convertKeyToTypeName(key: string): string {
+  key = key.replace(/\/(.)/g, (_match: string, p1: string) => {
+    return p1.toUpperCase();
+  });
+  return key
+    .replace(/}/g, '')
+    .replace(/{/g, '$')
+    .replace(/^\//, '')
+    .replace(/[^0-9A-Za-z_$]+/g, '_');
+}
+
 export async function main() {
   const argv = await yargs
     .option('transformOperationName', {
@@ -75,7 +87,7 @@ function generateMethodForOperation(methodName: string, operation: Operation, ex
   const { operationId, summary, description } = operation;
 
   // parameters arg
-  const normalizedOperationId = operationId;
+  const normalizedOperationId = convertKeyToTypeName(operationId);
   const parameterTypePaths = _.chain([
     _.find(exportTypes, { schemaRef: `#/paths/${normalizedOperationId}/pathParameters` }),
     _.find(exportTypes, { schemaRef: `#/paths/${normalizedOperationId}/queryParameters` }),
