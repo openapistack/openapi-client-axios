@@ -312,7 +312,7 @@ export class OpenAPIClientAxios {
     for (const name of baseURLBuilder.names) {
       const varValue = this.baseURLVariables[name];
 
-      if (varValue !== undefined) {
+      if (varValue !== undefined && baseURLVariableSet[name].enum) {
         // if varValue exists assign to baseURLVariablesResolved object
         if (typeof varValue === 'number') {
           // if number, get value from enum array
