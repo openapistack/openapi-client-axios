@@ -524,6 +524,7 @@ export class OpenAPIClientAxios {
           if (pathObject.servers) {
             op.servers = [...(op.servers || []), ...pathObject.servers];
           }
+          op.security = op.security ?? this.definition.security;
           return op as Operation;
         });
     });
