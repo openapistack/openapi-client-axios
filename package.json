@@ -2,7 +2,7 @@
   "name": "openapi-client-axios-monorepo",
   "description": "Monorepo for openapi-client-axios + typegen",
   "private": true,
-  "version": "5.0.0",
+  "version": "5.1.0",
   "author": "Viljami Kuosmanen <viljami@viljami.io>",
   "license": "MIT",
   "keywords": [
