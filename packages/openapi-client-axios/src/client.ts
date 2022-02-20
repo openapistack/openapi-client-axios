@@ -3,7 +3,6 @@ import bath from 'bath-es5';
 import RefParser from '@apidevtools/json-schema-ref-parser';
 import dereferenceSync from '@apidevtools/json-schema-ref-parser/lib/dereference';
 import RefParserOptions from '@apidevtools/json-schema-ref-parser/lib/options';
-import QueryString from 'query-string';
 import { copy } from 'copy-anything';
 
 import {
@@ -91,7 +90,7 @@ export class OpenAPIClientAxios {
       transformOperationMethod: (operationMethod: UnknownOperationMethod) => operationMethod,
       ...opts,
       axiosConfigDefaults: {
-        paramsSerializer: (params) => QueryString.stringify(params, { arrayFormat: 'none' }),
+        paramsSerializer: (params) => new URLSearchParams(params).toString(),
         ...(opts.axiosConfigDefaults || {}),
       } as AxiosRequestConfig,
     };
@@ -397,7 +396,7 @@ export class OpenAPIClientAxios {
     }
 
     const pathParams = {} as RequestConfig['pathParams'];
-    const query = {} as RequestConfig['query'];
+    const searchParams = new URLSearchParams();
     const headers = {} as RequestConfig['headers'];
     const cookies = {} as RequestConfig['cookies'];
     const parameters = (operation.parameters || []) as ParameterObject[];
@@ -408,7 +407,13 @@ export class OpenAPIClientAxios {
           pathParams[name] = value;
           break;
         case ParamType.Query:
-          query[name] = value;
+          if (Array.isArray(value)) {
+            for (const valueItem of value) {
+              searchParams.append(name, valueItem);
+            }
+          } else {
+            searchParams.append(name, value);
+          }
           break;
         case ParamType.Header:
           headers[name] = value;
@@ -470,7 +475,12 @@ export class OpenAPIClientAxios {
     const path = pathBuilder.path(pathParams);
 
     // query parameters
-    const queryString = QueryString.stringify(query, { arrayFormat: 'none' });
+    const queryString = searchParams.toString();
+    const query = {} as RequestConfig['query'];
+    for (const key of searchParams.keys()) {
+      const val = searchParams.getAll(key);
+      query[key] = val.length > 1 ? val : val[0];
+    }
 
     // full url with query string
     const url = `${this.getBaseURL(operation)}${path}${queryString ? `?${queryString}` : ''}`;
