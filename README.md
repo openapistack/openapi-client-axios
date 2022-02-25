@@ -14,6 +14,8 @@
 ## Features
 
 - [x] Create API clients from [OpenAPI v3 definitions](https://github.com/OAI/OpenAPI-Specification)
+- [x] Client is configured in runtime. **No generated code!**
+- [x] Generate TypeScript definitions (.d.ts) for your APIs with full IntelliSense support
 - [x] Easy to use API to call API operations using JavaScript methods
   - `client.getPet(1)`
   - `client.searchPets()`
@@ -21,7 +23,6 @@
   - `client.updatePet(1, payload)`
 - [x] Built on top of the robust [axios](https://github.com/axios/axios) JavaScript library
 - [x] Isomorphic, works both in browser and Node.js
-- [x] Generate TypeScript definitions (.d.ts) for your APIs with full IntelliSense support
 
 ## Documentation
 
