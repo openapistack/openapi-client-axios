@@ -74,7 +74,9 @@ export interface RequestConfig {
     [key: string]: string | string[];
   };
   queryString: string;
-  headers: AxiosRequestConfig['headers'];
+  headers: {
+    [header: string]: string | string[];
+  };
   cookies: {
     [cookie: string]: string;
   };
