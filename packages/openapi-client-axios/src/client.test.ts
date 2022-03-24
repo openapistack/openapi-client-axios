@@ -532,6 +532,18 @@ describe('OpenAPIClientAxios', () => {
       expect(config.queryString).toEqual('q=cat');
     });
 
+    test('getPets({ q: ["cat"] }) calls GET /pets?q=cat', async () => {
+      const api = new OpenAPIClientAxios({ definition });
+      const client = await api.init();
+      const config = api.getRequestConfigForOperation('getPets', [{ q: ['cat'] }]);
+
+      expect(config.method).toEqual('get');
+      expect(config.path).toEqual('/pets');
+      expect(config.url).toMatch('/pets?q=cat');
+      expect(config.query).toEqual({ q: ['cat'] });
+      expect(config.queryString).toEqual('q=cat');
+    });
+
     test('getPetById({ petId: 1 }) calls GET /pets/1', async () => {
       const api = new OpenAPIClientAxios({ definition });
       const client = await api.init();
