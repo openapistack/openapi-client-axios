@@ -415,7 +415,7 @@ export class OpenAPIClientAxios {
           } else {
             searchParams.append(name, value);
           }
-          query[name] = value
+          query[name] = value;
           break;
         case ParamType.Header:
           headers[name] = value;
