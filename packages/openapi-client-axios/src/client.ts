@@ -397,6 +397,7 @@ export class OpenAPIClientAxios {
 
     const pathParams = {} as RequestConfig['pathParams'];
     const searchParams = new URLSearchParams();
+    const query = {} as RequestConfig['query'];
     const headers = {} as RequestConfig['headers'];
     const cookies = {} as RequestConfig['cookies'];
     const parameters = (operation.parameters || []) as ParameterObject[];
@@ -414,6 +415,7 @@ export class OpenAPIClientAxios {
           } else {
             searchParams.append(name, value);
           }
+          query[name] = value;
           break;
         case ParamType.Header:
           headers[name] = value;
@@ -474,13 +476,8 @@ export class OpenAPIClientAxios {
     }
     const path = pathBuilder.path(pathParams);
 
-    // query parameters
+    // queryString parameter
     const queryString = searchParams.toString();
-    const query = {} as RequestConfig['query'];
-    for (const key of searchParams.keys()) {
-      const val = searchParams.getAll(key);
-      query[key] = val.length > 1 ? val : val[0];
-    }
 
     // full url with query string
     const url = `${this.getBaseURL(operation)}${path}${queryString ? `?${queryString}` : ''}`;
