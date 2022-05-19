@@ -55,7 +55,7 @@ Below is a simple example of how you would call an operation called `getPets()` 
 ```javascript
 const api = new OpenAPIClientAxios({ definition: './petstore.yml' });
 const client = await api.init();
-const res = await api.getPets(); // res.data will contain the result of the API call
+const res = await client.getPets(); // res.data will contain the result of the API call
 ```
 
 ## Authentication
