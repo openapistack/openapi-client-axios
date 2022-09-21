@@ -11,7 +11,8 @@ interface TypegenOptions {
 }
 
 // rule from 'dts-generator' jsonSchema.ts
-function convertKeyToTypeName(key: string): string {
+function convertKeyToTypeName(key?: string): string {
+  if(key == undefined){ return key; }
   key = key.replace(/\/(.)/g, (_match: string, p1: string) => {
     return p1.toUpperCase();
   });
