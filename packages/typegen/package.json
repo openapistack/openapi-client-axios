@@ -55,9 +55,8 @@
     "@types/lodash": "^4.14.178",
     "@types/yargs": "^17.0.7",
     "jest": "^27.4.4",
+    "prettier": "^2.7.1",
     "ts-jest": "^27.1.1",
-    "tslint": "^6.1.3",
-    "tslint-microsoft-contrib": "^6.2.0",
     "typescript": "^4.5.5"
   },
   "scripts": {
@@ -65,8 +64,8 @@
     "watch-build": "tsc -w",
     "prepare": "npm run build",
     "test": "NODE_ENV=test jest",
-    "lint": "tslint --format prose --project .",
-    "lint:fix": "tslint --fix --format prose --project ."
+    "lint": "prettier --check src/**/*.ts",
+    "lint:fix": "prettier --write src/**/*.ts"
   },
   "gitHead": "9075245dce9f318c202019abbd16e32866fa0999"
 }

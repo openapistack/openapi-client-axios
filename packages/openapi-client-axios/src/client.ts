@@ -36,21 +36,25 @@ export type OpenAPIClient<
  * in case you want to switch over from axios.
  */
 export declare type Runner = {
-  runRequest: RunRequestFunc
-  context?: UnknownContext
-}
+  runRequest: RunRequestFunc;
+  context?: UnknownContext;
+};
 
 /**
  * Context to be injected into Runner.runRequest
  */
-export declare type UnknownContext = Record<string, unknown>
+export declare type UnknownContext = Record<string, unknown>;
 
 /**
  * Type for runRequest function. It allows extending/switching from axios to another method of running http requests.
  */
-export declare type RunRequestFunc = (axiosConfig: AxiosRequestConfig, operation: Operation, context?: UnknownContext) => Promise<AxiosResponse>
+export declare type RunRequestFunc = (
+  axiosConfig: AxiosRequestConfig,
+  operation: Operation,
+  context?: UnknownContext,
+) => Promise<AxiosResponse>;
 
-const DefaultRunnerKey = 'default'
+const DefaultRunnerKey = 'default';
 
 /**
  * Main class and the default export of the 'openapi-client-axios' module
@@ -61,7 +65,7 @@ const DefaultRunnerKey = 'default'
 export class OpenAPIClientAxios {
   public document: Document;
   public inputDocument: Document | string;
-  public definition: Document;
+  public definition: Document
 
   public quick: boolean;
 
@@ -128,8 +132,8 @@ export class OpenAPIClientAxios {
     this.transformOperationName = optsWithDefaults.transformOperationName;
     this.transformOperationMethod = optsWithDefaults.transformOperationMethod;
     this.runners = {
-      [DefaultRunnerKey]: { runRequest: optsWithDefaults.axiosRunner }
-    }
+      [DefaultRunnerKey]: { runRequest: optsWithDefaults.axiosRunner },
+    };
   }
 
   /**
@@ -521,7 +525,6 @@ export class OpenAPIClientAxios {
     for (const [key, val] of Object.entries(methodHeaders)) {
       headers[key] = val;
     }
-
 
     // construct request config
     const config: RequestConfig = {

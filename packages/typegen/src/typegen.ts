@@ -82,7 +82,6 @@ export async function generateTypesForDocument(definition: Document | string, op
   return [imports, schemaTypes, operationTypings];
 }
 
-// tslint:disable-next-line:max-line-length
 function generateMethodForOperation(methodName: string, operation: Operation, exportTypes: ExportedType[]) {
   const { operationId, summary, description } = operation;
 
@@ -131,7 +130,6 @@ function generateMethodForOperation(methodName: string, operation: Operation, ex
   return [comment, operationMethod].join('\n');
 }
 
-// tslint:disable-next-line:max-line-length
 export function generateOperationMethodTypings(
   api: OpenAPIClientAxios,
   exportTypes: ExportedType[],

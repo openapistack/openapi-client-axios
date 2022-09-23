@@ -41,9 +41,10 @@
     "!typegen"
   ],
   "devDependencies": {
+    "husky": "^8.0.1",
     "lerna": "^4.0.0",
     "markdown-toc": "^1.2.0",
-    "prettier": "^2.5.1"
+    "prettier": "^2.7.1"
   },
   "scripts": {
     "postinstall": "lerna bootstrap",
@@ -51,8 +52,9 @@
     "watch-build": "lerna run watch-build",
     "lint": "lerna run lint",
     "lint:fix": "lerna run lint:fix",
-    "prettier": "prettier --write 'packages/**/*.ts'",
+    "prettier": "lerna run lint:fix",
     "test": "lerna run test --stream",
-    "toc": "./scripts/generate-toc.js"
+    "toc": "./scripts/generate-toc.js",
+    "prepare": "husky install"
   }
 }

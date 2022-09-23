@@ -285,7 +285,6 @@ describe('OpenAPIClientAxios', () => {
       expect(mockHandler).toBeCalled();
     });
 
-    // tslint:disable-next-line
     test('getPetById([{ name: "petId", value: "1", in: "path" }, { name: "new", value: "2", in: "query" }]) calls GET /pets/1?new=2', async () => {
       const api = new OpenAPIClientAxios({ definition });
       const client = await api.init();
