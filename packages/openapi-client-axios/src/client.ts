@@ -1,4 +1,4 @@
-import axios, { AxiosInstance, AxiosRequestConfig, Method } from 'axios';
+import axios, { AxiosInstance, AxiosRequestConfig, AxiosRequestHeaders, AxiosResponse, Method } from 'axios';
 import bath from 'bath-es5';
 import RefParser from '@apidevtools/json-schema-ref-parser';
 import dereferenceSync from '@apidevtools/json-schema-ref-parser/lib/dereference';
@@ -32,6 +32,27 @@ export type OpenAPIClient<
   };
 
 /**
+ * By default OpenAPIClient will use axios as request runner. You can register a different runner,
+ * in case you want to switch over from axios.
+ */
+export declare type Runner = {
+  runRequest: RunRequestFunc
+  context?: UnknownContext
+}
+
+/**
+ * Context to be injected into Runner.runRequest
+ */
+export declare type UnknownContext = Record<string, unknown>
+
+/**
+ * Type for runRequest function. It allows extending/switching from axios to another method of running http requests.
+ */
+export declare type RunRequestFunc = (axiosConfig: AxiosRequestConfig, operation: Operation, context?: UnknownContext) => Promise<AxiosResponse>
+
+const DefaultRunnerKey = 'default'
+
+/**
  * Main class and the default export of the 'openapi-client-axios' module
  *
  * @export
@@ -58,6 +79,9 @@ export class OpenAPIClientAxios {
     operationMethod: UnknownOperationMethod,
     operationToTransform: Operation,
   ) => UnknownOperationMethod;
+
+  // maps operationId to Runner
+  private runners: Record<string, Runner>;
 
   /**
    * Creates an instance of OpenAPIClientAxios.
@@ -88,6 +112,7 @@ export class OpenAPIClientAxios {
       swaggerParserOpts: {} as RefParser.Options,
       transformOperationName: (operationId: string) => operationId,
       transformOperationMethod: (operationMethod: UnknownOperationMethod) => operationMethod,
+      axiosRunner: (axiosConfig: AxiosRequestConfig) => this.client.request(axiosConfig),
       ...opts,
       axiosConfigDefaults: {
         paramsSerializer: (params) => new URLSearchParams(params).toString(),
@@ -102,6 +127,9 @@ export class OpenAPIClientAxios {
     this.baseURLVariables = optsWithDefaults.baseURLVariables;
     this.transformOperationName = optsWithDefaults.transformOperationName;
     this.transformOperationMethod = optsWithDefaults.transformOperationMethod;
+    this.runners = {
+      [DefaultRunnerKey]: { runRequest: optsWithDefaults.axiosRunner }
+    }
   }
 
   /**
@@ -482,6 +510,19 @@ export class OpenAPIClientAxios {
     // full url with query string
     const url = `${this.getBaseURL(operation)}${path}${queryString ? `?${queryString}` : ''}`;
 
+    // add default common headers
+    const defaultHeaders = this.client.defaults.headers;
+    for (const [key, val] of Object.entries(defaultHeaders.common ?? {})) {
+      headers[key] = val;
+    }
+
+    // add method specific default headers
+    const methodHeaders: AxiosRequestHeaders = (defaultHeaders as any)[operation.method] ?? {};
+    for (const [key, val] of Object.entries(methodHeaders)) {
+      headers[key] = val;
+    }
+
+
     // construct request config
     const config: RequestConfig = {
       method: operation.method,
@@ -539,6 +580,20 @@ export class OpenAPIClientAxios {
   };
 
   /**
+   * By default OpenAPIClient will use axios as request runner. You can register a different runner,
+   * in case you want to switch over from axios. This allows transitioning from axios to your library of choice.
+   * @param runner - request runner to be registered, either for all operations, or just one operation.
+   * @param operationId - optional parameter. If provided, runner will be registered for a single operation. Else, it will be registered for all operations.
+   */
+  public registerRunner(runner: Runner, operationId?: string) {
+    this.runners[operationId ?? DefaultRunnerKey] = runner;
+  }
+
+  private getRunner(operationId: string) {
+    return this.runners[operationId] ?? this.runners[DefaultRunnerKey];
+  }
+
+  /**
    * Creates an axios method for an operation
    * (...pathParams, data?, config?) => Promise<AxiosResponse>
    *
@@ -548,8 +603,10 @@ export class OpenAPIClientAxios {
   private createOperationMethod = (operation: Operation): UnknownOperationMethod => {
     const originalOperationMethod = async (...args: OperationMethodArguments) => {
       const axiosConfig = this.getAxiosConfigForOperation(operation, args);
-      // do the axios request
-      return this.client.request(axiosConfig);
+      // run the axios request with the registered runner
+      // by default: axios runner
+      const runner = this.getRunner(operation.operationId);
+      return runner.runRequest(axiosConfig, operation, runner.context);
     };
 
     return this.transformOperationMethod(originalOperationMethod, operation);
