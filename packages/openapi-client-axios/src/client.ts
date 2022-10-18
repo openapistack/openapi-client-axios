@@ -77,6 +77,7 @@ export class OpenAPIClientAxios {
 
   private defaultServer: number | string | Server;
   private baseURLVariables: { [key: string]: string | number };
+  private applyMethodCommonHeaders: boolean;
 
   private transformOperationName: (operation: string) => string;
   private transformOperationMethod: (
@@ -93,6 +94,7 @@ export class OpenAPIClientAxios {
    * @param opts - constructor options
    * @param {Document | string} opts.definition - the OpenAPI definition, file path or Document object
    * @param {boolean} opts.quick - quick mode, skips validation and doesn't guarantee document is unchanged
+   * @param {boolean} opts.applyMethodCommonHeaders Should method (patch / post / put / etc.) specific default headers (from axios.defaults.headers.{method}) be applied to operation methods?
    * @param {boolean} opts.axiosConfigDefaults - default axios config for the instance
    * @memberof OpenAPIClientAxios
    */
@@ -103,6 +105,7 @@ export class OpenAPIClientAxios {
     swaggerParserOpts?: RefParser.Options;
     withServer?: number | string | Server;
     baseURLVariables?: { [key: string]: string | number };
+    applyMethodCommonHeaders?: boolean;
     transformOperationName?: (operation: string) => string;
     transformOperationMethod?: (
       operationMethod: UnknownOperationMethod,
@@ -117,6 +120,7 @@ export class OpenAPIClientAxios {
       transformOperationName: (operationId: string) => operationId,
       transformOperationMethod: (operationMethod: UnknownOperationMethod) => operationMethod,
       axiosRunner: (axiosConfig: AxiosRequestConfig) => this.client.request(axiosConfig),
+      applyMethodCommonHeaders: false,
       ...opts,
       axiosConfigDefaults: {
         paramsSerializer: (params) => new URLSearchParams(params).toString(),
@@ -129,6 +133,7 @@ export class OpenAPIClientAxios {
     this.swaggerParserOpts = optsWithDefaults.swaggerParserOpts;
     this.defaultServer = optsWithDefaults.withServer;
     this.baseURLVariables = optsWithDefaults.baseURLVariables;
+    this.applyMethodCommonHeaders = optsWithDefaults.applyMethodCommonHeaders;
     this.transformOperationName = optsWithDefaults.transformOperationName;
     this.transformOperationMethod = optsWithDefaults.transformOperationMethod;
     this.runners = {
@@ -521,9 +526,11 @@ export class OpenAPIClientAxios {
     }
 
     // add method specific default headers
-    const methodHeaders: AxiosRequestHeaders = (defaultHeaders as any)[operation.method] ?? {};
-    for (const [key, val] of Object.entries(methodHeaders)) {
-      headers[key] = val;
+    if (this.applyMethodCommonHeaders) {
+      const methodHeaders: AxiosRequestHeaders = (defaultHeaders as any)[operation.method] ?? {};
+      for (const [key, val] of Object.entries(methodHeaders)) {
+        headers[key] = val;
+      }
     }
 
     // construct request config
