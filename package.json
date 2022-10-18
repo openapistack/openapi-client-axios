@@ -42,7 +42,7 @@
   ],
   "devDependencies": {
     "husky": "^8.0.1",
-    "lerna": "^4.0.0",
+    "lerna": "^6.0.1",
     "markdown-toc": "^1.2.0",
     "prettier": "^2.7.1"
   },
