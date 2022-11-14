@@ -123,7 +123,6 @@ export class OpenAPIClientAxios {
       applyMethodCommonHeaders: false,
       ...opts,
       axiosConfigDefaults: {
-        paramsSerializer: (params) => new URLSearchParams(params).toString(),
         ...(opts.axiosConfigDefaults || {}),
       } as AxiosRequestConfig,
     };
