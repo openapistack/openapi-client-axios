@@ -64,3 +64,41 @@ async function createPet() {
   console.log('Pet created', res.data);
 }
 ```
+
+## Browser Usage
+
+The `openapi-client-axios` library works both in Node.js and browsers.
+
+However, you may need to add NodeJS polyfills in your build configuration:
+
+```js
+// webpack.config.js
+const NodePolyfillPlugin = require('node-polyfill-webpack-plugin');
+
+module.exports = {
+	plugins: [new NodePolyfillPlugin()]
+};
+```
+
+```js
+// rollup.config.js
+import nodePolyfills from 'rollup-plugin-node-polyfills';
+
+export default {
+  plugins: [nodePolyfills()]
+}
+```
+
+```js
+// vite.config.js
+import { defineConfig } from 'vite'
+import { nodePolyfills } from 'vite-plugin-node-polyfills'
+
+export default defineConfig({
+  plugins: [nodePolyfills()],
+})
+```
+
+## Contributing
+
+OpenAPI Client Axios is Free and Open Source Software. Issues and pull requests are more than welcome!

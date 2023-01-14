@@ -4,8 +4,6 @@
 [![npm version](https://img.shields.io/npm/v/openapi-client-axios.svg)](https://www.npmjs.com/package/openapi-client-axios)
 [![npm downloads](https://img.shields.io/npm/dw/openapi-client-axios)](https://www.npmjs.com/package/openapi-client-axios)
 [![bundle size](https://img.shields.io/bundlephobia/minzip/openapi-client-axios?label=gzip%20bundle)](https://bundlephobia.com/package/openapi-client-axios)
-[![Total alerts](https://img.shields.io/lgtm/alerts/g/anttiviljami/openapi-client-axios.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/anttiviljami/openapi-client-axios/alerts/)
-[![Language grade: JavaScript](https://img.shields.io/lgtm/grade/javascript/g/anttiviljami/openapi-client-axios.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/anttiviljami/openapi-client-axios/context:javascript)
 [![License](http://img.shields.io/:license-mit-blue.svg)](https://github.com/anttiviljami/openapi-client-axios/blob/master/LICENSE)
 [![Buy me a coffee](https://img.shields.io/badge/donate-buy%20me%20a%20coffee-orange)](https://buymeacoff.ee/anttiviljami)
 
@@ -208,6 +206,40 @@ const client = await api.getClient<PetStoreClient>();
 ```
 $ typegen ./petstore.yaml
 $ typegen https://raw.githubusercontent.com/OAI/OpenAPI-Specification/master/examples/v3.0/petstore.yaml
+```
+
+## Browser Usage
+
+The `openapi-client-axios` library works both in Node.js and browsers.
+
+However, you may need to add NodeJS polyfills in your build configuration:
+
+```js
+// webpack.config.js
+const NodePolyfillPlugin = require('node-polyfill-webpack-plugin');
+
+module.exports = {
+	plugins: [new NodePolyfillPlugin()]
+};
+```
+
+```js
+// rollup.config.js
+import nodePolyfills from 'rollup-plugin-node-polyfills';
+
+export default {
+  plugins: [nodePolyfills()]
+}
+```
+
+```js
+// vite.config.js
+import { defineConfig } from 'vite'
+import { nodePolyfills } from 'vite-plugin-node-polyfills'
+
+export default defineConfig({
+  plugins: [nodePolyfills()],
+})
 ```
 
 ## Contributing
