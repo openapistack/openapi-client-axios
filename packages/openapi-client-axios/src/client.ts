@@ -1,8 +1,8 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosRequestHeaders, AxiosResponse, Method } from 'axios';
 import bath from 'bath-es5';
-import RefParser from '@apidevtools/json-schema-ref-parser';
-import dereferenceSync from '@apidevtools/json-schema-ref-parser/lib/dereference';
-import RefParserOptions from '@apidevtools/json-schema-ref-parser/lib/options';
+import RefParser from '@anttiviljami/json-schema-ref-parser';
+import dereferenceSync from '@anttiviljami/json-schema-ref-parser/lib/dereference';
+import RefParserOptions from '@anttiviljami/json-schema-ref-parser/lib/options';
 import { copy } from 'copy-anything';
 
 import {
