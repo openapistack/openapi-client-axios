@@ -76,7 +76,7 @@ However, you may need to add NodeJS polyfills in your build configuration:
 const NodePolyfillPlugin = require('node-polyfill-webpack-plugin');
 
 module.exports = {
-	plugins: [new NodePolyfillPlugin()]
+  plugins: [new NodePolyfillPlugin()],
 };
 ```
 
@@ -85,7 +85,7 @@ module.exports = {
 import nodePolyfills from 'rollup-plugin-node-polyfills';
 
 export default {
-  plugins: [nodePolyfills()]
+  plugins: [nodePolyfills()],
 }
 ```
 
