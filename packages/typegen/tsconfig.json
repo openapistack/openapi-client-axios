@@ -13,7 +13,8 @@
     "rootDir": "src/",
     "outDir": "",
     "sourceMap": true,
-    "declaration": true
+    "declaration": true,
+    "allowSyntheticDefaultImports": true
   },
   "include": [
     "src/**/*"
