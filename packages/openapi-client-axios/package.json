@@ -43,7 +43,7 @@
     "js-yaml": "^4.1.0"
   },
   "dependencies": {
-    "@anttiviljami/json-schema-ref-parser": "^9.2.1",
+    "@anttiviljami/json-schema-ref-parser": "^9.2.2",
     "bath-es5": "^3.0.3",
     "copy-anything": "^3.0.2",
     "openapi-types": "^12.0.2"
