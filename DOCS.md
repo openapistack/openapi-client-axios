@@ -53,7 +53,7 @@ in OpenAPIv3 definitions to call API operations.
 Below is a simple example of how you would call an operation called `getPets()` with `openapi-client-axios`.
 
 ```javascript
-const api = new OpenAPIClientAxios({ definition: './petstore.yml' });
+const api = new OpenAPIClientAxios({ definition: '/openapi.json' });
 const client = await api.init();
 const res = await client.getPets(); // res.data will contain the result of the API call
 ```
