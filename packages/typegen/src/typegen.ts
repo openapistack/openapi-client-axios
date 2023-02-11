@@ -66,7 +66,7 @@ export async function generateTypesForDocument(document: Document | string, opts
   const schemaTypes = await generator.generate();
   const exportedTypes = generator.getExports();
   const api = new OpenAPIClientAxios({ definition: rootSchema as Document });
-  api.init();
+  await api.init();
   const operationTypings = generateOperationMethodTypings(api, exportedTypes, opts);
 
   const imports = [

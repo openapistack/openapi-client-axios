@@ -1,11 +1,26 @@
 import path from 'path';
+import fs from 'fs';
+import { rest } from 'msw'
+import { setupServer } from 'msw/node'
 import MockAdapter from 'axios-mock-adapter';
 import { definition, baseURL, baseURLV2, baseURLAlternative, baseURLWithVariableResolved } from './__tests__/fixtures';
 import { OpenAPIClientAxios, OpenAPIClient } from './client';
 
 const testsDir = path.join(__dirname, '.', '__tests__');
+
 const examplePetAPIJSON = path.join(testsDir, 'resources', 'example-pet-api.openapi.json');
 const examplePetAPIYAML = path.join(testsDir, 'resources', 'example-pet-api.openapi.yml');
+
+const server = setupServer(
+  rest.get('http://localhost/example-pet-api.openapi.json', (_req, res, ctx) => {  
+    return res(ctx.body(fs.readFileSync(examplePetAPIJSON)), ctx.set('Content-Type', 'application/json'));
+  }),
+  rest.get('http://localhost/example-pet-api.openapi.yml', (_req, res, ctx) => {  
+    return res(ctx.body(fs.readFileSync(examplePetAPIYAML)), ctx.set('Content-Type', 'application/yaml'));
+  })
+);
+
+beforeAll(() => server.listen());
 
 describe('OpenAPIClientAxios', () => {
   const checkHasOperationMethods = (client: OpenAPIClient) => {
@@ -45,8 +60,24 @@ describe('OpenAPIClientAxios', () => {
     test('dereferences the input document', async () => {
       const api = new OpenAPIClientAxios({ definition });
       await api.init();
-      expect(JSON.stringify(api.document)).toMatch('$ref');
+      expect(JSON.stringify(api.inputDocument)).toMatch('$ref');
       expect(JSON.stringify(api.definition)).not.toMatch('$ref');
+    });
+
+    test('can be initialized using a valid YAML file', async () => {
+      const api = new OpenAPIClientAxios({ definition: 'http://localhost/example-pet-api.openapi.yml' });
+      await api.init();
+      expect(api.initialized).toEqual(true);
+      expect(api.client.api).toBe(api);
+      checkHasOperationMethods(api.client);
+    });
+
+    test('can be initialized using a valid JSON file', async () => {
+      const api = new OpenAPIClientAxios({ definition: 'http://localhost/example-pet-api.openapi.json' });
+      await api.init();
+      expect(api.initialized).toEqual(true);
+      expect(api.client.api).toBe(api);
+      checkHasOperationMethods(api.client);
     });
 
     test('can be initialized using alternative server using index', async () => {
@@ -149,8 +180,13 @@ describe('OpenAPIClientAxios', () => {
     test('dereferences the input document', () => {
       const api = new OpenAPIClientAxios({ definition });
       api.initSync();
-      expect(JSON.stringify(api.document)).toMatch('$ref');
+      expect(JSON.stringify(api.inputDocument)).toMatch('$ref');
       expect(JSON.stringify(api.definition)).not.toMatch('$ref');
+    });
+
+    test('throws an error when initialized using a URL', () => {
+      const api = new OpenAPIClientAxios({ definition: '/example-pet-api.openapi.json' });
+      expect(api.initSync).toThrowError();
     });
   });
 
