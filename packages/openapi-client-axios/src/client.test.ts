@@ -1,11 +1,26 @@
 import path from 'path';
+import fs from 'fs';
+import { rest } from 'msw'
+import { setupServer } from 'msw/node'
 import MockAdapter from 'axios-mock-adapter';
 import { definition, baseURL, baseURLV2, baseURLAlternative, baseURLWithVariableResolved } from './__tests__/fixtures';
 import { OpenAPIClientAxios, OpenAPIClient } from './client';
 
 const testsDir = path.join(__dirname, '.', '__tests__');
+
 const examplePetAPIJSON = path.join(testsDir, 'resources', 'example-pet-api.openapi.json');
 const examplePetAPIYAML = path.join(testsDir, 'resources', 'example-pet-api.openapi.yml');
+
+const server = setupServer(
+  rest.get('http://localhost/example-pet-api.openapi.json', (_req, res, ctx) => {  
+    return res(ctx.body(fs.readFileSync(examplePetAPIJSON)), ctx.set('Content-Type', 'application/json'));
+  }),
+  rest.get('http://localhost/example-pet-api.openapi.yml', (_req, res, ctx) => {  
+    return res(ctx.body(fs.readFileSync(examplePetAPIYAML)), ctx.set('Content-Type', 'application/yaml'));
+  })
+);
+
+beforeAll(() => server.listen());
 
 describe('OpenAPIClientAxios', () => {
   const checkHasOperationMethods = (client: OpenAPIClient) => {
@@ -50,7 +65,7 @@ describe('OpenAPIClientAxios', () => {
     });
 
     test('can be initialized using a valid YAML file', async () => {
-      const api = new OpenAPIClientAxios({ definition: examplePetAPIYAML });
+      const api = new OpenAPIClientAxios({ definition: 'http://localhost/example-pet-api.openapi.yml' });
       await api.init();
       expect(api.initialized).toEqual(true);
       expect(api.client.api).toBe(api);
@@ -58,7 +73,7 @@ describe('OpenAPIClientAxios', () => {
     });
 
     test('can be initialized using a valid JSON file', async () => {
-      const api = new OpenAPIClientAxios({ definition: examplePetAPIJSON });
+      const api = new OpenAPIClientAxios({ definition: 'http://localhost/example-pet-api.openapi.json' });
       await api.init();
       expect(api.initialized).toEqual(true);
       expect(api.client.api).toBe(api);
@@ -169,8 +184,8 @@ describe('OpenAPIClientAxios', () => {
       expect(JSON.stringify(api.definition)).not.toMatch('$ref');
     });
 
-    test('throws an error when initialized using a file URL', () => {
-      const api = new OpenAPIClientAxios({ definition: examplePetAPIYAML });
+    test('throws an error when initialized using a URL', () => {
+      const api = new OpenAPIClientAxios({ definition: '/example-pet-api.openapi.json' });
       expect(api.initSync).toThrowError();
     });
   });

@@ -53,7 +53,7 @@ in OpenAPIv3 definitions to call API operations.
 Below is a simple example of how you would call an operation called `getPets()` with `openapi-client-axios`.
 
 ```javascript
-const api = new OpenAPIClientAxios({ definition: './petstore.yml' });
+const api = new OpenAPIClientAxios({ definition: '/openapi.json' });
 const client = await api.init();
 const res = await client.getPets(); // res.data will contain the result of the API call
 ```
@@ -102,7 +102,7 @@ Creates an instance of OpenAPIClientAxios and returns it.
 Example:
 ```javascript
 const api = new OpenAPIClientAxios({
-  definition: './openapi.yml',
+  definition: '/openapi.json',
   withServer: 0,
   axiosConfigDefaults: {
     withCredentials: true,
@@ -119,7 +119,9 @@ Constructor options
 
 #### Parameter: opts.definition
 
-The OpenAPI definition as a file path or [Document object](#document-object).
+The OpenAPI definition as a URL or [Document object](#document-object).
+
+To support YAML openapi files, `js-yaml` must be installed.
 
 Type: `Document | string`
 
@@ -173,7 +175,7 @@ Initalizes OpenAPIClientAxios
 Returns a promise of the created member axios instance.
 
 1. Parses the input definition into a JS object. If the input definition is a URL, it will be resolved
-2. Dereferences the definition for use. Will resolve any remote $refs
+2. Dereferences the definition for use.
 3. Creates the member axios instance
 4. Sets `api.initialised = true` and returns the created axios instance
 
@@ -188,7 +190,7 @@ Synchronous version of [`.init()`](#init)
 
 Initalizes OpenAPIClientAxios and creates the axios client instance.
 
-Note: Only works when the input definition is a valid OpenAPI v3 object and doesn't contain any remote $refs.
+Note: Only works when the input definition is a valid OpenAPI v3 object.
 
 Example:
 ```javascript

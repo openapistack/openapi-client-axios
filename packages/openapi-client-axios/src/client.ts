@@ -1,9 +1,6 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosRequestHeaders, AxiosResponse, Method } from 'axios';
 import bath from 'bath-es5';
-import RefParser from '@apidevtools/json-schema-ref-parser';
-import dereferenceSync from '@apidevtools/json-schema-ref-parser/lib/dereference';
-import RefParserOptions from '@apidevtools/json-schema-ref-parser/lib/options';
-import { copy } from 'copy-anything';
+import { dereferenceSync } from 'dereference-json-schema';
 
 import {
   Document,
@@ -73,7 +70,6 @@ export class OpenAPIClientAxios {
   public instance: any;
 
   public axiosConfigDefaults: AxiosRequestConfig;
-  public swaggerParserOpts: RefParser.Options;
 
   private defaultServer: number | string | Server;
   private baseURLVariables: { [key: string]: string | number };
@@ -102,7 +98,6 @@ export class OpenAPIClientAxios {
     definition: Document | string;
     quick?: boolean;
     axiosConfigDefaults?: AxiosRequestConfig;
-    swaggerParserOpts?: RefParser.Options;
     withServer?: number | string | Server;
     baseURLVariables?: { [key: string]: string | number };
     applyMethodCommonHeaders?: boolean;
@@ -116,7 +111,6 @@ export class OpenAPIClientAxios {
       quick: false,
       withServer: 0,
       baseURLVariables: {},
-      swaggerParserOpts: {} as RefParser.Options,
       transformOperationName: (operationId: string) => operationId,
       transformOperationMethod: (operationMethod: UnknownOperationMethod) => operationMethod,
       axiosRunner: (axiosConfig: AxiosRequestConfig) => this.client.request(axiosConfig),
@@ -129,7 +123,6 @@ export class OpenAPIClientAxios {
     this.inputDocument = optsWithDefaults.definition;
     this.quick = optsWithDefaults.quick;
     this.axiosConfigDefaults = optsWithDefaults.axiosConfigDefaults;
-    this.swaggerParserOpts = optsWithDefaults.swaggerParserOpts;
     this.defaultServer = optsWithDefaults.withServer;
     this.baseURLVariables = optsWithDefaults.baseURLVariables;
     this.applyMethodCommonHeaders = optsWithDefaults.applyMethodCommonHeaders;
@@ -178,18 +171,10 @@ export class OpenAPIClientAxios {
    * @memberof OpenAPIClientAxios
    */
   public init = async <Client = OpenAPIClient>(): Promise<Client> => {
-    if (this.quick) {
-      // to save time, just dereference input document
-      this.definition = (await RefParser.dereference(this.inputDocument, this.swaggerParserOpts)) as Document;
-      // in quick mode no guarantees document will be the original document
-      this.document = typeof this.inputDocument === 'object' ? this.inputDocument : this.definition;
-    } else {
-      // load and parse the document
-      await this.loadDocument();
+    await this.loadDocument();
 
-      // dereference the document into definition
-      this.definition = (await RefParser.dereference(copy(this.document), this.swaggerParserOpts)) as Document;
-    }
+    // dereference the document into definition
+    this.definition = dereferenceSync(this.document) as Document;
 
     // create axios instance
     this.instance = this.createAxiosInstance();
@@ -200,19 +185,44 @@ export class OpenAPIClientAxios {
   };
 
   /**
-   * Loads the input document asynchronously and sets this.document
+   * Loads document from inputDocument
+   * 
+   * Supports loading from a string (url) or an object (json)
    *
    * @memberof OpenAPIClientAxios
    */
   public async loadDocument() {
-    this.document = (await RefParser.parse(this.inputDocument, this.swaggerParserOpts)) as Document;
+    if (typeof this.inputDocument === 'object') {
+      this.document = this.inputDocument
+    } else {
+      // create temporary instance to get the document
+      const client = this.getAxiosInstance()
+
+      // load the document
+      const documentRes = await client.get(this.inputDocument)
+
+      // set document
+      if (typeof documentRes.data === 'object') {
+        // json response
+        this.document = documentRes.data
+      } else if (typeof documentRes.data === 'string' && documentRes.headers['content-type'] === 'application/yaml') {
+        // yaml response
+        const yaml = await import('js-yaml')
+        this.document = yaml.load(documentRes.data) as Document
+      } else {
+        const err = new Error(`Invalid fesponse fetching OpenAPI definition: ${documentRes}`) as any
+        err.response = documentRes
+        throw err
+      }
+    }
+
     return this.document;
   }
 
   /**
    * Synchronous version of .init()
    *
-   * Note: Only works when the input definition is a valid OpenAPI v3 object and doesn't contain remote $refs.
+   * Note: Only works when the input definition is a valid OpenAPI v3 object (URLs are not supported)
    *
    * @memberof OpenAPIClientAxios
    */
@@ -225,11 +235,7 @@ export class OpenAPIClientAxios {
     this.document = this.inputDocument;
 
     // dereference the document into definition
-    this.definition = copy(this.document);
-    const parser = new RefParser();
-    parser.parse(this.definition);
-    parser.schema = this.definition;
-    dereferenceSync(parser, new RefParserOptions(this.swaggerParserOpts)); // mutates this.definition (synchronous)
+    this.definition = dereferenceSync(this.document) as Document;
 
     // create axios instance
     this.instance = this.createAxiosInstance();
@@ -240,13 +246,21 @@ export class OpenAPIClientAxios {
   };
 
   /**
+   * Creates a new axios instance with defaults and returns it
+   */
+  public getAxiosInstance = (): AxiosInstance => {
+    const instance = axios.create(this.axiosConfigDefaults) as OpenAPIClient;
+    return instance 
+  }
+
+  /**
    * Creates a new axios instance, extends it and returns it
    *
    * @memberof OpenAPIClientAxios
    */
   public createAxiosInstance = <Client = OpenAPIClient>(): Client => {
     // create axios instance
-    const instance = axios.create(this.axiosConfigDefaults) as OpenAPIClient;
+    const instance = this.getAxiosInstance() as OpenAPIClient;
 
     // set baseURL to the one found in the definition servers (if not set in axios defaults)
     const baseURL = this.getBaseURL();

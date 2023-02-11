@@ -62,12 +62,15 @@ const schemaParserOptions = { resolve: { http: { headers: { "User-Agent": 'Typeg
 
 export async function generateTypesForDocument(definition: Document | string, opts: TypegenOptions) {
   const rootSchema = await RefParser.bundle(definition, schemaParserOptions);
+
   const schema = parseSchema(rootSchema as any);
 
   const generator = new DtsGenerator([schema]);
   const schemaTypes = await generator.generate();
   const exportedTypes = generator.getExports();
+
   const api = new OpenAPIClientAxios({ definition, swaggerParserOpts: schemaParserOptions });
+
   await api.init();
   const operationTypings = generateOperationMethodTypings(api, exportedTypes, opts);
 
