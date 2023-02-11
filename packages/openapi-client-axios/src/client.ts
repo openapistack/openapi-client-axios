@@ -1,9 +1,6 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosRequestHeaders, AxiosResponse, Method } from 'axios';
 import bath from 'bath-es5';
-import RefParser from '@anttiviljami/json-schema-ref-parser';
-import dereferenceSync from '@anttiviljami/json-schema-ref-parser/lib/dereference';
-import RefParserOptions from '@anttiviljami/json-schema-ref-parser/lib/options';
-import { copy } from 'copy-anything';
+import { dereferenceSync } from 'dereference-json-schema';
 
 import {
   Document,
@@ -64,7 +61,6 @@ const DefaultRunnerKey = 'default';
  */
 export class OpenAPIClientAxios {
   public document: Document;
-  public inputDocument: Document | string;
   public definition: Document
 
   public quick: boolean;
@@ -73,7 +69,6 @@ export class OpenAPIClientAxios {
   public instance: any;
 
   public axiosConfigDefaults: AxiosRequestConfig;
-  public swaggerParserOpts: RefParser.Options;
 
   private defaultServer: number | string | Server;
   private baseURLVariables: { [key: string]: string | number };
@@ -99,10 +94,9 @@ export class OpenAPIClientAxios {
    * @memberof OpenAPIClientAxios
    */
   constructor(opts: {
-    definition: Document | string;
+    definition: Document;
     quick?: boolean;
     axiosConfigDefaults?: AxiosRequestConfig;
-    swaggerParserOpts?: RefParser.Options;
     withServer?: number | string | Server;
     baseURLVariables?: { [key: string]: string | number };
     applyMethodCommonHeaders?: boolean;
@@ -116,7 +110,6 @@ export class OpenAPIClientAxios {
       quick: false,
       withServer: 0,
       baseURLVariables: {},
-      swaggerParserOpts: {} as RefParser.Options,
       transformOperationName: (operationId: string) => operationId,
       transformOperationMethod: (operationMethod: UnknownOperationMethod) => operationMethod,
       axiosRunner: (axiosConfig: AxiosRequestConfig) => this.client.request(axiosConfig),
@@ -126,10 +119,9 @@ export class OpenAPIClientAxios {
         ...(opts.axiosConfigDefaults || {}),
       } as AxiosRequestConfig,
     };
-    this.inputDocument = optsWithDefaults.definition;
+    this.document = optsWithDefaults.definition;
     this.quick = optsWithDefaults.quick;
     this.axiosConfigDefaults = optsWithDefaults.axiosConfigDefaults;
-    this.swaggerParserOpts = optsWithDefaults.swaggerParserOpts;
     this.defaultServer = optsWithDefaults.withServer;
     this.baseURLVariables = optsWithDefaults.baseURLVariables;
     this.applyMethodCommonHeaders = optsWithDefaults.applyMethodCommonHeaders;
@@ -177,19 +169,9 @@ export class OpenAPIClientAxios {
    * @returns AxiosInstance
    * @memberof OpenAPIClientAxios
    */
-  public init = async <Client = OpenAPIClient>(): Promise<Client> => {
-    if (this.quick) {
-      // to save time, just dereference input document
-      this.definition = (await RefParser.dereference(this.inputDocument, this.swaggerParserOpts)) as Document;
-      // in quick mode no guarantees document will be the original document
-      this.document = typeof this.inputDocument === 'object' ? this.inputDocument : this.definition;
-    } else {
-      // load and parse the document
-      await this.loadDocument();
-
-      // dereference the document into definition
-      this.definition = (await RefParser.dereference(copy(this.document), this.swaggerParserOpts)) as Document;
-    }
+  public init = <Client = OpenAPIClient>(): Client => {
+    // dereference the input definition
+    this.definition = dereferenceSync(this.document) as Document;
 
     // create axios instance
     this.instance = this.createAxiosInstance();
@@ -200,43 +182,13 @@ export class OpenAPIClientAxios {
   };
 
   /**
-   * Loads the input document asynchronously and sets this.document
+   * Alias for init
    *
-   * @memberof OpenAPIClientAxios
-   */
-  public async loadDocument() {
-    this.document = (await RefParser.parse(this.inputDocument, this.swaggerParserOpts)) as Document;
-    return this.document;
-  }
-
-  /**
-   * Synchronous version of .init()
-   *
-   * Note: Only works when the input definition is a valid OpenAPI v3 object and doesn't contain remote $refs.
-   *
+   * @returns AxiosInstance
    * @memberof OpenAPIClientAxios
    */
   public initSync = <Client = OpenAPIClient>(): Client => {
-    if (typeof this.inputDocument !== 'object') {
-      throw new Error(`.initSync() can't be called with a non-object definition. Please use .init()`);
-    }
-
-    // set document
-    this.document = this.inputDocument;
-
-    // dereference the document into definition
-    this.definition = copy(this.document);
-    const parser = new RefParser();
-    parser.parse(this.definition);
-    parser.schema = this.definition;
-    dereferenceSync(parser, new RefParserOptions(this.swaggerParserOpts)); // mutates this.definition (synchronous)
-
-    // create axios instance
-    this.instance = this.createAxiosInstance();
-
-    // we are now initialized
-    this.initialized = true;
-    return this.instance as Client;
+    return this.init();
   };
 
   /**

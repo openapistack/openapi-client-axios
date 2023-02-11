@@ -45,24 +45,8 @@ describe('OpenAPIClientAxios', () => {
     test('dereferences the input document', async () => {
       const api = new OpenAPIClientAxios({ definition });
       await api.init();
-      expect(JSON.stringify(api.inputDocument)).toMatch('$ref');
+      expect(JSON.stringify(api.document)).toMatch('$ref');
       expect(JSON.stringify(api.definition)).not.toMatch('$ref');
-    });
-
-    test('can be initialized using a valid YAML file', async () => {
-      const api = new OpenAPIClientAxios({ definition: examplePetAPIYAML });
-      await api.init();
-      expect(api.initialized).toEqual(true);
-      expect(api.client.api).toBe(api);
-      checkHasOperationMethods(api.client);
-    });
-
-    test('can be initialized using a valid JSON file', async () => {
-      const api = new OpenAPIClientAxios({ definition: examplePetAPIJSON });
-      await api.init();
-      expect(api.initialized).toEqual(true);
-      expect(api.client.api).toBe(api);
-      checkHasOperationMethods(api.client);
     });
 
     test('can be initialized using alternative server using index', async () => {
@@ -165,13 +149,8 @@ describe('OpenAPIClientAxios', () => {
     test('dereferences the input document', () => {
       const api = new OpenAPIClientAxios({ definition });
       api.initSync();
-      expect(JSON.stringify(api.inputDocument)).toMatch('$ref');
+      expect(JSON.stringify(api.document)).toMatch('$ref');
       expect(JSON.stringify(api.definition)).not.toMatch('$ref');
-    });
-
-    test('throws an error when initialized using a file URL', () => {
-      const api = new OpenAPIClientAxios({ definition: examplePetAPIYAML });
-      expect(api.initSync).toThrowError();
     });
   });
 
