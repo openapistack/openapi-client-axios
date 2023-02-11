@@ -58,7 +58,7 @@ export async function main() {
   console.log(operationTypings);
 }
 
-const schemaParserOptions = { resolve: { http: { headers: { "User-Agent": 'Typegen' } } } };
+const schemaParserOptions = { resolve: { http: { headers: { 'User-Agent': 'Typegen' } } } };
 
 export async function generateTypesForDocument(definition: Document | string, opts: TypegenOptions) {
   const rootSchema = await RefParser.bundle(definition, schemaParserOptions);
