@@ -5,6 +5,12 @@
 
 Type generator for [openapi-client-axios](https://github.com/anttiviljami/openapi-client-axios)
 
+## Documentation
+
+**New!** OpenAPI Client Axios documentation is now found on [openapistack.co](https://openapistack.co)
+
+https://openapistack.co/docs/openapi-client-axios/intro
+
 ## Generating type files (.d.ts)
 
 ![TypeScript IntelliSense](intellisense.gif)

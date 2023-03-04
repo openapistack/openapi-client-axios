@@ -24,10 +24,9 @@
 
 ## Documentation
 
-See full [README.md](https://github.com/anttiviljami/openapi-client-axios/blob/master/packages/openapi-client-axios/README.md)
+**New!** OpenAPI Client Axios documentation is now found on [openapistack.co](https://openapistack.co)
 
-See [DOCS.md](https://github.com/anttiviljami/openapi-client-axios/blob/master/DOCS.md)
-
+https://openapistack.co/docs/openapi-client-axios/intro
 
 ## Quick Start
 
