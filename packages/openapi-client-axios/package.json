@@ -74,5 +74,5 @@
     "lint": "prettier --check src/**/*.ts __tests__/**/*.ts",
     "lint:fix": "prettier --write src/**/*.ts __tests__/**/*.ts"
   },
-  "gitHead": "9075245dce9f318c202019abbd16e32866fa0999"
+  "gitHead": "e76a6a539f64b805dfa24b55188eac1a986973fa"
 }
