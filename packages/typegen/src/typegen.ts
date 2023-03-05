@@ -29,7 +29,8 @@ export async function main() {
       type: 'string',
     })
     .usage('Usage: $0 [file]')
-    .example('$0 ./openapi.yml > client.d.ts', '- generate a type definition file')
+    .example('$0 ./openapi.yml > openapi.d.ts', '')
+    .example('$0 https://openapistack.co/petstore.openapi.json > openapi.d.ts', '')
     .demandCommand(1).argv;
 
   const opts: TypegenOptions = {

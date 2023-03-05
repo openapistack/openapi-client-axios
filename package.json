@@ -2,7 +2,7 @@
   "name": "openapi-client-axios-monorepo",
   "description": "Monorepo for openapi-client-axios + typegen",
   "private": true,
-  "version": "7.1.1",
+  "version": "7.1.3",
   "author": "Viljami Kuosmanen <viljami@viljami.io>",
   "license": "MIT",
   "keywords": [
@@ -15,7 +15,7 @@
     "mock",
     "typescript"
   ],
-  "homepage": "https://github.com/anttiviljami/openapi-client-axios",
+  "homepage": "https://openapistack.co",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/anttiviljami/openapi-client-axios.git"
