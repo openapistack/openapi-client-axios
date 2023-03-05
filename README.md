@@ -64,6 +64,54 @@ async function createPet() {
 }
 ```
 
+## Type safe clients
+
+![TypeScript IntelliSense](https://github.com/anttiviljami/openapi-client-axios/blob/master/packages/typegen/intellisense.gif)
+
+`openapi-client-axios` comes with a tool called `typegen` to generate typescript type files (.d.ts) for
+OpenAPIClient instances using an OpenAPI definition file.
+
+```
+npm install -g openapi-client-axios-typegen
+```
+
+or with npx:
+
+```
+npx openapi-client-axios-typegen
+```
+
+```
+Usage: typegen [file]
+
+Options:
+      --help                    Show help                              [boolean]
+      --version                 Show version number                    [boolean]
+  -t, --transformOperationName                                          [string]
+
+Examples:
+  typegen ./openapi.yml > openapi.d.ts
+  typegen https://openapistack.co/petstore.openapi.json > openapi.d.ts
+```
+
+The output of `typegen` exports a type called `Client`, which can be used for instances created with `OpenAPIClientAxios`.
+
+Both the `api.getClient()` and `api.init()` methods support passing in a Client type.
+
+```typescript
+import { Client as PetStoreClient } from './openapi.d.ts';
+
+const client = await api.init<PetStoreClient>();
+const client = await api.getClient<PetStoreClient>();
+```
+
+`typegen` supports using both local and remote OpenAPI definition files.
+
+```
+$ typegen ./petstore.yaml > openapi.d.ts # local file
+$ typegen https://petstore3.swagger.io/api/v3/openapi.json > openapi.d.ts # remote url
+```
+
 ## Contributing
 
 OpenAPI Client Axios is Free and Open Source Software. Issues and pull requests are more than welcome!
