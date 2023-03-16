@@ -143,9 +143,13 @@ export function generateOperationMethodTypings(
 ) {
   const operations = api.getOperations();
 
-  const operationTypings = operations.map((op) => {
-    return generateMethodForOperation(opts.transformOperationName(op.operationId), op, exportTypes);
-  });
+  const operationTypings = operations
+    .map((op) => {
+      return op.operationId
+        ? generateMethodForOperation(opts.transformOperationName(op.operationId), op, exportTypes)
+        : null;
+    })
+    .filter((op) => Boolean(op));
 
   const pathOperationTypes = _.entries(api.definition.paths).map(([path, pathItem]) => {
     const methodTypings: string[] = [];
@@ -153,7 +157,10 @@ export function generateOperationMethodTypings(
       if (pathItem[m as HttpMethod] && _.includes(Object.values(HttpMethod), m)) {
         const method = m as HttpMethod;
         const operation = _.find(operations, { path, method });
-        methodTypings.push(generateMethodForOperation(method, operation, exportTypes));
+        if (operation.operationId) {
+          const methodForOperation = generateMethodForOperation(method, operation, exportTypes);
+          methodTypings.push(methodForOperation);
+        }
       }
     }
     return [`['${path}']: {`, ...methodTypings.map((m) => indent(m, 2)), '}'].join('\n');
