@@ -1,0 +1,156 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Example API with missing Operation IDs",
+    "description": "Exmaple generated from AWS API Gateway REST API, which creates option paths to support CORS; see: https://docs.aws.amazon.com/apigateway/latest/developerguide/how-to-cors.html",
+    "version": "1.0.0"
+  },
+  "tags": [
+    {
+      "name": "pets",
+      "description": "Pet operations"
+    }
+  ],
+  "servers": [
+    {
+      "url": "http://localhost:8080"
+    }
+  ],
+  "paths": {
+    "/pets": {
+      "get": {
+        "operationId": "getPets",
+        "summary": "List pets",
+        "description": "Returns all pets in database",
+        "tags": [
+          "pets"
+        ],
+        "responses": {
+          "200": {
+            "description": "List of pets in database"
+          }
+        },
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Number of items to return",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/QueryLimit"
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "description": "Starting offset for returning items",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/QueryOffset"
+            }
+          }
+        ]
+      },
+      "options": {
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Number of items to return",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/QueryLimit"
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "description": "Starting offset for returning items",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/QueryOffset"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "204 response",
+            "headers": {
+              "Access-Control-Allow-Origin": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Access-Control-Allow-Methods": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Vary": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Access-Control-Allow-Headers": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {}
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "PetId": {
+        "description": "Unique identifier for pet in database",
+        "example": 1,
+        "title": "PetId",
+        "type": "integer"
+      },
+      "PetPayload": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "description": "Name of the pet",
+            "example": "Garfield",
+            "title": "PetName",
+            "type": "string"
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "name"
+        ]
+      },
+      "QueryLimit": {
+        "description": "Number of items to return",
+        "example": 25,
+        "title": "QueryLimit",
+        "type": "integer"
+      },
+      "QueryOffset": {
+        "description": "Starting offset for returning items",
+        "example": 0,
+        "title": "QueryOffset",
+        "type": "integer",
+        "minimum": 0
+      }
+    },
+    "requestBodies": {
+      "PetPayload": {
+        "description": "Request payload containing a pet object",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/PetPayload"
+            }
+          }
+        }
+      }
+    }
+  }
+}
