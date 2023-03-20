@@ -9,6 +9,7 @@
     "noImplicitAny": true,
     "strictPropertyInitialization": false,
     "strictNullChecks": false,
+    "skipLibCheck": true,
     "baseUrl": ".",
     "rootDir": "src/",
     "outDir": "",

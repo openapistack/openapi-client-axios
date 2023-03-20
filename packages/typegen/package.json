@@ -1,7 +1,7 @@
 {
   "name": "openapi-client-axios-typegen",
   "description": "Typescript type generator for openapi-client-axios",
-  "version": "7.1.3",
+  "version": "7.2.0",
   "author": "Viljami Kuosmanen <viljami@viljami.io>",
   "funding": "https://github.com/sponsors/anttiviljami",
   "homepage": "https://openapistack.co",
@@ -42,13 +42,12 @@
   "types": "typegen.d.ts",
   "dependencies": {
     "@anttiviljami/dtsgenerator": "^3.12.2",
-    "@apidevtools/json-schema-ref-parser": "^9.0.9",
+    "@apidevtools/json-schema-ref-parser": "^10.1.0",
     "axios": "^0.25.0 || ^1.1.3",
     "indent-string": "^4.0.0",
     "lodash": "^4.17.21",
-    "openapi-client-axios": "^6.0.0",
-    "openapi-types": "^10.0.0",
-    "swagger-parser": "^10.0.2",
+    "openapi-client-axios": "^7.1.3",
+    "openapi-types": "^12.1.0",
     "yargs": "^17.3.0"
   },
   "devDependencies": {
