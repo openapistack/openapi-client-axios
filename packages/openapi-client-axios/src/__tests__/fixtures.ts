@@ -19,6 +19,14 @@ export const petId: OpenAPIV3.ParameterObject = {
   },
 };
 
+export const petShopId: OpenAPIV3.ParameterObject = {
+  name: 'x-petshop-id',
+  in: 'header',
+  schema: {
+    type: 'string',
+  },
+};
+
 export const ownerId: OpenAPIV3.ParameterObject = {
   name: 'ownerId',
   in: 'path',
@@ -98,6 +106,7 @@ export const definition: OpenAPIV3.Document = {
             $ref: '#/components/responses/PetRes',
           },
         },
+        parameters: [petShopId],
       },
       put: {
         operationId: 'replacePetById',

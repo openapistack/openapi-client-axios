@@ -286,6 +286,34 @@ describe('OpenAPIClientAxios', () => {
       expect(mockHandler).toBeCalled();
     });
 
+    test('getPetById({ petId: 1 }) calls GET /pets/1', async () => {
+      const api = new OpenAPIClientAxios({ definition });
+      const client = await api.init();
+
+      const mock = new MockAdapter(api.client);
+      const mockResponse = { id: 1, name: 'Garfield' };
+      const mockHandler = jest.fn((config) => [200, mockResponse]);
+      mock.onGet('/pets/1').reply((config) => mockHandler(config));
+
+      const res = await client.getPetById({ petId: 1 });
+      expect(res.data).toEqual(mockResponse);
+      expect(mockHandler).toBeCalled();
+    });
+
+    test('getPetById({ petId: 1, "x-petshop-id": "test-shop" }) calls GET /pets/1 with request header', async () => {
+      const api = new OpenAPIClientAxios({ definition });
+      const client = await api.init();
+
+      const mock = new MockAdapter(api.client);
+      const mockResponse = { id: 1, name: 'Garfield' };
+      const mockHandler = jest.fn((config) => [200, mockResponse]);
+      mock.onGet('/pets/1').reply((config) => mockHandler(config));
+
+      const res = await client.getPetById({ petId: 1, 'x-petshop-id': 'test-shop' });
+      expect(res.data).toEqual(mockResponse);
+      expect(mockHandler).toBeCalledWith(expect.objectContaining({ headers: expect.objectContaining({ 'x-petshop-id': 'test-shop' }) }))
+    });
+
     test('getPetById([{ name: "petId", value: "1", in: "path" }]) calls GET /pets/1', async () => {
       const api = new OpenAPIClientAxios({ definition });
       const client = await api.init();

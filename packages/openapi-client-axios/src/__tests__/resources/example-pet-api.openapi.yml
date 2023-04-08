@@ -63,6 +63,12 @@ paths:
           required: true
           schema:
             $ref: '#/components/schemas/PetId'
+        - name: x-petshop-id
+          in: header
+          description: Optional header parameter to pass petshop id
+          schema:
+            type: string
+            example: "123"
     put:
       operationId: replacePetById
       summary: Replace pet
