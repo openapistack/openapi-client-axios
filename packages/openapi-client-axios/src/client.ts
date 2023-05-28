@@ -62,7 +62,7 @@ const DefaultRunnerKey = 'default';
 export class OpenAPIClientAxios {
   public document: Document;
   public inputDocument: Document | string;
-  public definition: Document
+  public definition: Document;
 
   public quick: boolean;
 
@@ -186,33 +186,33 @@ export class OpenAPIClientAxios {
 
   /**
    * Loads document from inputDocument
-   * 
+   *
    * Supports loading from a string (url) or an object (json)
    *
    * @memberof OpenAPIClientAxios
    */
   public async loadDocument() {
     if (typeof this.inputDocument === 'object') {
-      this.document = this.inputDocument
+      this.document = this.inputDocument;
     } else {
       // create temporary instance to get the document
-      const client = this.getAxiosInstance()
+      const client = this.getAxiosInstance();
 
       // load the document
-      const documentRes = await client.get(this.inputDocument)
+      const documentRes = await client.get(this.inputDocument);
 
       // set document
       if (typeof documentRes.data === 'object') {
         // json response
-        this.document = documentRes.data
+        this.document = documentRes.data;
       } else if (typeof documentRes.data === 'string' && documentRes.headers['content-type'] === 'application/yaml') {
         // yaml response
-        const yaml = await import('js-yaml')
-        this.document = yaml.load(documentRes.data) as Document
+        const yaml = await import('js-yaml');
+        this.document = yaml.load(documentRes.data) as Document;
       } else {
-        const err = new Error(`Invalid fesponse fetching OpenAPI definition: ${documentRes}`) as any
-        err.response = documentRes
-        throw err
+        const err = new Error(`Invalid fesponse fetching OpenAPI definition: ${documentRes}`) as any;
+        err.response = documentRes;
+        throw err;
       }
     }
 
@@ -250,8 +250,8 @@ export class OpenAPIClientAxios {
    */
   public getAxiosInstance = (): AxiosInstance => {
     const instance = axios.create(this.axiosConfigDefaults) as OpenAPIClient;
-    return instance 
-  }
+    return instance;
+  };
 
   /**
    * Creates a new axios instance, extends it and returns it
@@ -430,18 +430,14 @@ export class OpenAPIClientAxios {
 
     // allow overriding any parameters in AxiosRequestConfig
     const [, , config] = args;
-    let mergedConfig;
-    if (config) {
-      mergedConfig = {
-        ...axiosConfig,
-        ...config,
-        headers: {
-          ...axiosConfig.headers,
-          ...config.headers,
-        },
-      };
-    }
-    return mergedConfig || axiosConfig;
+    return {
+      ...axiosConfig,
+      ...config,
+      headers: {
+        ...axiosConfig?.headers,
+        ...config?.headers,
+      },
+    };
   };
 
   /**
