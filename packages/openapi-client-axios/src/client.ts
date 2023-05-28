@@ -430,7 +430,18 @@ export class OpenAPIClientAxios {
 
     // allow overriding any parameters in AxiosRequestConfig
     const [, , config] = args;
-    return config ? { ...axiosConfig, ...config } : axiosConfig;
+    let mergedConfig;
+    if (config) {
+      mergedConfig = {
+        ...axiosConfig,
+        ...config,
+        headers: {
+          ...axiosConfig.headers,
+          ...config.headers,
+        },
+      };
+    }
+    return mergedConfig || axiosConfig;
   };
 
   /**
