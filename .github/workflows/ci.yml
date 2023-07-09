@@ -1,19 +1,26 @@
 name: CI
 on:
   push:
-    branches: ['master']
-    tags: ['*']
+    branches: ["master"]
+    tags: ["*"]
   pull_request:
-    branches: ['master']
+    branches: ["master"]
 
 jobs:
   test:
     name: Test
+    strategy:
+      matrix:
+        axios_version:
+          - 0.25.0 # oldest supported
+          - 0.*.* # latest 0.x
+          - ^1.0.0 # latest 1.x
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
       - run: npm ci
+      - run: npm install axios@${{ matrix.axios_version }} && npm why axios
       - run: npm run lint
       - run: npm test
 
