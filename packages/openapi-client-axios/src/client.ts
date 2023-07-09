@@ -407,7 +407,7 @@ export class OpenAPIClientAxios {
    * Creates an axios config object for operation + arguments
    * @memberof OpenAPIClientAxios
    */
-  public getAxiosConfigForOperation = (operation: Operation | string, args: OperationMethodArguments) => {
+  public getAxiosConfigForOperation = (operation: Operation | string, args: OperationMethodArguments): AxiosRequestConfig => {
     if (typeof operation === 'string') {
       operation = this.getOperation(operation);
     }
