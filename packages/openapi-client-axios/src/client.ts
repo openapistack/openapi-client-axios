@@ -210,7 +210,7 @@ export class OpenAPIClientAxios {
         const yaml = await import('js-yaml');
         this.document = yaml.load(documentRes.data) as Document;
       } else {
-        const err = new Error(`Invalid fesponse fetching OpenAPI definition: ${documentRes}`) as any;
+        const err = new Error(`Invalid response fetching OpenAPI definition: ${documentRes}`) as any;
         err.response = documentRes;
         throw err;
       }
