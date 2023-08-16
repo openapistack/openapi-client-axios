@@ -39,7 +39,7 @@
     "!*.config.js"
   ],
   "peerDependencies": {
-    "axios": ">0.25.0",
+    "axios": ">=0.25.0",
     "js-yaml": "^4.1.0"
   },
   "dependencies": {

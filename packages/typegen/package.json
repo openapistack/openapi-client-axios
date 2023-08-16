@@ -43,7 +43,7 @@
   "dependencies": {
     "@anttiviljami/dtsgenerator": "^3.12.2",
     "@apidevtools/json-schema-ref-parser": "^10.1.0",
-    "axios": "^0.25.0 || ^1.1.3",
+    "axios": ">=0.25.0",
     "indent-string": "^4.0.0",
     "lodash": "^4.17.21",
     "openapi-client-axios": "^7.3.2",
