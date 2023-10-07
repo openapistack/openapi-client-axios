@@ -5,22 +5,15 @@
 
 Type generator for [openapi-client-axios](https://github.com/anttiviljami/openapi-client-axios)
 
+> **Tip:** It's recommended to use [`openapicmd typegen`](https://openapistack.co/docs/openapicmd/typegen/) to generate types instead of directly installing the openapi-client-axios-typegen package.
+
 ## Documentation
 
 **New!** OpenAPI Client Axios documentation is now found on [openapistack.co](https://openapistack.co)
 
 https://openapistack.co/docs/openapi-client-axios/intro
 
-## Generating type files (.d.ts)
-
-![TypeScript IntelliSense](intellisense.gif)
-
-`openapi-client-axios` comes with a tool called `typegen` to generate typescript type files (.d.ts) for
-OpenAPIClient instances using an OpenAPI definition file.
-
-```
-$ npm install -g openapi-client-axios-typegen
-```
+## Usage
 
 ```
 Usage: typegen [file]
@@ -48,7 +41,7 @@ const client = await api.getClient<PetStoreClient>();
 
 ```
 $ typegen ./petstore.yaml
-$ typegen https://raw.githubusercontent.com/OAI/OpenAPI-Specification/master/examples/v3.0/petstore.yaml
+$ typegen https://petstore3.swagger.io/api/v3/openapi.json
 ```
 
 ## Contributing

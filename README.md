@@ -64,23 +64,32 @@ async function createPet() {
 }
 ```
 
-## Type safe clients
+## Typesafe Clients
 
 ![TypeScript IntelliSense](https://github.com/anttiviljami/openapi-client-axios/blob/master/packages/typegen/intellisense.gif)
 
-`openapi-client-axios` comes with a tool called `typegen` to generate typescript type files (.d.ts) for
-OpenAPIClient instances using an OpenAPI definition file.
+`openapi-client-axios` comes with a CLI command `openapicmd typegen` to generate Typescript types for type safety and code autocomplete.
 
 ```
-npx openapi-client-axios-typegen ./openapi.yaml > src/types/openapi.d.ts
+npx openapicmd typegen ./openapi.yaml > src/types/openapi.d.ts
 ```
 
-The output file exports a type `Client`, which can directly be used with instances created with `OpenAPIClientAxios`.
+The output of `typegen` exports a type called `Client`, which can be used for instances created with `OpenAPIClientAxios`.
+
+Both the `api.getClient()` and `api.init()` methods support passing in a Client type.
 
 ```typescript
-import { Client as PetStoreClient } from './openapi.d.ts';
+import { Client as PetStoreClient } from './client.d.ts';
 
+const client = await api.init<PetStoreClient>();
 const client = await api.getClient<PetStoreClient>();
+```
+
+`openapicmd typegen` supports using both local and remote URLs for OpenAPI definition files.
+
+```
+$ npx openapicmd typegen ./petstore.yaml
+$ npx openapicmd typegen https://petstore3.swagger.io/api/v3/openapi.json
 ```
 
 ## Contributing
