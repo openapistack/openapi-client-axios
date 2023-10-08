@@ -33,10 +33,10 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/anttiviljami/openapi-client-axios.git"
+    "url": "git+https://github.com/openapistack/openapi-client-axios.git"
   },
   "bugs": {
-    "url": "https://github.com/anttiviljami/openapi-client-axios/issues"
+    "url": "https://github.com/openapistack/openapi-client-axios/issues"
   },
   "main": "typegen.js",
   "types": "typegen.d.ts",
