@@ -1,7 +1,7 @@
 # OpenAPI Client Axios Typegen
 [![CI](https://github.com/openapistack/openapi-client-axios/workflows/CI/badge.svg)](https://github.com/openapistack/openapi-client-axios/actions?query=workflow%3ACI)
 [![npm version](https://img.shields.io/npm/v/openapi-client-axios-typegen.svg)](https://www.npmjs.com/package/openapi-client-axios-typegen)
-[![License](http://img.shields.io/:license-mit-blue.svg)](https://github.com/openapistack/openapi-client-axios/blob/master/LICENSE)
+[![License](http://img.shields.io/:license-mit-blue.svg)](https://github.com/openapistack/openapi-client-axios/blob/main/LICENSE)
 
 Type generator for [openapi-client-axios](https://github.com/openapistack/openapi-client-axios)
 
