@@ -1,7 +1,7 @@
 {
   "name": "openapi-client-axios-typegen",
   "description": "Typescript type generator for openapi-client-axios",
-  "version": "7.3.5",
+  "version": "7.3.6",
   "author": "Viljami Kuosmanen <viljami@viljami.io>",
   "funding": "https://github.com/sponsors/anttiviljami",
   "homepage": "https://openapistack.co",
@@ -46,7 +46,7 @@
     "axios": ">=0.25.0",
     "indent-string": "^4.0.0",
     "lodash": "^4.17.21",
-    "openapi-client-axios": "^7.3.5",
+    "openapi-client-axios": "^7.3.6",
     "openapi-types": "^12.1.0",
     "yargs": "^17.3.0"
   },
