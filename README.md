@@ -1,10 +1,12 @@
 <h1 align="center"><img alt="openapi-client-axios" src="https://github.com/openapistack/openapi-client-axios/raw/main/header.png?raw=true" style="max-width:50rem"></h1>
 
 [![CI](https://github.com/openapistack/openapi-client-axios/workflows/CI/badge.svg)](https://github.com/openapistack/openapi-client-axios/actions?query=workflow%3ACI)
-[![npm version](https://img.shields.io/npm/v/openapi-client-axios.svg)](https://www.npmjs.com/package/openapi-client-axios)
-[![npm downloads](https://img.shields.io/npm/dw/openapi-client-axios)](https://www.npmjs.com/package/openapi-client-axios)
-[![bundle size](https://img.shields.io/bundlephobia/minzip/openapi-client-axios?label=gzip%20bundle)](https://bundlephobia.com/package/openapi-client-axios)
 [![License](http://img.shields.io/:license-mit-blue.svg)](https://github.com/openapistack/openapi-client-axios/blob/main/LICENSE)
+[![npm version](https://img.shields.io/npm/v/openapi-client-axios.svg)](https://www.npmjs.com/package/openapi-client-axios)
+[![npm downloads](https://img.shields.io/npm/dw/openapi-client-axios.svg)](https://www.npmjs.com/package/openapi-client-axios)
+[![bundle size](https://img.shields.io/bundlephobia/minzip/openapi-client-axios.svg?label=gzip%20bundle)](https://bundlephobia.com/package/openapi-client-axios)
+[![Libraries.io dependency status for latest release](https://img.shields.io/librariesio/release/npm/openapi-client-axios.svg)](https://www.npmjs.com/package/openapi-client-axios?activeTab=dependencies)
+![npm type definitions](https://img.shields.io/npm/types/openapi-client-axios.svg)
 [![Buy me a coffee](https://img.shields.io/badge/donate-buy%20me%20a%20coffee-orange)](https://buymeacoff.ee/anttiviljami)
 
 <p align="center">JavaScript client library for consuming OpenAPI-enabled APIs with <a href="https://github.com/axios/axios" target="_blank">axios</a>. Types included.</p>
