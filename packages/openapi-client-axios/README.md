@@ -1,4 +1,4 @@
-<h1 align="center"><img alt="openapi-client-axios" src="https://github.com/openapistack/openapi-client-axios/raw/main/header.png?raw=true" style="max-width:50rem"></h1>
+<h1 align="center"><img alt="openapi-client-axios" src="https://raw.githubusercontent.com/openapistack/openapi-client-axios/main/header.png" style="max-width:50rem"></h1>
 
 [![CI](https://github.com/openapistack/openapi-client-axios/workflows/CI/badge.svg)](https://github.com/openapistack/openapi-client-axios/actions?query=workflow%3ACI)
 [![License](http://img.shields.io/:license-mit-blue.svg)](https://github.com/openapistack/openapi-client-axios/blob/main/LICENSE)
