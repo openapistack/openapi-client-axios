@@ -202,6 +202,16 @@ $ npx openapicmd typegen ./petstore.yaml
 $ npx openapicmd typegen https://petstore3.swagger.io/api/v3/openapi.json
 ```
 
+## Sponsors
+
+The openapi-client-axios project is supported by:
+
+<a href="https://www.devmark.ai/fern/?utm_source=openapistack-openapiclientaxios&utm_loc=readme&utm_type=logo"><img alt="Fern" src="https://github.com/openapistack/docs/blob/main/static/img/sponsors/fern_logo_tagline.png?raw=true" height="80"></a>
+
+## Commercial support
+
+For assistance with openapi-client-axios in your company, reach out at support@openapistack.co.
+
 ## Contributing
 
 OpenAPI Client Axios is Free and Open Source Software. Issues and pull requests are more than welcome!
