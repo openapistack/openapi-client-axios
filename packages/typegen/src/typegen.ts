@@ -102,10 +102,6 @@ export async function generateTypesForDocument(definition: Document | string, op
 function generateMethodForOperation(methodName: string, operation: Operation, exportTypes: ExportedType[]) {
   const { operationId, summary, description } = operation;
 
-  if (operationId === 'createEntity') {
-    debugger;
-  }
-
   // parameters arg
   const normalizedOperationId = convertKeyToTypeName(operationId);
   const normalizedPath = convertKeyToTypeName(operation.path);
