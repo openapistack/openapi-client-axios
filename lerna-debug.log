@@ -1,0 +1,47 @@
+46 error Error: Command failed with exit code 1: git commit -F /private/var/folders/34/z8zr3p2j1d1gc39m16v7ym980000gp/T/472805c4-5ae0-40f5-abba-11258be47804/lerna-commit.txt
+46 error
+46 error > openapi-client-axios-monorepo@7.1.3 lint
+46 error > lerna run lint
+46 error
+46 error lerna notice cli v6.4.1
+46 error lerna info versioning independent
+46 error
+46 error  >  Lerna (powered by Nx)   Running target lint for 2 projects:
+46 error
+46 error     - openapi-client-axios
+46 error     - openapi-client-axios-typegen
+46 error
+46 error
+46 error
+46 error > openapi-client-axios:lint
+46 error
+46 error
+46 error > openapi-client-axios@7.3.12 lint
+46 error > prettier --check src/**/*.ts __tests__/**/*.ts
+46 error
+46 error Checking formatting...
+46 error All matched files use Prettier code style!
+46 error
+46 error > openapi-client-axios-typegen:lint
+46 error
+46 error
+46 error > openapi-client-axios-typegen@7.3.12 lint
+46 error > prettier --check src/**/*.ts
+46 error
+46 error Checking formatting...
+46 error [[33mwarn[39m] src/typegen.ts
+46 error [[33mwarn[39m] Code style issues found in the above file. Forgot to run Prettier?
+46 error
+46 error
+46 error
+46 error  >  Lerna (powered by Nx)   Running target lint for 2 projects failed
+46 error
+46 error    Failed tasks:
+46 error
+46 error    - openapi-client-axios-typegen:lint
+46 error
+46 error husky - pre-commit hook exited with code 1 (error)
+46 error     at makeError (/Users/viljamikuosmanen/Projects/openapi-client-axios/node_modules/execa/lib/error.js:60:11)
+46 error     at handlePromise (/Users/viljamikuosmanen/Projects/openapi-client-axios/node_modules/execa/index.js:118:26)
+46 error     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+46 error     at async Promise.all (index 0)

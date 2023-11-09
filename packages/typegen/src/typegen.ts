@@ -73,10 +73,10 @@ export async function generateTypesForDocument(definition: Document | string, op
 
   const schema = parseSchema(rootSchema as any);
 
-  const generator = new DTSGenerator([schema])
+  const generator = new DTSGenerator([schema]);
 
   const schemaTypes = await generator.generate();
-  const exportedTypes: ExportedType[] = generator.getExports()
+  const exportedTypes: ExportedType[] = generator.getExports();
 
   const api = new OpenAPIClientAxios({ definition: rootSchema as Document });
 
@@ -194,7 +194,7 @@ export function generateOperationMethodTypings(
 
 /**
  * Reads the AST from dtsgenerator and generates a list of exported types like:
- * 
+ *
  * {
  *   name: '$404',
  *   path: 'Paths.GetPetById.Responses.$404',
@@ -204,10 +204,8 @@ export function generateOperationMethodTypings(
 const getExportedTypes = (schemaAST: string): ExportedType[] => {
   const parsedAST = JSON.parse(schemaAST) as SourceFile;
 
-  
-
-  return []
-}
+  return [];
+};
 
 if (require.main === module) {
   main();
