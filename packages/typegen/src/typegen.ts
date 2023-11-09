@@ -103,7 +103,7 @@ function generateMethodForOperation(methodName: string, operation: Operation, ex
   const { operationId, summary, description } = operation;
 
   if (operationId === 'createEntity') {
-    debugger
+    debugger;
   }
 
   // parameters arg
@@ -222,8 +222,8 @@ const normalizeSchema = (schema: Document): Document => {
   }
 
   // make sure schema is plain JSON with no metadata
-  return JSON.parse(JSON.stringify(clonedSchema))
-}
+  return JSON.parse(JSON.stringify(clonedSchema));
+};
 
 if (require.main === module) {
   main();
