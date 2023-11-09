@@ -41,7 +41,7 @@
   "main": "typegen.js",
   "types": "typegen.d.ts",
   "dependencies": {
-    "@anttiviljami/dtsgenerator": "^3.12.2",
+    "@anttiviljami/dtsgenerator": "^3.19.1",
     "@apidevtools/json-schema-ref-parser": "^10.1.0",
     "axios": ">=0.25.0",
     "indent-string": "^4.0.0",

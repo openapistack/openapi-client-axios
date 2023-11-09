@@ -2,12 +2,19 @@ import _ from 'lodash';
 import yargs from 'yargs';
 import indent from 'indent-string';
 import OpenAPIClientAxios, { Document, HttpMethod, Operation } from 'openapi-client-axios';
-import DtsGenerator, { ExportedType } from '@anttiviljami/dtsgenerator/dist/core/dtsGenerator';
+import DTSGenerator from '@anttiviljami/dtsgenerator/dist/core/dtsGenerator';
+import { parseSchema } from '@anttiviljami/dtsgenerator';
 import RefParser from '@apidevtools/json-schema-ref-parser';
-import { parseSchema } from '@anttiviljami/dtsgenerator/dist/core/type';
+import { SourceFile } from 'typescript';
 
 interface TypegenOptions {
   transformOperationName?: (operation: string) => string;
+}
+
+interface ExportedType {
+  name: string;
+  path: string;
+  schemaRef: string;
 }
 
 // rule from 'dts-generator' jsonSchema.ts
@@ -66,9 +73,10 @@ export async function generateTypesForDocument(definition: Document | string, op
 
   const schema = parseSchema(rootSchema as any);
 
-  const generator = new DtsGenerator([schema]);
+  const generator = new DTSGenerator([schema])
+
   const schemaTypes = await generator.generate();
-  const exportedTypes = generator.getExports();
+  const exportedTypes: ExportedType[] = generator.getExports()
 
   const api = new OpenAPIClientAxios({ definition: rootSchema as Document });
 
@@ -182,6 +190,23 @@ export function generateOperationMethodTypings(
     '',
     'export type Client = OpenAPIClient<OperationMethods, PathsDictionary>',
   ].join('\n');
+}
+
+/**
+ * Reads the AST from dtsgenerator and generates a list of exported types like:
+ * 
+ * {
+ *   name: '$404',
+ *   path: 'Paths.GetPetById.Responses.$404',
+ *   schemaRef: '#/paths/getPetById/responses/404',
+ * }
+ */
+const getExportedTypes = (schemaAST: string): ExportedType[] => {
+  const parsedAST = JSON.parse(schemaAST) as SourceFile;
+
+  
+
+  return []
 }
 
 if (require.main === module) {
