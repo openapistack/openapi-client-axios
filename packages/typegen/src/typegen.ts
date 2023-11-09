@@ -3,9 +3,10 @@ import yargs from 'yargs';
 import indent from 'indent-string';
 import OpenAPIClientAxios, { Document, HttpMethod, Operation } from 'openapi-client-axios';
 import DTSGenerator from '@anttiviljami/dtsgenerator/dist/core/dtsGenerator';
-import { parseSchema } from '@anttiviljami/dtsgenerator';
+import { JsonSchema, parseSchema } from '@anttiviljami/dtsgenerator';
 import RefParser from '@apidevtools/json-schema-ref-parser';
 import { SourceFile } from 'typescript';
+import { JSONSchema } from '@apidevtools/json-schema-ref-parser/dist/lib/types';
 
 interface TypegenOptions {
   transformOperationName?: (operation: string) => string;
@@ -71,14 +72,16 @@ const schemaParserOptions = { resolve: { http: { headers: { 'User-Agent': 'Typeg
 export async function generateTypesForDocument(definition: Document | string, opts: TypegenOptions) {
   const rootSchema = await RefParser.bundle(definition, schemaParserOptions);
 
-  const schema = parseSchema(rootSchema as any);
+  const normalizedSchema = normalizeSchema(rootSchema as Document);
+
+  const schema = parseSchema(normalizedSchema as JsonSchema);
 
   const generator = new DTSGenerator([schema]);
 
   const schemaTypes = await generator.generate();
   const exportedTypes: ExportedType[] = generator.getExports();
 
-  const api = new OpenAPIClientAxios({ definition: rootSchema as Document });
+  const api = new OpenAPIClientAxios({ definition: normalizedSchema as Document });
 
   await api.init();
   const operationTypings = generateOperationMethodTypings(api, exportedTypes, opts);
@@ -98,6 +101,10 @@ export async function generateTypesForDocument(definition: Document | string, op
 
 function generateMethodForOperation(methodName: string, operation: Operation, exportTypes: ExportedType[]) {
   const { operationId, summary, description } = operation;
+
+  if (operationId === 'createEntity') {
+    debugger
+  }
 
   // parameters arg
   const normalizedOperationId = convertKeyToTypeName(operationId);
@@ -192,20 +199,31 @@ export function generateOperationMethodTypings(
   ].join('\n');
 }
 
-/**
- * Reads the AST from dtsgenerator and generates a list of exported types like:
- *
- * {
- *   name: '$404',
- *   path: 'Paths.GetPetById.Responses.$404',
- *   schemaRef: '#/paths/getPetById/responses/404',
- * }
- */
-const getExportedTypes = (schemaAST: string): ExportedType[] => {
-  const parsedAST = JSON.parse(schemaAST) as SourceFile;
+const normalizeSchema = (schema: Document): Document => {
+  const clonedSchema: Document = _.cloneDeep(schema);
 
-  return [];
-};
+  // dtsgenerator doesn't generate parameters correctly if they are $refs to Parameter Objects
+  // so we resolve them here
+  for (const path in clonedSchema.paths ?? {}) {
+    const pathItem = clonedSchema.paths[path];
+    for (const method in pathItem) {
+      const operation = pathItem[method as HttpMethod];
+      if (operation.parameters) {
+        operation.parameters = operation.parameters.map((parameter) => {
+          if ('$ref' in parameter) {
+            const refPath = parameter.$ref.replace('#/', '').replace(/\//g, '.');
+            const resolvedParameter = _.get(clonedSchema, refPath);
+            return resolvedParameter ?? parameter;
+          }
+          return parameter;
+        });
+      }
+    }
+  }
+
+  // make sure schema is plain JSON with no metadata
+  return JSON.parse(JSON.stringify(clonedSchema))
+}
 
 if (require.main === module) {
   main();
