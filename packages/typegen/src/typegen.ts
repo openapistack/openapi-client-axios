@@ -131,7 +131,7 @@ function generateMethodForOperation(methodName: string, operation: Operation, ex
   let parametersArg = `parameters?: Parameters<${parametersType}> | null`;
 
   // All path parameters are required
-  if (_.isEmpty(pathParameterTypePaths)) {
+  if (!_.isEmpty(pathParameterTypePaths)) {
     parametersArg = `parameters: Parameters<${parametersType}>`;
   }
 
