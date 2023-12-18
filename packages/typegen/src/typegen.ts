@@ -105,9 +105,16 @@ function generateMethodForOperation(methodName: string, operation: Operation, ex
   // parameters arg
   const normalizedOperationId = convertKeyToTypeName(operationId);
   const normalizedPath = convertKeyToTypeName(operation.path);
-  const parameterTypePaths = _.chain([
+
+  const pathParameterTypePaths = _.chain([
     _.find(exportTypes, { schemaRef: `#/paths/${normalizedOperationId}/pathParameters` }),
     _.find(exportTypes, { schemaRef: `#/paths/${normalizedPath}/pathParameters` }),
+  ])
+    .filter()
+    .map('path')
+    .value();
+
+  const parameterTypePaths = _.chain([
     _.find(exportTypes, { schemaRef: `#/paths/${normalizedOperationId}/queryParameters` }),
     _.find(exportTypes, { schemaRef: `#/paths/${normalizedPath}/queryParameters` }),
     _.find(exportTypes, { schemaRef: `#/paths/${normalizedOperationId}/headerParameters` }),
@@ -117,10 +124,16 @@ function generateMethodForOperation(methodName: string, operation: Operation, ex
   ])
     .filter()
     .map('path')
-    .value();
+    .value()
+    .concat(pathParameterTypePaths);
 
   const parametersType = !_.isEmpty(parameterTypePaths) ? parameterTypePaths.join(' & ') : 'UnknownParamsObject';
-  const parametersArg = `parameters?: Parameters<${parametersType}> | null`;
+  let parametersArg = `parameters?: Parameters<${parametersType}> | null`;
+
+  // All path parameters are required
+  if (_.isEmpty(pathParameterTypePaths)) {
+    parametersArg = `parameters: Parameters<${parametersType}>`;
+  }
 
   // payload arg
   const requestBodyType = _.find(exportTypes, { schemaRef: `#/paths/${normalizedOperationId}/requestBody` });
