@@ -36,6 +36,11 @@ export async function main() {
       alias: 't',
       type: 'string',
     })
+    .option('banner', {
+      alias: 'b',
+      type: 'string',
+      description: 'Add disclaimer comment to the generated file e.g. /* eslint-disable */',
+    })
     .usage('Usage: $0 [file]')
     .example('$0 ./openapi.yml > openapi.d.ts', '')
     .example('$0 https://openapistack.co/petstore.openapi.json > openapi.d.ts', '')
@@ -62,6 +67,7 @@ export async function main() {
   }
 
   const [imports, schemaTypes, operationTypings] = await generateTypesForDocument(argv._[0] as string, opts);
+  console.log(argv.banner ? `${argv.banner}\n` : '');
   console.log(imports, '\n');
   console.log(schemaTypes);
   console.log(operationTypings);
