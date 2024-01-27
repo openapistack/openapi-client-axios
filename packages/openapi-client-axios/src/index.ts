@@ -3,5 +3,5 @@ export default OpenAPIClientAxios;
 export * from './client';
 export * from './types/client';
 
-// re-export axios types and utilities
-export type { Axios, AxiosInstance, AxiosRequestConfig, AxiosError } from 'axios';
+// re-export axios types
+export type { Axios, AxiosInstance, AxiosRequestConfig, AxiosResponse, AxiosError } from 'axios';
