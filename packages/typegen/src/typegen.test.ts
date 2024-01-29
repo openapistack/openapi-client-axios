@@ -11,6 +11,7 @@ describe('typegen', () => {
   beforeAll(async () => {
     const types = await generateTypesForDocument(examplePetAPIYAML, {
       transformOperationName: (operationId: string) => operationId,
+      disableOptionalPathParameters: true,
     });
     imports = types[0];
     schemaTypes = types[1];
@@ -36,6 +37,15 @@ describe('typegen', () => {
       expect(operationTypings).toMatch('getPetOwner');
       expect(operationTypings).toMatch('getPetsMeta');
       expect(operationTypings).toMatch('getPetsRelative');
+    });
+
+    test('types parameters', () => {
+      expect(operationTypings).toMatch(`parameters: Parameters<Paths.GetPetById.PathParameters>`);
+      expect(operationTypings).toMatch(`parameters: Parameters<Paths.ReplacePetById.PathParameters>`);
+      expect(operationTypings).toMatch(`parameters: Parameters<Paths.UpdatePetById.PathParameters>`);
+      expect(operationTypings).toMatch(`parameters: Parameters<Paths.DeletePetById.PathParameters>`);
+      expect(operationTypings).toMatch(`parameters: Parameters<Paths.GetOwnerByPetId.PathParameters>`);
+      expect(operationTypings).toMatch(`parameters: Parameters<Paths.GetPetOwner.PathParameters>`);
     });
 
     test('types responses', () => {
