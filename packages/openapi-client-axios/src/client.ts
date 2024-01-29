@@ -433,6 +433,10 @@ export class OpenAPIClientAxios {
     return {
       ...axiosConfig,
       ...config,
+      params: {
+        ...axiosConfig?.params,
+        ...config?.params,
+      },
       headers: {
         ...axiosConfig?.headers,
         ...config?.headers,

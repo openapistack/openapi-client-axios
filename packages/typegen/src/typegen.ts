@@ -10,6 +10,7 @@ import { JSONSchema } from '@apidevtools/json-schema-ref-parser/dist/lib/types';
 
 interface TypegenOptions {
   transformOperationName?: (operation: string) => string;
+  disableOptionalPathParameters?: boolean;
 }
 
 interface ExportedType {
@@ -41,6 +42,11 @@ export async function main() {
       type: 'string',
       description: 'Add comment to the generated file e.g. /* eslint-disable */',
     })
+    .option('disableOptionalPathParameters', {
+      type: 'string',
+      description: 'Force all path parameters to be required',
+      default: true,
+    })
     .usage('Usage: $0 [file]')
     .example('$0 ./openapi.yml > openapi.d.ts', '')
     .example('$0 https://openapistack.co/petstore.openapi.json > openapi.d.ts', '')
@@ -65,6 +71,8 @@ export async function main() {
 
     opts.transformOperationName = module[func];
   }
+
+  opts.disableOptionalPathParameters = argv.disableOptionalPathParameters ?? true;
 
   const [imports, schemaTypes, operationTypings] = await generateTypesForDocument(argv._[0] as string, opts);
   console.log(argv.banner ? `${argv.banner}\n` : '');
@@ -105,15 +113,27 @@ export async function generateTypesForDocument(definition: Document | string, op
   return [imports, schemaTypes, operationTypings];
 }
 
-function generateMethodForOperation(methodName: string, operation: Operation, exportTypes: ExportedType[]) {
+function generateMethodForOperation(
+  methodName: string,
+  operation: Operation,
+  exportTypes: ExportedType[],
+  opts: TypegenOptions,
+) {
   const { operationId, summary, description } = operation;
 
   // parameters arg
   const normalizedOperationId = convertKeyToTypeName(operationId);
   const normalizedPath = convertKeyToTypeName(operation.path);
-  const parameterTypePaths = _.chain([
+
+  const pathParameterTypePaths = _.chain([
     _.find(exportTypes, { schemaRef: `#/paths/${normalizedOperationId}/pathParameters` }),
     _.find(exportTypes, { schemaRef: `#/paths/${normalizedPath}/pathParameters` }),
+  ])
+    .filter()
+    .map('path')
+    .value();
+
+  const parameterTypePaths = _.chain([
     _.find(exportTypes, { schemaRef: `#/paths/${normalizedOperationId}/queryParameters` }),
     _.find(exportTypes, { schemaRef: `#/paths/${normalizedPath}/queryParameters` }),
     _.find(exportTypes, { schemaRef: `#/paths/${normalizedOperationId}/headerParameters` }),
@@ -123,10 +143,15 @@ function generateMethodForOperation(methodName: string, operation: Operation, ex
   ])
     .filter()
     .map('path')
-    .value();
+    .value()
+    .concat(pathParameterTypePaths);
 
   const parametersType = !_.isEmpty(parameterTypePaths) ? parameterTypePaths.join(' & ') : 'UnknownParamsObject';
-  const parametersArg = `parameters?: Parameters<${parametersType}> | null`;
+  let parametersArg = `parameters?: Parameters<${parametersType}> | null`;
+
+  if (opts.disableOptionalPathParameters && !_.isEmpty(pathParameterTypePaths)) {
+    parametersArg = `parameters: Parameters<${parametersType}>`;
+  }
 
   // payload arg
   const requestBodyType = _.find(exportTypes, { schemaRef: `#/paths/${normalizedOperationId}/requestBody` });
@@ -168,7 +193,7 @@ export function generateOperationMethodTypings(
   const operationTypings = operations
     .map((op) => {
       return op.operationId
-        ? generateMethodForOperation(opts.transformOperationName(op.operationId), op, exportTypes)
+        ? generateMethodForOperation(opts.transformOperationName(op.operationId), op, exportTypes, opts)
         : null;
     })
     .filter((op) => Boolean(op));
@@ -180,7 +205,7 @@ export function generateOperationMethodTypings(
         const method = m as HttpMethod;
         const operation = _.find(operations, { path, method });
         if (operation.operationId) {
-          const methodForOperation = generateMethodForOperation(method, operation, exportTypes);
+          const methodForOperation = generateMethodForOperation(method, operation, exportTypes, opts);
           methodTypings.push(methodForOperation);
         }
       }
