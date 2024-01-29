@@ -39,8 +39,8 @@ export async function main() {
     })
     .option('disableOptionalPathParameters', {
       type: 'string',
-      description: 'If true the parameters will be required when path parameters are given',
-      default: false,
+      description: 'Force all path parameters to be required',
+      default: true,
     })
     .usage('Usage: $0 [file]')
     .example('$0 ./openapi.yml > openapi.d.ts', '')
@@ -67,7 +67,7 @@ export async function main() {
     opts.transformOperationName = module[func];
   }
 
-  opts.disableOptionalPathParameters = argv.disableOptionalPathParameters ?? false;
+  opts.disableOptionalPathParameters = argv.disableOptionalPathParameters ?? true;
 
   const [imports, schemaTypes, operationTypings] = await generateTypesForDocument(argv._[0] as string, opts);
   console.log(imports, '\n');
