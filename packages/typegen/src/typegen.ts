@@ -39,7 +39,7 @@ export async function main() {
     .option('banner', {
       alias: 'b',
       type: 'string',
-      description: 'Add disclaimer comment to the generated file e.g. /* eslint-disable */',
+      description: 'Add comment to the generated file e.g. /* eslint-disable */',
     })
     .usage('Usage: $0 [file]')
     .example('$0 ./openapi.yml > openapi.d.ts', '')
