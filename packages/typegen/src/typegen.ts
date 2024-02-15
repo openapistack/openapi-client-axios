@@ -77,7 +77,11 @@ export async function main() {
   opts.disableOptionalPathParameters = argv.disableOptionalPathParameters ?? true;
 
   const [imports, schemaTypes, operationTypings, banner] = await generateTypesForDocument(argv._[0] as string, opts);
-  console.log(banner, '\n');
+
+  if (banner?.length) {
+    console.log(banner, '\n');
+  }
+
   console.log(imports, '\n');
   console.log(schemaTypes);
   console.log(operationTypings);
