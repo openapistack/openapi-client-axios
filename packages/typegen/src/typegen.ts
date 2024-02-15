@@ -43,7 +43,7 @@ export async function main() {
       description: 'Add comment to the generated file e.g. /* eslint-disable */',
     })
     .option('disableOptionalPathParameters', {
-      type: 'string',
+      type: 'boolean',
       description: 'Force all path parameters to be required',
       default: true,
     })
