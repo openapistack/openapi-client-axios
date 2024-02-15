@@ -11,6 +11,7 @@ import { JSONSchema } from '@apidevtools/json-schema-ref-parser/dist/lib/types';
 interface TypegenOptions {
   transformOperationName?: (operation: string) => string;
   disableOptionalPathParameters?: boolean;
+  banner?: string;
 }
 
 interface ExportedType {
@@ -40,7 +41,7 @@ export async function main() {
     .option('banner', {
       alias: 'b',
       type: 'string',
-      description: 'Add comment to the generated file e.g. /* eslint-disable */',
+      description: 'Add banner to generated file',
     })
     .option('disableOptionalPathParameters', {
       type: 'boolean',
@@ -54,6 +55,7 @@ export async function main() {
 
   const opts: TypegenOptions = {
     transformOperationName: (operation: string) => operation,
+    banner: argv.banner,
   };
 
   if (argv.transformOperationName) {
@@ -74,8 +76,8 @@ export async function main() {
 
   opts.disableOptionalPathParameters = argv.disableOptionalPathParameters ?? true;
 
-  const [imports, schemaTypes, operationTypings] = await generateTypesForDocument(argv._[0] as string, opts);
-  console.log(argv.banner ? `${argv.banner}\n` : '');
+  const [imports, schemaTypes, operationTypings, banner] = await generateTypesForDocument(argv._[0] as string, opts);
+  console.log(banner, '\n');
   console.log(imports, '\n');
   console.log(schemaTypes);
   console.log(operationTypings);
@@ -100,6 +102,8 @@ export async function generateTypesForDocument(definition: Document | string, op
   await api.init();
   const operationTypings = generateOperationMethodTypings(api, exportedTypes, opts);
 
+  const banner = opts.banner ?? '';
+
   const imports = [
     'import type {',
     '  OpenAPIClient,',
@@ -110,7 +114,7 @@ export async function generateTypesForDocument(definition: Document | string, op
     `} from 'openapi-client-axios';`,
   ].join('\n');
 
-  return [imports, schemaTypes, operationTypings];
+  return [imports, schemaTypes, operationTypings, banner];
 }
 
 function generateMethodForOperation(
