@@ -4,6 +4,7 @@ import { generateTypesForDocument } from './typegen';
 const examplePetAPIYAML = path.join(__dirname, '__tests__', 'resources', 'example-pet-api.openapi.yml');
 
 describe('typegen', () => {
+  let banner: string;
   let imports: string;
   let schemaTypes: string;
   let operationTypings: string;
@@ -11,11 +12,13 @@ describe('typegen', () => {
   beforeAll(async () => {
     const types = await generateTypesForDocument(examplePetAPIYAML, {
       transformOperationName: (operationId: string) => operationId,
+      banner: '/* eslint-disable */',
       disableOptionalPathParameters: true,
     });
     imports = types[0];
     schemaTypes = types[1];
     operationTypings = types[2];
+    banner = types[3];
   });
 
   test('generates type files from valid v3 specification', async () => {
