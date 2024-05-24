@@ -42,7 +42,7 @@
   "types": "typegen.d.ts",
   "dependencies": {
     "@anttiviljami/dtsgenerator": "^3.19.3",
-    "@apidevtools/json-schema-ref-parser": "^10.1.0",
+    "@apidevtools/json-schema-ref-parser": "^11.2.0",
     "axios": ">=0.25.0",
     "indent-string": "^4.0.0",
     "lodash": "^4.17.21",
