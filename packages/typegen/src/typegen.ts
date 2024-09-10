@@ -82,7 +82,10 @@ export async function main() {
 
   opts.disableOptionalPathParameters = argv.disableOptionalPathParameters ?? true;
 
-  const [imports, schemaTypes, operationTypings, banner, aliases] = await generateTypesForDocument(argv._[0] as string, opts);
+  const [imports, schemaTypes, operationTypings, banner, aliases] = await generateTypesForDocument(
+    argv._[0] as string,
+    opts,
+  );
 
   if (opts.banner && banner?.length) {
     console.log(banner, '\n');
@@ -114,7 +117,7 @@ export async function generateTypesForDocument(definition: Document | string, op
   const api = new OpenAPIClientAxios({ definition: normalizedSchema as Document });
 
   await api.init();
-  
+
   const operationTypings = generateOperationMethodTypings(api, exportedTypes, opts);
   const rootLevelAliases = generateRootLevelAliases(exportedTypes);
 
@@ -252,9 +255,7 @@ const generateRootLevelAliases = (exportedTypes: ExportedType[]) => {
   for (const exportedType of exportedTypes) {
     if (exportedType.schemaRef.startsWith('#/components/schemas/')) {
       const name = exportedType.schemaRef.replace('#/components/schemas/', '');
-      aliases.push([
-        `export type ${name} = ${exportedType.path};`,
-      ].join('\n'));
+      aliases.push([`export type ${name} = ${exportedType.path};`].join('\n'));
     }
   }
 
