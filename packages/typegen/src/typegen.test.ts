@@ -8,6 +8,7 @@ describe('typegen', () => {
   let imports: string;
   let schemaTypes: string;
   let operationTypings: string;
+  let aliases: string;
 
   beforeAll(async () => {
     const types = await generateTypesForDocument(examplePetAPIYAML, {
@@ -19,12 +20,14 @@ describe('typegen', () => {
     schemaTypes = types[1];
     operationTypings = types[2];
     banner = types[3];
+    aliases = types[4];
   });
 
   test('generates type files from valid v3 specification', async () => {
     expect(imports).not.toBeFalsy();
     expect(schemaTypes).not.toBeFalsy();
     expect(operationTypings).not.toBeFalsy();
+    expect(aliases).not.toBeFalsy();
   });
 
   describe('OperationsMethods', () => {
@@ -61,6 +64,15 @@ describe('typegen', () => {
       expect(operationTypings).toMatch('OperationResponse<Paths.GetPetOwner.Responses.$200>');
       expect(operationTypings).toMatch('OperationResponse<Paths.GetPetsMeta.Responses.$200>');
       expect(operationTypings).toMatch('OperationResponse<Paths.GetPetsRelative.Responses.$200>');
+    });
+  });
+
+  describe('root level aliases', () => {
+    test('exports type aliases for components defined in spec', async () => {
+      expect(aliases).toMatch('export type PetId = Components.Schemas.PetId;');
+      expect(aliases).toMatch('export type PetPayload = Components.Schemas.PetPayload;');
+      expect(aliases).toMatch('export type QueryLimit = Components.Schemas.QueryLimit;');
+      expect(aliases).toMatch('export type QueryOffset = Components.Schemas.QueryOffset;');
     });
   });
 

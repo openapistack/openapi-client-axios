@@ -5,13 +5,12 @@ import OpenAPIClientAxios, { Document, HttpMethod, Operation } from 'openapi-cli
 import DTSGenerator from '@anttiviljami/dtsgenerator/dist/core/dtsGenerator';
 import { JsonSchema, parseSchema } from '@anttiviljami/dtsgenerator';
 import RefParser from '@apidevtools/json-schema-ref-parser';
-import { SourceFile } from 'typescript';
-import { JSONSchema } from '@apidevtools/json-schema-ref-parser/dist/lib/types';
 
 interface TypegenOptions {
   transformOperationName?: (operation: string) => string;
   disableOptionalPathParameters?: boolean;
   banner?: string;
+  typeAliases?: boolean;
 }
 
 interface ExportedType {
@@ -48,6 +47,12 @@ export async function main() {
       description: 'Force all path parameters to be required',
       default: true,
     })
+    .option('typeAliases', {
+      alias: 'A',
+      type: 'boolean',
+      description: 'Generate module level type aliases for schema components defined in spec',
+      default: false,
+    })
     .usage('Usage: $0 [file]')
     .example('$0 ./openapi.yml > openapi.d.ts', '')
     .example('$0 https://openapistack.co/petstore.openapi.json > openapi.d.ts', '')
@@ -56,6 +61,7 @@ export async function main() {
   const opts: TypegenOptions = {
     transformOperationName: (operation: string) => operation,
     banner: argv.banner,
+    typeAliases: argv.typeAliases,
   };
 
   if (argv.transformOperationName) {
@@ -76,15 +82,19 @@ export async function main() {
 
   opts.disableOptionalPathParameters = argv.disableOptionalPathParameters ?? true;
 
-  const [imports, schemaTypes, operationTypings, banner] = await generateTypesForDocument(argv._[0] as string, opts);
+  const [imports, schemaTypes, operationTypings, banner, aliases] = await generateTypesForDocument(argv._[0] as string, opts);
 
-  if (banner?.length) {
+  if (opts.banner && banner?.length) {
     console.log(banner, '\n');
   }
 
   console.log(imports, '\n');
   console.log(schemaTypes);
   console.log(operationTypings);
+
+  if (opts.typeAliases && aliases?.length) {
+    console.log(`\n${aliases}`);
+  }
 }
 
 const schemaParserOptions = { resolve: { http: { headers: { 'User-Agent': 'Typegen' } } } };
@@ -104,7 +114,9 @@ export async function generateTypesForDocument(definition: Document | string, op
   const api = new OpenAPIClientAxios({ definition: normalizedSchema as Document });
 
   await api.init();
+  
   const operationTypings = generateOperationMethodTypings(api, exportedTypes, opts);
+  const rootLevelAliases = generateRootLevelAliases(exportedTypes);
 
   const banner = opts.banner ?? '';
 
@@ -118,7 +130,7 @@ export async function generateTypesForDocument(definition: Document | string, op
     `} from 'openapi-client-axios';`,
   ].join('\n');
 
-  return [imports, schemaTypes, operationTypings, banner];
+  return [imports, schemaTypes, operationTypings, banner, rootLevelAliases];
 }
 
 function generateMethodForOperation(
@@ -233,6 +245,21 @@ export function generateOperationMethodTypings(
     'export type Client = OpenAPIClient<OperationMethods, PathsDictionary>',
   ].join('\n');
 }
+
+const generateRootLevelAliases = (exportedTypes: ExportedType[]) => {
+  const aliases: string[] = [];
+
+  for (const exportedType of exportedTypes) {
+    if (exportedType.schemaRef.startsWith('#/components/schemas/')) {
+      const name = exportedType.schemaRef.replace('#/components/schemas/', '');
+      aliases.push([
+        `export type ${name} = ${exportedType.path};`,
+      ].join('\n'));
+    }
+  }
+
+  return aliases.join('\n');
+};
 
 const normalizeSchema = (schema: Document): Document => {
   const clonedSchema: Document = _.cloneDeep(schema);
