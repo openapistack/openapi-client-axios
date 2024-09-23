@@ -92,8 +92,8 @@ export async function main() {
   }
 
   console.log(imports, '\n');
-  console.log(schemaTypes);
-  console.log(operationTypings);
+  console.log(schemaTypes, '\n');
+  console.log(operationTypings, '\n');
 
   if (opts.typeAliases && aliases?.length) {
     console.log(`\n${aliases}`);
