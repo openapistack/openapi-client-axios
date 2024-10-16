@@ -5,6 +5,7 @@ import { setupServer } from 'msw/node'
 import MockAdapter from 'axios-mock-adapter';
 import { definition, baseURL, baseURLV2, baseURLAlternative, baseURLWithVariableResolved } from './__tests__/fixtures';
 import { OpenAPIClientAxios, OpenAPIClient } from './client';
+import axios, { AxiosResponse } from 'axios';
 
 const testsDir = path.join(__dirname, '.', '__tests__');
 
@@ -205,6 +206,106 @@ describe('OpenAPIClientAxios', () => {
       const client = await api.init();
       expect(client.defaults.maxRedirects).toBe(1);
       expect(client.defaults.withCredentials).toBe(true);
+    });
+
+    test('request defaults from user-provided axios instance are not modified', async () => {
+      const userRequestTransformer = (data: object, headers: object) => data;
+      const userResponseTransformer = (data: object) => data;
+      const userParamsSerializer = () => "";
+      const userAdapter = () => new Promise<AxiosResponse<any, any>>(() => ({}));
+      const userOnUploadProgress = () => {};
+      const userOnDownloadProgress = () => {};
+      const userValidateStatus = () => true;
+      const userCancelToken = new axios.CancelToken(() => {});
+
+      const userAxiosInstance = axios.create({
+        url: '/hello',
+        method: 'post',
+        baseURL: 'https://some-domain.com/api',
+        transformRequest: userRequestTransformer,
+        transformResponse: userResponseTransformer,
+        headers: {'X-Requested-With': 'fake'},
+        params: {
+          ID: 123456789,
+        },
+        paramsSerializer: userParamsSerializer,
+        data: {
+          hello: 'world',
+        },
+        timeout: 1234,
+        withCredentials: true,
+        adapter: userAdapter,
+        auth: {
+          username: 'fake',
+          password: 'fakepassword'
+        },
+        responseType: 'stream',
+        responseEncoding: 'fakeEncoding',
+        xsrfCookieName: 'HELLO-WORLD',
+        xsrfHeaderName: 'HELLO-WORLD-2',
+        onUploadProgress: userOnUploadProgress,
+        onDownloadProgress: userOnDownloadProgress,
+        maxContentLength: 1234,
+        maxBodyLength: 5678,
+        validateStatus: userValidateStatus,
+        maxRedirects: 99,
+        socketPath: '/fake/path/example',
+        proxy: {
+          host: '1.2.3.4',
+          port: 9876,
+          auth: {
+            username: 'anotherFakeUsername',
+            password: 'anotherFakePassword'
+          }
+        },
+        cancelToken: userCancelToken,
+        decompress: false
+      });
+
+      const api = new OpenAPIClientAxios({
+        definition,
+        axiosInstance: userAxiosInstance,
+      });
+      const client = await api.init();
+      const d = client.defaults;
+
+      expect(d.url).toBe('/hello');
+      expect(d.method).toBe('post');
+      expect(d.baseURL).toBe('https://some-domain.com/api');
+      expect(d.transformRequest).toBe(userRequestTransformer);
+      expect(d.transformResponse).toBe(userResponseTransformer);
+      expect(d.headers['X-Requested-With']).toBe('fake');
+      expect(d.params.ID).toBe(123456789);
+      expect(d.paramsSerializer).toBe(userParamsSerializer);
+      expect(d.data.hello).toBe('world');
+      expect(d.timeout).toBe(1234);
+      expect(d.withCredentials).toBe(true);
+      expect(d.adapter).toBe(userAdapter);
+      expect(d.auth).toStrictEqual({
+        username: 'fake',
+        password: 'fakepassword'
+      }),
+      expect(d.responseType).toBe('stream');
+      expect(d.responseEncoding).toBe('fakeEncoding');
+      expect(d.xsrfCookieName).toBe('HELLO-WORLD');
+      expect(d.xsrfHeaderName).toBe('HELLO-WORLD-2');
+      expect(d.onUploadProgress).toBe(userOnUploadProgress);
+      expect(d.onDownloadProgress).toBe(userOnDownloadProgress);
+      expect(d.maxContentLength).toBe(1234);
+      expect(d.maxBodyLength).toBe(5678);
+      expect(d.validateStatus).toBe(userValidateStatus);
+      expect(d.maxRedirects).toBe(99);
+      expect(d.socketPath).toBe('/fake/path/example');
+      expect(d.proxy).toStrictEqual({
+          host: '1.2.3.4',
+          port: 9876,
+          auth: {
+            username: 'anotherFakeUsername',
+            password: 'anotherFakePassword'
+          },
+      });
+      expect(d.cancelToken).toBe(userCancelToken);
+      expect(d.decompress).toBe(false);
     });
   });
 
