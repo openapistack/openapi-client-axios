@@ -64,7 +64,7 @@ export type OpenAPIClientAxiosOptions = {
     operationMethod: UnknownOperationMethod,
     operationToTransform: Operation,
   ) => UnknownOperationMethod;
-  axiosRunner: (axiosConfig: AxiosRequestConfig) => Promise<AxiosResponse>;
+  axiosRunner?: (axiosConfig: AxiosRequestConfig) => Promise<AxiosResponse>;
   axiosConfigDefaults?: AxiosRequestConfig;
 } & ({
   axiosConfigDefaults?: AxiosRequestConfig;
