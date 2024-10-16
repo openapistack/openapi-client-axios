@@ -113,6 +113,7 @@ export class OpenAPIClientAxios {
    * @param {boolean} opts.quick - quick mode, skips validation and doesn't guarantee document is unchanged
    * @param {boolean} opts.applyMethodCommonHeaders Should method (patch / post / put / etc.) specific default headers (from axios.defaults.headers.{method}) be applied to operation methods?
    * @param {boolean} opts.axiosConfigDefaults - default axios config for the instance
+   * @param {boolean} opts.axiosInstance - axios instance to use
    * @memberof OpenAPIClientAxios
    */
   constructor(opts: OpenAPIClientAxiosOptions) {
