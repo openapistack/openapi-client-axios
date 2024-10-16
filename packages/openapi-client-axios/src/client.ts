@@ -61,9 +61,10 @@ export type OpenAPIClientAxiosOptions = {
   applyMethodCommonHeaders?: boolean;
   transformOperationName?: (operation: string) => string;
   transformOperationMethod?: (
-  operationMethod: UnknownOperationMethod,
-  operationToTransform: Operation,
+    operationMethod: UnknownOperationMethod,
+    operationToTransform: Operation,
   ) => UnknownOperationMethod;
+  axiosRunner: (axiosConfig: AxiosRequestConfig) => Promise<AxiosResponse>;
   axiosConfigDefaults?: AxiosRequestConfig;
 } & ({
   axiosConfigDefaults?: AxiosRequestConfig;
@@ -115,30 +116,20 @@ export class OpenAPIClientAxios {
    * @memberof OpenAPIClientAxios
    */
   constructor(opts: OpenAPIClientAxiosOptions) {
-    const optsWithDefaults = {
-      quick: false,
-      withServer: 0,
-      baseURLVariables: {},
-      transformOperationName: (operationId: string) => operationId,
-      transformOperationMethod: (operationMethod: UnknownOperationMethod) => operationMethod,
-      axiosRunner: (axiosConfig: AxiosRequestConfig) => this.client.request(axiosConfig),
-      applyMethodCommonHeaders: false,
-      ...opts,
-      axiosConfigDefaults: {
-        ...(opts.axiosConfigDefaults || {}),
-      } as AxiosRequestConfig,
-    };
-    this.inputDocument = optsWithDefaults.definition;
-    this.quick = optsWithDefaults.quick;
-    this.axiosConfigDefaults = optsWithDefaults.axiosConfigDefaults;
+    this.inputDocument = opts.definition;
+    this.quick = opts.quick ?? false;
+    this.axiosConfigDefaults = opts.axiosConfigDefaults ?? {};
     this.instance = opts.axiosInstance;
-    this.defaultServer = optsWithDefaults.withServer;
-    this.baseURLVariables = optsWithDefaults.baseURLVariables;
-    this.applyMethodCommonHeaders = optsWithDefaults.applyMethodCommonHeaders;
-    this.transformOperationName = optsWithDefaults.transformOperationName;
-    this.transformOperationMethod = optsWithDefaults.transformOperationMethod;
+    this.defaultServer = opts.withServer ?? 0;
+    this.baseURLVariables = opts.baseURLVariables ?? {};
+    this.applyMethodCommonHeaders = opts.applyMethodCommonHeaders ?? false;
+    this.transformOperationName = opts.transformOperationName ?? ((operationId: string) => operationId);
+    this.transformOperationMethod =
+      opts.transformOperationMethod ?? ((operationMethod: UnknownOperationMethod) => operationMethod);
     this.runners = {
-      [DefaultRunnerKey]: { runRequest: optsWithDefaults.axiosRunner },
+      [DefaultRunnerKey]: {
+        runRequest: opts.axiosRunner ?? ((axiosConfig: AxiosRequestConfig) => this.client.request(axiosConfig)),
+      },
     };
   }
 
@@ -419,7 +410,10 @@ export class OpenAPIClientAxios {
    * Creates an axios config object for operation + arguments
    * @memberof OpenAPIClientAxios
    */
-  public getAxiosConfigForOperation = (operation: Operation | string, args: OperationMethodArguments): AxiosRequestConfig => {
+  public getAxiosConfigForOperation = (
+    operation: Operation | string,
+    args: OperationMethodArguments,
+  ): AxiosRequestConfig => {
     if (typeof operation === 'string') {
       operation = this.getOperation(operation);
     }
