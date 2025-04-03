@@ -3,7 +3,7 @@ import fs from 'fs';
 import { rest } from 'msw'
 import { setupServer } from 'msw/node'
 import MockAdapter from 'axios-mock-adapter';
-import { definition, baseURL, baseURLV2, baseURLAlternative, baseURLWithVariableResolved } from './__tests__/fixtures';
+import { definition, baseURL, baseURLV2, baseURLAlternative, baseURLWithVariableResolved, createDefinition } from './__tests__/fixtures';
 import { OpenAPIClientAxios, OpenAPIClient } from './client';
 
 const testsDir = path.join(__dirname, '.', '__tests__');
@@ -685,6 +685,22 @@ describe('OpenAPIClientAxios', () => {
 
       expect(config.method).toEqual('get');
       expect(config.path).toEqual('/pets/meta');
+    });
+
+    test('should url encode path parameters', async () => {
+      const api = new OpenAPIClientAxios({ definition: createDefinition({
+        paths: {
+          '/discounts/{name}': {
+            get: {
+              operationId: 'getDiscount',
+              parameters: [{ name: 'name', in: 'path', required: true, schema: { type: 'string' } }],
+              responses: { '200': { description: 'ok' } } },
+            }
+          }
+      })});
+      const client = await api.init();
+      const config = api.getRequestConfigForOperation('getDiscount', ['20% / 30% off']);
+      expect(config.path).toEqual('/discounts/20%25%20%2F%2030%25%20off');
     });
   });
 

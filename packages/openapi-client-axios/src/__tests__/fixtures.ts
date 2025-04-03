@@ -36,6 +36,17 @@ export const ownerId: OpenAPIV3.ParameterObject = {
   },
 };
 
+export const createDefinition = (overrides: Partial<OpenAPIV3.Document> = {}): OpenAPIV3.Document => ({
+  openapi: '3.0.0',
+  info: {
+    title: 'api',
+    version: '1.0.0',
+  },
+  servers: [],
+  paths: {},
+  ...overrides,
+});
+
 export const definition: OpenAPIV3.Document = {
   openapi: '3.0.0',
   info: {
