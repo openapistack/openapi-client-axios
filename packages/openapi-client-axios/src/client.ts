@@ -53,6 +53,27 @@ export declare type RunRequestFunc = (
 
 const DefaultRunnerKey = 'default';
 
+export type OpenAPIClientAxiosOptions = {
+  definition: Document | string;
+  quick?: boolean;
+  withServer?: number | string | Server;
+  baseURLVariables?: { [key: string]: string | number };
+  applyMethodCommonHeaders?: boolean;
+  transformOperationName?: (operation: string) => string;
+  transformOperationMethod?: (
+    operationMethod: UnknownOperationMethod,
+    operationToTransform: Operation,
+  ) => UnknownOperationMethod;
+  axiosRunner?: (axiosConfig: AxiosRequestConfig) => Promise<AxiosResponse>;
+  axiosConfigDefaults?: AxiosRequestConfig;
+} & ({
+  axiosConfigDefaults?: AxiosRequestConfig;
+  axiosInstance?: never;
+} | {
+  axiosConfigDefaults?: never;
+  axiosInstance?: AxiosInstance;
+});
+
 /**
  * Main class and the default export of the 'openapi-client-axios' module
  *
@@ -92,44 +113,24 @@ export class OpenAPIClientAxios {
    * @param {boolean} opts.quick - quick mode, skips validation and doesn't guarantee document is unchanged
    * @param {boolean} opts.applyMethodCommonHeaders Should method (patch / post / put / etc.) specific default headers (from axios.defaults.headers.{method}) be applied to operation methods?
    * @param {boolean} opts.axiosConfigDefaults - default axios config for the instance
+   * @param {boolean} opts.axiosInstance - axios instance to use
    * @memberof OpenAPIClientAxios
    */
-  constructor(opts: {
-    definition: Document | string;
-    quick?: boolean;
-    axiosConfigDefaults?: AxiosRequestConfig;
-    withServer?: number | string | Server;
-    baseURLVariables?: { [key: string]: string | number };
-    applyMethodCommonHeaders?: boolean;
-    transformOperationName?: (operation: string) => string;
-    transformOperationMethod?: (
-      operationMethod: UnknownOperationMethod,
-      operationToTransform: Operation,
-    ) => UnknownOperationMethod;
-  }) {
-    const optsWithDefaults = {
-      quick: false,
-      withServer: 0,
-      baseURLVariables: {},
-      transformOperationName: (operationId: string) => operationId,
-      transformOperationMethod: (operationMethod: UnknownOperationMethod) => operationMethod,
-      axiosRunner: (axiosConfig: AxiosRequestConfig) => this.client.request(axiosConfig),
-      applyMethodCommonHeaders: false,
-      ...opts,
-      axiosConfigDefaults: {
-        ...(opts.axiosConfigDefaults || {}),
-      } as AxiosRequestConfig,
-    };
-    this.inputDocument = optsWithDefaults.definition;
-    this.quick = optsWithDefaults.quick;
-    this.axiosConfigDefaults = optsWithDefaults.axiosConfigDefaults;
-    this.defaultServer = optsWithDefaults.withServer;
-    this.baseURLVariables = optsWithDefaults.baseURLVariables;
-    this.applyMethodCommonHeaders = optsWithDefaults.applyMethodCommonHeaders;
-    this.transformOperationName = optsWithDefaults.transformOperationName;
-    this.transformOperationMethod = optsWithDefaults.transformOperationMethod;
+  constructor(opts: OpenAPIClientAxiosOptions) {
+    this.inputDocument = opts.definition;
+    this.quick = opts.quick ?? false;
+    this.axiosConfigDefaults = opts.axiosConfigDefaults ?? {};
+    this.instance = opts.axiosInstance;
+    this.defaultServer = opts.withServer ?? 0;
+    this.baseURLVariables = opts.baseURLVariables ?? {};
+    this.applyMethodCommonHeaders = opts.applyMethodCommonHeaders ?? false;
+    this.transformOperationName = opts.transformOperationName ?? ((operationId: string) => operationId);
+    this.transformOperationMethod =
+      opts.transformOperationMethod ?? ((operationMethod: UnknownOperationMethod) => operationMethod);
     this.runners = {
-      [DefaultRunnerKey]: { runRequest: optsWithDefaults.axiosRunner },
+      [DefaultRunnerKey]: {
+        runRequest: opts.axiosRunner ?? ((axiosConfig: AxiosRequestConfig) => this.client.request(axiosConfig)),
+      },
     };
   }
 
@@ -246,10 +247,13 @@ export class OpenAPIClientAxios {
   };
 
   /**
-   * Creates a new axios instance with defaults and returns it
+   * Creates a new axios instance, if necessary, and returns it
    */
   public getAxiosInstance = (): AxiosInstance => {
-    const instance = axios.create(this.axiosConfigDefaults) as OpenAPIClient;
+    let instance = this.instance;
+    if (!instance) {
+      instance = axios.create(this.axiosConfigDefaults) as OpenAPIClient;
+    }
     return instance;
   };
 
@@ -264,7 +268,7 @@ export class OpenAPIClientAxios {
 
     // set baseURL to the one found in the definition servers (if not set in axios defaults)
     const baseURL = this.getBaseURL();
-    if (baseURL && !this.axiosConfigDefaults.baseURL) {
+    if (baseURL && !instance.defaults.baseURL) {
       instance.defaults.baseURL = baseURL;
     }
 
@@ -407,7 +411,10 @@ export class OpenAPIClientAxios {
    * Creates an axios config object for operation + arguments
    * @memberof OpenAPIClientAxios
    */
-  public getAxiosConfigForOperation = (operation: Operation | string, args: OperationMethodArguments): AxiosRequestConfig => {
+  public getAxiosConfigForOperation = (
+    operation: Operation | string,
+    args: OperationMethodArguments,
+  ): AxiosRequestConfig => {
     if (typeof operation === 'string') {
       operation = this.getOperation(operation);
     }
