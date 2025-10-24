@@ -805,6 +805,193 @@ describe('OpenAPIClientAxios', () => {
     });
   });
 
+  describe('query parameter array serialization', () => {
+    test('array query param with default style (form, explode: true) serializes as repeated params', async () => {
+      const api = new OpenAPIClientAxios({ definition: createDefinition({
+        paths: {
+          '/items': {
+            get: {
+              operationId: 'getItems',
+              parameters: [{
+                name: 'id',
+                in: 'query',
+                schema: { type: 'array', items: { type: 'integer' } },
+                // default is style: 'form', explode: true
+              }],
+              responses: { '200': { description: 'ok' } }
+            }
+          }
+        }
+      })});
+      await api.init();
+      const config = api.getRequestConfigForOperation('getItems', [{ id: [3, 4, 5] }]);
+      expect(config.queryString).toEqual('id=3&id=4&id=5');
+    });
+
+    test('array query param with style: form, explode: false serializes as comma-separated', async () => {
+      const api = new OpenAPIClientAxios({ definition: createDefinition({
+        paths: {
+          '/items': {
+            get: {
+              operationId: 'getItems',
+              parameters: [{
+                name: 'id',
+                in: 'query',
+                schema: { type: 'array', items: { type: 'integer' } },
+                style: 'form',
+                explode: false
+              }],
+              responses: { '200': { description: 'ok' } }
+            }
+          }
+        }
+      })});
+      await api.init();
+      const config = api.getRequestConfigForOperation('getItems', [{ id: [3, 4, 5] }]);
+      expect(config.queryString).toEqual('id=3,4,5');
+    });
+
+    test('array query param with style: spaceDelimited serializes as space-separated', async () => {
+      const api = new OpenAPIClientAxios({ definition: createDefinition({
+        paths: {
+          '/items': {
+            get: {
+              operationId: 'getItems',
+              parameters: [{
+                name: 'id',
+                in: 'query',
+                schema: { type: 'array', items: { type: 'integer' } },
+                style: 'spaceDelimited',
+                explode: false
+              }],
+              responses: { '200': { description: 'ok' } }
+            }
+          }
+        }
+      })});
+      await api.init();
+      const config = api.getRequestConfigForOperation('getItems', [{ id: [3, 4, 5] }]);
+      expect(config.queryString).toEqual('id=3%204%205');
+    });
+
+    test('array query param with style: pipeDelimited serializes as pipe-separated', async () => {
+      const api = new OpenAPIClientAxios({ definition: createDefinition({
+        paths: {
+          '/items': {
+            get: {
+              operationId: 'getItems',
+              parameters: [{
+                name: 'id',
+                in: 'query',
+                schema: { type: 'array', items: { type: 'integer' } },
+                style: 'pipeDelimited',
+                explode: false
+              }],
+              responses: { '200': { description: 'ok' } }
+            }
+          }
+        }
+      })});
+      await api.init();
+      const config = api.getRequestConfigForOperation('getItems', [{ id: [3, 4, 5] }]);
+      expect(config.queryString).toEqual('id=3%7C4%7C5');
+    });
+
+    test('object query param with style: deepObject serializes with bracket notation', async () => {
+      const api = new OpenAPIClientAxios({ definition: createDefinition({
+        paths: {
+          '/users': {
+            get: {
+              operationId: 'getUsers',
+              parameters: [{
+                name: 'filter',
+                in: 'query',
+                schema: { type: 'object' },
+                style: 'deepObject',
+                explode: true
+              }],
+              responses: { '200': { description: 'ok' } }
+            }
+          }
+        }
+      })});
+      await api.init();
+      const config = api.getRequestConfigForOperation('getUsers', [{ filter: { role: 'admin', firstName: 'Alex' } } as any]);
+      expect(config.queryString).toMatch(/filter\[role\]=admin/);
+      expect(config.queryString).toMatch(/filter\[firstName\]=Alex/);
+    });
+
+    test('object query param with style: form, explode: true serializes as flat params', async () => {
+      const api = new OpenAPIClientAxios({ definition: createDefinition({
+        paths: {
+          '/users': {
+            get: {
+              operationId: 'getUsers',
+              parameters: [{
+                name: 'filter',
+                in: 'query',
+                schema: { type: 'object' },
+                style: 'form',
+                explode: true
+              }],
+              responses: { '200': { description: 'ok' } }
+            }
+          }
+        }
+      })});
+      await api.init();
+      const config = api.getRequestConfigForOperation('getUsers', [{ filter: { role: 'admin', firstName: 'Alex' } } as any]);
+      expect(config.queryString).toMatch(/role=admin/);
+      expect(config.queryString).toMatch(/firstName=Alex/);
+    });
+
+    test('object query param with style: form, explode: false serializes as comma-separated key-value pairs', async () => {
+      const api = new OpenAPIClientAxios({ definition: createDefinition({
+        paths: {
+          '/users': {
+            get: {
+              operationId: 'getUsers',
+              parameters: [{
+                name: 'filter',
+                in: 'query',
+                schema: { type: 'object' },
+                style: 'form',
+                explode: false
+              }],
+              responses: { '200': { description: 'ok' } }
+            }
+          }
+        }
+      })});
+      await api.init();
+      const config = api.getRequestConfigForOperation('getUsers', [{ filter: { role: 'admin', firstName: 'Alex' } } as any]);
+      expect(config.queryString).toMatch(/filter=role,admin,firstName,Alex/);
+    });
+
+    test('array of strings with special characters is properly encoded', async () => {
+      const api = new OpenAPIClientAxios({ definition: createDefinition({
+        paths: {
+          '/items': {
+            get: {
+              operationId: 'getItems',
+              parameters: [{
+                name: 'tags',
+                in: 'query',
+                schema: { type: 'array', items: { type: 'string' } },
+                style: 'form',
+                explode: true
+              }],
+              responses: { '200': { description: 'ok' } }
+            }
+          }
+        }
+      })});
+      await api.init();
+      const config = api.getRequestConfigForOperation('getItems', [{ tags: ['foo bar', 'baz&qux'] }]);
+      expect(config.queryString).toEqual('tags=foo%20bar&tags=baz%26qux');
+    });
+  });
+
   describe('axios methods', () => {
     test("get('/pets') calls GET /pets", async () => {
       const api = new OpenAPIClientAxios({ definition });

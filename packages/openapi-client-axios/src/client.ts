@@ -15,6 +15,7 @@ import {
   Server,
   ParameterObject,
 } from './types/client';
+import { serializeQueryParameter } from './query-serializer';
 
 /**
  * OpenAPIClient is an AxiosInstance extended with operation methods
@@ -464,8 +465,8 @@ export class OpenAPIClientAxios {
     }
 
     const pathParams = {} as RequestConfig['pathParams'];
-    const searchParams = new URLSearchParams();
     const query = {} as RequestConfig['query'];
+    const queryStringParts: string[] = [];
     const headers = {} as RequestConfig['headers'];
     const cookies = {} as RequestConfig['cookies'];
     const parameters = (operation.parameters || []) as ParameterObject[];
@@ -475,16 +476,14 @@ export class OpenAPIClientAxios {
         case ParamType.Path:
           pathParams[name] = value;
           break;
-        case ParamType.Query:
-          if (Array.isArray(value)) {
-            for (const valueItem of value) {
-              searchParams.append(name, valueItem);
-            }
-          } else {
-            searchParams.append(name, value);
-          }
+        case ParamType.Query: {
           query[name] = value;
+          // Find the parameter definition to get style and explode
+          const param = parameters.find((p) => p.name === name && p.in === 'query');
+          const serialized = serializeQueryParameter(param, name, value);
+          queryStringParts.push(...serialized);
           break;
+        }
         case ParamType.Header:
           headers[name] = value;
           break;
@@ -545,7 +544,7 @@ export class OpenAPIClientAxios {
     const path = pathBuilder.path(pathParams);
 
     // queryString parameter
-    const queryString = searchParams.toString();
+    const queryString = queryStringParts.join('&');
 
     // full url with query string
     const url = `${this.getBaseURL(operation)}${path}${queryString ? `?${queryString}` : ''}`;
