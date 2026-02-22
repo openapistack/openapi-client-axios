@@ -209,7 +209,7 @@ describe('OpenAPIClientAxios', () => {
     });
 
     test('request defaults from user-provided axios instance are not modified', async () => {
-      const userRequestTransformer = (data: object, headers: object) => data;
+      const userRequestTransformer = (data: object, headers?: object) => data;
       const userResponseTransformer = (data: object) => data;
       const userParamsSerializer = () => "";
       const userAdapter = () => new Promise<AxiosResponse<any, any>>(() => ({}));
@@ -274,7 +274,7 @@ describe('OpenAPIClientAxios', () => {
       expect(d.baseURL).toBe('https://some-domain.com/api');
       expect(d.transformRequest).toBe(userRequestTransformer);
       expect(d.transformResponse).toBe(userResponseTransformer);
-      expect(d.headers['X-Requested-With']).toBe('fake');
+      expect((d.headers as unknown as Record<string, unknown>)['X-Requested-With']).toBe('fake');
       expect(d.params.ID).toBe(123456789);
       expect(d.paramsSerializer).toBe(userParamsSerializer);
       expect(d.data.hello).toBe('world');

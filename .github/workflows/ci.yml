@@ -19,6 +19,7 @@ jobs:
           - 0.25.0 # oldest supported
           - 0.*.* # latest 0.x
           - ^1.0.0 # latest 1.x
+          - latest
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
