@@ -9,6 +9,7 @@
 [![bundle size](https://img.shields.io/bundlephobia/minzip/openapi-client-axios.svg?label=gzip%20bundle)](https://bundlephobia.com/package/openapi-client-axios)
 [![Libraries.io dependency status for latest release](https://img.shields.io/librariesio/release/npm/openapi-client-axios.svg)](https://www.npmjs.com/package/openapi-client-axios?activeTab=dependencies)
 ![npm type definitions](https://img.shields.io/npm/types/openapi-client-axios.svg)
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/openapistack/openapi-client-axios)
 [![Buy me a coffee](https://img.shields.io/badge/donate-buy%20me%20a%20coffee-orange)](https://buymeacoff.ee/anttiviljami)
 
 <p align="center">JavaScript client library for consuming OpenAPI-enabled APIs with <a href="https://github.com/axios/axios" target="_blank">axios</a>. Types included.</p>
