@@ -14,6 +14,8 @@
 
 <p align="center">JavaScript client library for consuming OpenAPI-enabled APIs with <a href="https://github.com/axios/axios" target="_blank">axios</a>. Types included.</p>
 
+<p align="center"><i>Battle-tested in production. <a href="https://openapistack.co/users/">See who uses openapi-stack →</a></i></p>
+
 ## Features
 
 - [x] Create API clients from [OpenAPI v3 definitions](https://github.com/OAI/OpenAPI-Specification)
