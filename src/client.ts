@@ -207,7 +207,11 @@ export class OpenAPIClientAxios {
       if (typeof documentRes.data === 'object') {
         // json response
         this.document = documentRes.data;
-      } else if (typeof documentRes.data === 'string' && documentRes.headers['content-type']?.match(/ya?ml/)) {
+      } else if (
+        typeof documentRes.data === 'string' &&
+        typeof documentRes.headers['content-type'] === 'string' &&
+        /ya?ml/.test(documentRes.headers['content-type'])
+      ) {
         // yaml response
         const yaml = await import('js-yaml');
         this.document = yaml.load(documentRes.data) as Document;
