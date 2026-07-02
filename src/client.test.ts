@@ -3,7 +3,7 @@ import fs from 'fs';
 import { rest } from 'msw'
 import { setupServer } from 'msw/node'
 import MockAdapter from 'axios-mock-adapter';
-import { definition, baseURL, baseURLV2, baseURLAlternative, baseURLWithVariableResolved, createDefinition } from './__tests__/fixtures';
+import { definition, baseURL, baseURLV2, baseURLAlternative, baseURLWithVariableResolved, createDefinition, responses } from './__tests__/fixtures';
 import { OpenAPIClientAxios, OpenAPIClient } from './client';
 import axios, { AxiosResponse } from 'axios';
 
@@ -430,6 +430,69 @@ describe('OpenAPIClientAxios', () => {
       expect(mockHandler).toBeCalledWith(
         expect.objectContaining({
           headers: expect.objectContaining({ 'x-petshop-id': 'test-shop', authorization: 'Bearer abc' }),
+        }),
+      );
+    });
+
+    test('searchTweets() preserves an OpenAPI apiKey security scheme with config headers', async () => {
+      const api = new OpenAPIClientAxios({
+        definition: createDefinition({
+          servers: [{ url: 'https://xquik.com' }],
+          paths: {
+            '/api/v1/x/tweets/search': {
+              get: {
+                operationId: 'searchTweets',
+                security: [{ apiKey: [] }, { oauthBearer: [] }, {}],
+                parameters: [
+                  {
+                    name: 'q',
+                    in: 'query',
+                    required: true,
+                    schema: { type: 'string' },
+                  },
+                  {
+                    name: 'limit',
+                    in: 'query',
+                    schema: { type: 'integer', default: 20, maximum: 200 },
+                  },
+                ],
+                responses,
+              },
+            },
+          },
+          components: {
+            securitySchemes: {
+              apiKey: {
+                type: 'apiKey',
+                in: 'header',
+                name: 'x-api-key',
+              },
+              oauthBearer: {
+                type: 'http',
+                scheme: 'bearer',
+              },
+            },
+          },
+        }),
+      });
+      const client = await api.init();
+
+      const mock = new MockAdapter(api.client);
+      const mockResponse: { data: unknown[] } = { data: [] };
+      const mockHandler = jest.fn((config) => [200, mockResponse]);
+      mock.onGet('/api/v1/x/tweets/search').reply((config) => mockHandler(config));
+
+      const res = await client.searchTweets(
+        { q: 'from:xquik', limit: 5 },
+        undefined,
+        { headers: { 'x-api-key': 'test-key' } },
+      );
+      expect(res.data).toEqual(mockResponse);
+      expect(api.getOperation('searchTweets').security).toEqual([{ apiKey: [] }, { oauthBearer: [] }, {}]);
+      expect(mockHandler).toBeCalledWith(
+        expect.objectContaining({
+          headers: expect.objectContaining({ 'x-api-key': 'test-key' }),
+          params: { q: 'from:xquik', limit: 5 },
         }),
       );
     });
