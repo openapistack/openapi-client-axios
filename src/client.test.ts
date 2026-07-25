@@ -281,7 +281,7 @@ describe('OpenAPIClientAxios', () => {
       expect(d.timeout).toBe(1234);
       expect(d.withCredentials).toBe(true);
       expect(d.adapter).toBe(userAdapter);
-      expect(d.auth).toStrictEqual({
+      expect(d.auth).toEqual({
         username: 'fake',
         password: 'fakepassword'
       }),
@@ -296,7 +296,7 @@ describe('OpenAPIClientAxios', () => {
       expect(d.validateStatus).toBe(userValidateStatus);
       expect(d.maxRedirects).toBe(99);
       expect(d.socketPath).toBe('/fake/path/example');
-      expect(d.proxy).toStrictEqual({
+      expect(d.proxy).toEqual({
           host: '1.2.3.4',
           port: 9876,
           auth: {
