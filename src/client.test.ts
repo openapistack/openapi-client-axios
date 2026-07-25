@@ -803,6 +803,25 @@ describe('OpenAPIClientAxios', () => {
       const config = api.getRequestConfigForOperation('getDiscount', ['20% / 30% off']);
       expect(config.path).toEqual('/discounts/20%25%20%2F%2030%25%20off');
     });
+
+    test('operation security overrides global security with an empty list', async () => {
+      const api = new OpenAPIClientAxios({ definition: createDefinition({
+        security: [{ bearerAuth: [] }],
+        paths: {
+          '/public': {
+            get: {
+              operationId: 'getPublic',
+              security: [],
+              responses: { '200': { description: 'ok' } },
+            },
+          },
+        },
+      })});
+      await api.init();
+
+      const operation = api.getOperation('getPublic');
+      expect(operation?.security).toEqual([]);
+    });
   });
 
   describe('query parameter array serialization', () => {
