@@ -571,14 +571,15 @@ export class OpenAPIClientAxios {
     // add default common headers
     const defaultHeaders = this.client.defaults.headers;
     for (const [key, val] of Object.entries(defaultHeaders.common ?? {})) {
-      headers[key] = val;
+      // axios 1.x types include AxiosHeaders in Object.entries values; copy as a raw header
+      (headers as Record<string, unknown>)[key] = val;
     }
 
     // add method specific default headers
     if (this.applyMethodCommonHeaders) {
       const methodHeaders: AxiosRequestHeaders = (defaultHeaders as any)[operation.method] ?? {};
       for (const [key, val] of Object.entries(methodHeaders)) {
-        headers[key] = val;
+        (headers as Record<string, unknown>)[key] = val;
       }
     }
 
