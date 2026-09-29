@@ -54,6 +54,10 @@ export declare type RunRequestFunc = (
 
 const DefaultRunnerKey = 'default';
 
+const RESERVED_PROPERTY_NAMES = new Set(['__proto__', 'constructor', 'prototype']);
+
+const isSafePropertyName = (name: string) => !RESERVED_PROPERTY_NAMES.has(name);
+
 export type OpenAPIClientAxiosOptions = {
   definition: Document | string;
   quick?: boolean;
@@ -282,20 +286,31 @@ export class OpenAPIClientAxios {
     for (const operation of operations) {
       const { operationId } = operation;
       if (operationId) {
-        instance[this.transformOperationName(operationId)] = this.createOperationMethod(operation);
+        const name = this.transformOperationName(operationId);
+        if (!isSafePropertyName(name)) {
+          continue;
+        }
+        // do not overwrite axios instance members (request, defaults, interceptors, get, ...)
+        if (name in instance) {
+          continue;
+        }
+        instance[name] = this.createOperationMethod(operation);
       }
     }
 
     // create paths dictionary
     // Example: api.paths['/pets/{id}'].get({ id: 1 });
-    instance.paths = {};
-    for (const path in this.definition.paths) {
+    instance.paths = Object.create(null);
+    for (const path of Object.keys(this.definition.paths || {})) {
+      if (!isSafePropertyName(path)) {
+        continue;
+      }
       if (this.definition.paths[path]) {
-        if (!instance.paths[path]) {
-          instance.paths[path] = {};
+        if (!Object.prototype.hasOwnProperty.call(instance.paths, path)) {
+          instance.paths[path] = Object.create(null);
         }
         const methods = this.definition.paths[path];
-        for (const m in methods) {
+        for (const m of Object.keys(methods || {})) {
           if (methods[m as HttpMethod] && Object.values(HttpMethod).includes(m as HttpMethod)) {
             const method = m as HttpMethod;
             const operation = this.getOperations().find((op) => op.method === method && op.path === path);
@@ -590,7 +605,9 @@ export class OpenAPIClientAxios {
    */
   public getOperations = (): Operation[] => {
     const paths = this.definition?.paths || {};
-    return Object.entries(paths).flatMap(([path, pathObject]) => {
+    return Object.entries(paths)
+      .filter(([path]) => isSafePropertyName(path))
+      .flatMap(([path, pathObject]) => {
       return Object.values(HttpMethod)
         .map((method) => ({ path, method, operation: pathObject[method] }))
         .filter(({ operation }) => operation)

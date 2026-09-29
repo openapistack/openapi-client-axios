@@ -58,6 +58,63 @@ describe('OpenAPIClientAxios', () => {
       expect(api.client).toHaveProperty('GETPETBYID');
     });
 
+    test('does not pollute Object.prototype via a __proto__ paths key', async () => {
+      const api = new OpenAPIClientAxios({ definition, quick: true });
+      await api.init();
+      const hostile = JSON.parse(
+        '{"openapi":"3.0.0","info":{"title":"t","version":"1.0.0"},"paths":{"/pets":{"get":{"operationId":"getPets"}},"__proto__":{"get":{"operationId":"p1"}}}}',
+      );
+      api.definition = hostile;
+      try {
+        api.createAxiosInstance();
+        expect(Object.prototype.hasOwnProperty('get')).toBe(false);
+      } finally {
+        delete (Object.prototype as any).get;
+      }
+    });
+
+    test('does not overwrite axios request with a colliding operationId', async () => {
+      const api = new OpenAPIClientAxios({
+        definition: {
+          openapi: '3.0.0',
+          info: { title: 't', version: '1.0.0' },
+          paths: {
+            '/pets': {
+              get: {
+                operationId: 'request',
+                responses: { '200': { description: 'ok' } },
+              },
+            },
+          },
+        } as any,
+        quick: true,
+      });
+      const client = await api.init();
+      expect(typeof client.request).toBe('function');
+      expect(client).not.toHaveProperty('getPets');
+    });
+
+    test('does not overwrite axios interceptors with a colliding operationId', async () => {
+      const api = new OpenAPIClientAxios({
+        definition: {
+          openapi: '3.0.0',
+          info: { title: 't', version: '1.0.0' },
+          paths: {
+            '/pets': {
+              get: {
+                operationId: 'interceptors',
+                responses: { '200': { description: 'ok' } },
+              },
+            },
+          },
+        } as any,
+        quick: true,
+      });
+      const client = await api.init();
+      expect(client.interceptors).toBeDefined();
+      expect(typeof client.interceptors.request.use).toBe('function');
+    });
+
     test('dereferences the input document', async () => {
       const api = new OpenAPIClientAxios({ definition });
       await api.init();
