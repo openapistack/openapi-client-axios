@@ -246,6 +246,23 @@ describe('OpenAPIClientAxios', () => {
       const api = new OpenAPIClientAxios({ definition: '/example-pet-api.openapi.json' });
       expect(api.initSync).toThrowError();
     });
+
+    test('does not retain the definition of a discarded client', async () => {
+      const gc = (global as { gc?: () => void }).gc;
+      expect(gc).toBeDefined();
+
+      const createDiscardedClient = () => {
+        const fresh = JSON.parse(JSON.stringify(definition));
+        new OpenAPIClientAxios({ definition: fresh }).initSync();
+        return new WeakRef(fresh);
+      };
+      const ref = createDiscardedClient();
+
+      await new Promise((resolve) => setImmediate(resolve));
+      gc!();
+
+      expect(ref.deref()).toBeUndefined();
+    });
   });
 
   describe('client', () => {
